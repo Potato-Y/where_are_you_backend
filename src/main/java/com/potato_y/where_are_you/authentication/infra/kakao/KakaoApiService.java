@@ -6,6 +6,7 @@ import com.potato_y.where_are_you.authentication.domain.oauth.OAuthLoginParams;
 import com.potato_y.where_are_you.authentication.domain.oauth.OAuthProvider;
 import com.potato_y.where_are_you.authentication.infra.kakao.dto.KakaoInfoResponse;
 import com.potato_y.where_are_you.authentication.infra.kakao.dto.KakaoTokenResponse;
+import com.potato_y.where_are_you.error.exception.InternalServerErrorException;
 import io.netty.handler.codec.http.HttpHeaderValues;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
@@ -55,6 +56,10 @@ public class KakaoApiService implements OAuthApiService {
             clientResponse -> Mono.error(new RuntimeException("Internal Server Error")))
         .bodyToMono(KakaoTokenResponse.class)
         .block();
+
+    if (dto == null) {
+      throw new InternalServerErrorException("KakaoTokenResponse가 비어있습니다.");
+    }
 
     return dto.getAccessToken();
   }
