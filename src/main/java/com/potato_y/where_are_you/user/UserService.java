@@ -4,6 +4,7 @@ import com.potato_y.where_are_you.authentication.CurrentUserProvider;
 import com.potato_y.where_are_you.authentication.domain.oauth.OAuthInfoResponse;
 import com.potato_y.where_are_you.user.domain.User;
 import com.potato_y.where_are_you.user.domain.UserRepository;
+import com.potato_y.where_are_you.user.dto.UserResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -28,5 +29,9 @@ public class UserService {
         .build();
 
     return userRepository.save(user);
+  }
+
+  public UserResponse getMyAccount() {
+    return new UserResponse(currentUserProvider.getCurrentUser());
   }
 }
