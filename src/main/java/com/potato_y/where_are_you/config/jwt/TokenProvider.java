@@ -23,6 +23,8 @@ import org.springframework.stereotype.Service;
 @Service
 public class TokenProvider {
 
+  private static final Duration TOKEN_EXPIRATION_THRESHOLD = Duration.ofDays(7);
+
   private final JwtProperties jwtProperties;
   private final UserDetailService userDetailService;
 
@@ -103,6 +105,36 @@ public class TokenProvider {
   public Long getUserId(String token) {
     Claims claims = getClaims(token);
     return Long.parseLong(claims.getSubject());
+  }
+
+  /**
+   * 토큰 만료 예정일인지 검증
+   *
+   * @param token RefreshToken
+   * @return 토큰 만료 예정 여부
+   */
+  public boolean isRefreshTokenExpiringSoon(String token) {
+    Duration remainingValidity = getRemainingValidity(token);
+    return remainingValidity.compareTo(TOKEN_EXPIRATION_THRESHOLD) < 0;
+  }
+
+  /**
+   * 토큰의 남은 유효 기간을 반환
+   *
+   * @param token Token
+   * @return Duration 남은 유효 기간
+   */
+  private Duration getRemainingValidity(String token) {
+    Claims claims = getClaims(token);
+    Date expiration = claims.getExpiration();
+    Date now = new Date();
+
+    if (expiration.after(now)) {
+      long remainingMillis = expiration.getTime() - now.getTime();
+      return Duration.ofMillis(remainingMillis);
+    } else {
+      return Duration.ZERO; // 토큰이 이미 만료된 경우
+    }
   }
 
   /**
