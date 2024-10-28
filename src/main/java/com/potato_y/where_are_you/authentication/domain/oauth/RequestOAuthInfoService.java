@@ -23,4 +23,10 @@ public class RequestOAuthInfoService {
 
     return oAuthApiService.requestOAuthInfo(accessToken);
   }
+
+  public OAuthInfoResponse request(OAuthProvider oAuthProvider, String accessToken) {
+    OAuthApiService oAuthApiService = clients.get(oAuthProvider);
+
+    return oAuthApiService.requestOAuthInfo(accessToken);
+  }
 }
