@@ -4,6 +4,7 @@ package com.potato_y.where_are_you.authentication.infra.kakao.dto;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.potato_y.where_are_you.authentication.domain.oauth.OAuthInfoResponse;
+import com.potato_y.where_are_you.authentication.domain.oauth.OAuthProvider;
 import java.util.Date;
 import java.util.HashMap;
 import lombok.Getter;
@@ -66,7 +67,7 @@ public class KakaoInfoResponse implements OAuthInfoResponse {
   @Getter
   @NoArgsConstructor
   @JsonIgnoreProperties(ignoreUnknown = true)
-  public class KakaoAccount {
+  public static class KakaoAccount {
 
     //프로필 정보 제공 동의 여부
     @JsonProperty("profile_needs_agreement")
@@ -172,7 +173,7 @@ public class KakaoInfoResponse implements OAuthInfoResponse {
     @Getter
     @NoArgsConstructor
     @JsonIgnoreProperties(ignoreUnknown = true)
-    public class Profile {
+    public static class Profile {
 
       //닉네임
       @JsonProperty("nickname")
