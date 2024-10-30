@@ -19,7 +19,7 @@ public class CurrentUserProvider {
     Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
     UserDetails userDetails = (UserDetails) authentication.getPrincipal();
 
-    return userRepository.findByEmail(userDetails.getUsername())
+    return userRepository.findById(Long.valueOf(userDetails.getUsername()))
         .orElseThrow(() -> new NotFoundException("Unexpected user"));
   }
 }
