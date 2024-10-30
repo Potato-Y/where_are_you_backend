@@ -43,7 +43,7 @@ public class User implements UserDetails {
 
   @Override // 사용자 id 반환
   public String getUsername() {
-    return email;
+    return String.valueOf(id);
   }
 
   @Override // 사용자 패스워드 반환
