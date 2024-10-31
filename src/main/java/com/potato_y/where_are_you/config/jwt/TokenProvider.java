@@ -35,9 +35,9 @@ public class TokenProvider {
    * @param expiredAt 유효 시간
    * @return Token
    */
-  public String generateToken(User user, Duration expiredAt) {
+  public String generateToken(User user, Duration expiredAt, TokenType tokenType) {
     Date now = new Date();
-    return makeToken(new Date(now.getTime() + expiredAt.toMillis()), user);
+    return makeToken(new Date(now.getTime() + expiredAt.toMillis()), user, tokenType);
   }
 
   /**
@@ -47,7 +47,7 @@ public class TokenProvider {
    * @param user   유저 객체
    * @return Token
    */
-  private String makeToken(Date expiry, User user) {
+  private String makeToken(Date expiry, User user, TokenType tokenType) {
     Date now = new Date();
 
     return Jwts.builder().setHeaderParam(Header.TYPE, Header.JWT_TYPE) // 헤더 type: JWT
@@ -57,6 +57,7 @@ public class TokenProvider {
         .setSubject(user.getId().toString()) // 내용 sub: User id
         .claim("email", user.getEmail()) // 클래임 id: User email
         .claim("nickname", user.getNickname())
+        .claim("token_type", tokenType.getType())
         // 서명: 비밀값과 함께 해시값을 HS256 방식으로 암호화
         .signWith(SignatureAlgorithm.HS256, jwtProperties.getSecretKey()).compact();
   }
@@ -64,13 +65,18 @@ public class TokenProvider {
   /**
    * 유효한 토큰인지 확인
    *
-   * @param token Token
+   * @param token     Token
+   * @param tokenType Token 형식
    * @return boolean true: 검증 성공, false: 검증 실패
    */
-  public boolean validToken(String token) {
+  public boolean validToken(String token, TokenType tokenType) {
     try {
-      Jwts.parser().setSigningKey(jwtProperties.getSecretKey()) // 비밀값으로 복호화
-          .parseClaimsJws(token);
+      Claims claims = getClaims(token);
+      String type = (String) claims.getOrDefault("token_type", "");
+
+      if (!type.equals(tokenType.getType())) {
+        throw new RuntimeException("잘못된 Access Token");
+      }
 
       return true;
     } catch (Exception e) { // 복호화 과정에서 오류가 발생할 경우 false 반환

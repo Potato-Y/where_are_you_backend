@@ -1,6 +1,7 @@
 package com.potato_y.where_are_you.config;
 
 import com.potato_y.where_are_you.config.jwt.TokenProvider;
+import com.potato_y.where_are_you.config.jwt.TokenType;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -27,7 +28,7 @@ public class TokenAuthenticationFilter extends OncePerRequestFilter {
     String token = getAccessToken(authorizationHeader);
 
     // 가져온 토큰이 유효한지 확인하고, 유효한 때는 인증 정보를 설정
-    if (tokenProvider.validToken(token)) {
+    if (tokenProvider.validToken(token, TokenType.ACCESS)) {
       Authentication authentication = tokenProvider.getAuthentication(token);
       SecurityContextHolder.getContext().setAuthentication(authentication);
     }

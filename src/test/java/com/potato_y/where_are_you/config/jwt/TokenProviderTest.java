@@ -6,6 +6,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import com.potato_y.where_are_you.authentication.domain.oauth.OAuthProvider;
 import com.potato_y.where_are_you.user.domain.User;
 import com.potato_y.where_are_you.user.domain.UserRepository;
+import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import java.time.Duration;
 import java.util.Date;
@@ -35,9 +36,10 @@ public class TokenProviderTest {
     userRepository.deleteAll();
   }
 
-  @DisplayName("generateToken(): 유저 정보와 만료 기간을 전달해 토큰을 만들 수 있다.")
+
+  @DisplayName("generateToken(): 유저 정보와 만료 기간을 전달해 토큰을 만들 수 있다. - access token")
   @Test
-  void generateToken() {
+  void generateToken_accessToken() {
     // given 토큰에 유저 정보를 추가하기 위한 테스트 유저를 만든다.
     User testUser = userRepository.save(User.builder()
         .serviceId("1")
@@ -46,17 +48,47 @@ public class TokenProviderTest {
         .build());
 
     // when 토큰 제공자의 generateToken() 메서드를 호출해 토큰을 만든다.
-    String token = tokenProvider.generateToken(testUser, Duration.ofDays(14));
+    String token = tokenProvider.generateToken(testUser, Duration.ofDays(1), TokenType.ACCESS);
 
     // then jjwt 라이브러리를 사용해 토큰을 복호화한다. 토큰을 만들 때 클레임으로 넣어둔 id 값이 given 절에서 만든 유저 id와
     // 동일한지 확인한다.
-    Long userId = Long.valueOf(Jwts.parser()
+    Claims claims = Jwts.parser()
         .setSigningKey(jwtProperties.getSecretKey())
         .parseClaimsJws(token)
-        .getBody()
-        .getSubject());
+        .getBody();
+
+    Long userId = Long.valueOf(claims.getSubject());
+    String tokenType = (String) claims.get("token_type");
 
     assertThat(userId).isEqualTo(testUser.getId());
+    assertThat(tokenType).isEqualTo(TokenType.ACCESS.getType());
+  }
+
+  @DisplayName("generateToken(): 유저 정보와 만료 기간을 전달해 토큰을 만들 수 있다. - refresh token")
+  @Test
+  void generateToken_refreshToken() {
+    // given 토큰에 유저 정보를 추가하기 위한 테스트 유저를 만든다.
+    User testUser = userRepository.save(User.builder()
+        .serviceId("1")
+        .email("user@email.com")
+        .nickname("test user")
+        .build());
+
+    // when 토큰 제공자의 generateToken() 메서드를 호출해 토큰을 만든다.
+    String token = tokenProvider.generateToken(testUser, Duration.ofDays(14), TokenType.REFRESH);
+
+    // then jjwt 라이브러리를 사용해 토큰을 복호화한다. 토큰을 만들 때 클레임으로 넣어둔 id 값이 given 절에서 만든 유저 id와
+    // 동일한지 확인한다.
+    Claims claims = Jwts.parser()
+        .setSigningKey(jwtProperties.getSecretKey())
+        .parseClaimsJws(token)
+        .getBody();
+
+    Long userId = Long.valueOf(claims.getSubject());
+    String tokenType = (String) claims.get("token_type");
+
+    assertThat(userId).isEqualTo(testUser.getId());
+    assertThat(tokenType).isEqualTo(TokenType.REFRESH.getType());
   }
 
   @DisplayName("validToken(): 만료된 토큰인 때에 유효성 검증에 실패한다.")
@@ -72,7 +104,7 @@ public class TokenProviderTest {
             .createToken(jwtProperties);
 
     // when 토큰 제공자의 validToken() 메서드를 호출해 토큰인지 검증한 뒤 결괏값을 치환받는다.
-    boolean result = tokenProvider.validToken(token);
+    boolean result = tokenProvider.validToken(token, TokenType.ACCESS);
 
     // then 반환값이 false(유효한 토큰이 아님)인 것을 확인한다.
     assertThat(result).isFalse();
@@ -82,13 +114,42 @@ public class TokenProviderTest {
   @Test
   void validToken_validToken() {
     // given jjwt 라이브러리를 사용해 토큰을 생성한다. 만료 시간은 현재 시간으로부터 14일 뒤로, 만료되지 않은 토큰으로 생성한다.
-    String token = JwtFactory.withDefaultValues().createToken(jwtProperties);
+    String token = JwtFactory.builder()
+        .expiration(new Date(new Date().getTime() + Duration.ofDays(1).toMillis()))
+        .build()
+        .createToken(jwtProperties);
 
     // when 토큰 제공자의 validToken() 메서드를 호출해 유효한 토큰인지 검증한 뒤 결괏값을 반환받는다.
-    boolean result = tokenProvider.validToken(token);
+    boolean result = tokenProvider.validToken(token, TokenType.ACCESS);
 
     // then 반환값이 true(유효한 토큰임)인 것을 확인한다.
     assertThat(result).isTrue();
+  }
+
+
+  @DisplayName("validToken(): 검증에 맞는 타입이 아니면 실패한다.")
+  @Test
+  void validToken_notMatchTokenType() {
+    // given jjwt 라이브러리를 사용해 토큰을 생성한다. 만료 시간은 현재 시간으로부터 14일 뒤로, 만료되지 않은 토큰으로 생성한다.
+    String validToken = JwtFactory.builder()
+        .expiration(new Date(new Date().getTime() + Duration.ofDays(1).toMillis()))
+        .build()
+        .createToken(jwtProperties);
+    String failToken = JwtFactory.builder()
+        .expiration(new Date(new Date().getTime() + Duration.ofDays(1).toMillis()))
+        .tokenType(TokenType.REFRESH)
+        .build()
+        .createToken(jwtProperties);
+
+    // when 토큰 제공자의 validToken() 메서드를 호출해 유효한 토큰인지 검증한 뒤 결괏값을 반환받는다.
+    boolean validResult = tokenProvider.validToken(validToken, TokenType.ACCESS);
+    boolean failResult1 = tokenProvider.validToken(validToken, TokenType.REFRESH);
+    boolean failResult2 = tokenProvider.validToken(failToken, TokenType.ACCESS);
+
+    // then 반환값이 true(유효한 토큰임)인 것을 확인한다.
+    assertThat(validResult).isTrue();
+    assertThat(failResult1).isFalse();
+    assertThat(failResult2).isFalse();
   }
 
   @DisplayName("getAuthentication(): 검증 테스트")
@@ -134,11 +195,13 @@ public class TokenProviderTest {
     // given 만료 예정인 토큰 생성
     String expiringToken = JwtFactory.builder()
         .expiration(new Date(new Date().getTime() + Duration.ofDays(7).toMillis()))
+        .tokenType(TokenType.REFRESH)
         .build()
         .createToken(jwtProperties);
 
     String validToken = JwtFactory.builder()
         .expiration(new Date(new Date().getTime() + Duration.ofDays(14).toMillis()))
+        .tokenType(TokenType.REFRESH)
         .build()
         .createToken(jwtProperties);
 
