@@ -32,6 +32,6 @@ public class GroupApiController {
   public ResponseEntity<GroupResponse> getGroup(@PathVariable Long groupId) {
     GroupResponse response = groupService.getGroupResponse(groupId);
 
-    return ResponseEntity.status(HttpStatus.CREATED).body(response);
+    return ResponseEntity.status(HttpStatus.OK).body(response);
   }
 }
