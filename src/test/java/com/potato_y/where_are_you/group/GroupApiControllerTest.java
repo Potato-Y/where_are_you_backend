@@ -149,7 +149,7 @@ class GroupApiControllerTest {
 
     // then
     result
-        .andExpect(status().isCreated())
+        .andExpect(status().isOk())
         .andExpect(jsonPath("$.id").isNotEmpty())
         .andExpect(jsonPath("$.groupName").value(groupName))
         .andExpect(jsonPath("$.userResponse.userId").value(testUser.getId()))

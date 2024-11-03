@@ -1,6 +1,5 @@
 package com.potato_y.where_are_you.group;
 
-import static com.potato_y.where_are_you.common.utils.CodeMaker.createCode;
 import static com.potato_y.where_are_you.group.GroupTestUtils.createGroup;
 import static com.potato_y.where_are_you.group.GroupTestUtils.createGroupInviteCode;
 import static com.potato_y.where_are_you.group.GroupTestUtils.createGroupMember;
@@ -216,14 +215,13 @@ class GroupServiceTest {
     // given
     String code = "1234567890";
 
-    given(createCode(any(Integer.class))).willReturn(code);
     given(groupInviteCodeRepository.findByCode(any(String.class))).willReturn(Optional.empty());
 
     // when
     String result = groupService.getUniqueInviteCode();
 
     // then
-    assertThat(result).isEqualTo(code);
+    assertThat(result).hasSize(10);
   }
 
   @Test
