@@ -143,12 +143,12 @@ class GroupApiControllerTest {
   @DisplayName("getGroup(): 그룹 정보를 조회할 수 있다.")
   void successGetGroup() throws Exception {
     // given
-    final String url = "/v1/groups";
+    final String url = "/v1/groups/{groupId}";
     final String groupName = "test group";
     final Group group = groupRepository.save(createGroup(groupName, testUser));
 
     // when
-    ResultActions result = mockMvc.perform(get(url + "/" + group.getId()));
+    ResultActions result = mockMvc.perform(get(url, group.getId()));
 
     // then
     result
@@ -181,8 +181,7 @@ class GroupApiControllerTest {
     Group group = groupRepository.save(createGroup("test group", testUser));
 
     // when
-    ResultActions result = mockMvc.perform(
-        post(url.replace("{groupId}", group.getId().toString())));
+    ResultActions result = mockMvc.perform(post(url, group.getId()));
 
     // then
     result
@@ -202,7 +201,7 @@ class GroupApiControllerTest {
         post(url.replace("{groupId}", group.getId().toString())));
 
     // when, then
-    mockMvc.perform(get("/v1/groups/1"))
+    result
         .andExpect(status().isForbidden());
   }
 
@@ -211,7 +210,7 @@ class GroupApiControllerTest {
   @DisplayName("updateGroup(): 그룹 정보를 변경할 수 있다.")
   void successUpdateGroup() throws Exception {
     // given
-    final String url = "/v1/groups/";
+    final String url = "/v1/groups/{groupId}";
     final String groupName = "new group";
 
     Group group = groupRepository.save(
@@ -222,7 +221,7 @@ class GroupApiControllerTest {
 
     // when
     ResultActions result = mockMvc.perform(
-        put(url + group.getId())
+        put(url, group.getId())
             .contentType(MediaType.APPLICATION_JSON_VALUE)
             .content(requestBody));
 
@@ -241,7 +240,7 @@ class GroupApiControllerTest {
   @DisplayName("updateGroup(): 없는 그룹은 정보를 변경할 수 없다.")
   void failUpdateGroup_notFoundGroup() throws Exception {
     // given
-    final String url = "/v1/groups/";
+    final String url = "/v1/groups/{groupId}";
     final String groupName = "new group";
 
     CreateGroupRequest request = new CreateGroupRequest(groupName);
@@ -249,7 +248,7 @@ class GroupApiControllerTest {
 
     // when
     ResultActions result = mockMvc.perform(
-        put(url + 1)
+        put(url, 1L)
             .contentType(MediaType.APPLICATION_JSON_VALUE)
             .content(requestBody));
 
@@ -262,7 +261,7 @@ class GroupApiControllerTest {
   @DisplayName("updateGroup(): 권한이 없는 경우 실패한다.")
   void failUpdateGroup_notForbidden() throws Exception {
     // given
-    final String url = "/v1/groups/";
+    final String url = "/v1/groups/{groupId}";
 
     Group group = groupRepository.save(
         Group.builder().groupName("group").hostUser(testUser).build());
@@ -272,7 +271,7 @@ class GroupApiControllerTest {
 
     // when
     ResultActions result = mockMvc.perform(
-        put(url + 1)
+        put(url, 1)
             .contentType(MediaType.APPLICATION_JSON_VALUE)
             .content(requestBody));
 
@@ -286,7 +285,7 @@ class GroupApiControllerTest {
   @DisplayName("signupGroup(): 그룹에 가입할 수 있다.")
   void successSignupGroup() throws Exception {
     // given
-    final String url = "/v1/groups/signup/";
+    final String url = "/v1/groups/signup/{inviteCode}";
     final String groupName = "group";
     final String code = "code";
     final User hostUser = userRepository.save(createUser("host@mail.com", "host", "1"));
@@ -297,7 +296,7 @@ class GroupApiControllerTest {
         GroupInviteCode.builder().group(group).code(code).createUser(hostUser).build());
 
     // when
-    ResultActions result = mockMvc.perform(post(url + code));
+    ResultActions result = mockMvc.perform(post(url, code));
 
     // then
     result
@@ -314,7 +313,7 @@ class GroupApiControllerTest {
   @DisplayName("signupGroup(): 호스트 사용자는 그룹에 가입할 수 없다.")
   void failSignupGroup_hostUser() throws Exception {
     // given
-    final String url = "/v1/groups/signup/";
+    final String url = "/v1/groups/signup/{inviteCode}";
     final String groupName = "group";
     final String code = "code";
 
@@ -324,7 +323,7 @@ class GroupApiControllerTest {
         GroupInviteCode.builder().group(group).code(code).createUser(testUser).build());
 
     // when
-    ResultActions result = mockMvc.perform(post(url + code));
+    ResultActions result = mockMvc.perform(post(url, code));
 
     // then
     result
@@ -336,7 +335,7 @@ class GroupApiControllerTest {
   @DisplayName("signupGroup(): 호스트 사용자는 그룹에 가입할 수 없다.")
   void failSignupGroup_notFoundCode() throws Exception {
     // given
-    final String url = "/v1/groups/signup/";
+    final String url = "/v1/groups/signup/{inviteCode}";
     final String groupName = "group";
     final User hostUser = userRepository.save(createUser("host@mail.com", "host", "1"));
 
@@ -346,7 +345,7 @@ class GroupApiControllerTest {
         GroupInviteCode.builder().group(group).code("code").createUser(hostUser).build());
 
     // when
-    ResultActions result = mockMvc.perform(post(url + "codes"));
+    ResultActions result = mockMvc.perform(post(url, "codes"));
 
     // then
     result
@@ -358,7 +357,7 @@ class GroupApiControllerTest {
   @DisplayName("signupGroup(): 이미 그룹에 가입한 사용자는 가입할 수 없다.")
   void failSignupGroup_inMember() throws Exception {
     // given
-    final String url = "/v1/groups/signup/";
+    final String url = "/v1/groups/signup/{inviteCode}";
     final String groupName = "group";
     final String code = "code";
     final User hostUser = userRepository.save(createUser("host@mail.com", "host", "1"));
@@ -370,7 +369,7 @@ class GroupApiControllerTest {
     groupMemberRepository.save(createGroupMember(group, testUser));
 
     // when
-    ResultActions result = mockMvc.perform(post(url + code));
+    ResultActions result = mockMvc.perform(post(url, code));
 
     // then
     result
@@ -381,7 +380,7 @@ class GroupApiControllerTest {
   @DisplayName("signupGroup(): 인증이 없는 사용자는 가입할 수 없다.")
   void failSignupGroup_notForbidden() throws Exception {
     // given
-    final String url = "/v1/groups/signup/";
+    final String url = "/v1/groups/signup/{inviteCode}";
     final String groupName = "group";
     final String code = "code";
     final User hostUser = userRepository.save(createUser("host@mail.com", "host", "1"));
@@ -392,7 +391,7 @@ class GroupApiControllerTest {
         GroupInviteCode.builder().group(group).code(code).createUser(hostUser).build());
 
     // when
-    ResultActions result = mockMvc.perform(post(url + code));
+    ResultActions result = mockMvc.perform(post(url, code));
 
     // then
     result
