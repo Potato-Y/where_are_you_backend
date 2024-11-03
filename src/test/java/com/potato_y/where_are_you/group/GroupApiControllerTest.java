@@ -3,7 +3,9 @@ package com.potato_y.where_are_you.group;
 import static com.potato_y.where_are_you.group.GroupTestUtils.createGroup;
 import static com.potato_y.where_are_you.group.GroupTestUtils.createGroupMember;
 import static com.potato_y.where_are_you.group.GroupTestUtils.createUser;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers.springSecurity;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
@@ -14,6 +16,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.potato_y.where_are_you.group.domain.Group;
 import com.potato_y.where_are_you.group.domain.GroupInviteCode;
 import com.potato_y.where_are_you.group.domain.GroupInviteCodeRepository;
+import com.potato_y.where_are_you.group.domain.GroupMember;
 import com.potato_y.where_are_you.group.domain.GroupMemberRepository;
 import com.potato_y.where_are_you.group.domain.GroupRepository;
 import com.potato_y.where_are_you.group.dto.CreateGroupRequest;
@@ -457,5 +460,86 @@ class GroupApiControllerTest {
 
     // then
     result.andExpect(status().isForbidden());
+  }
+
+  @Test
+  @WithMockUser("1")
+  @DisplayName("deleteOrLeaveGroup(): 호스트 사용자는 그룹을 삭제할 수 있다.")
+  void successDeleteOrLeaveGroup_hostUser() throws Exception {
+    // given
+    final String url = "/v1/groups/{groupId}";
+    Group group = groupRepository.save(createGroup("test group", testUser));
+
+    // when
+    ResultActions result = mockMvc.perform(delete(url, group.getId()));
+
+    // then
+    result.andExpect(status().isOk());
+    assertThat(groupRepository.findById(group.getId())).isEmpty();
+  }
+
+  @Test
+  @WithMockUser("1")
+  @DisplayName("deleteOrLeaveGroup(): 멤버 사용자는 그룹에서 탈퇴할 수 있다.")
+  void successDeleteOrLeaveGroup_memberUser() throws Exception {
+    // given
+    final String url = "/v1/groups/{groupId}";
+    User hostUser = userRepository.save(createUser("host@mail.com", "host user", "2"));
+    Group group = groupRepository.save(createGroup("test group", hostUser));
+    GroupMember member = groupMemberRepository.save(createGroupMember(group, testUser));
+
+    // when
+    ResultActions result = mockMvc.perform(delete(url, group.getId()));
+
+    // then
+    result.andExpect(status().isOk());
+    assertThat(groupMemberRepository.findById(member.getId())).isEmpty();
+    assertThat(groupRepository.findById(group.getId())).isPresent();
+  }
+
+  @Test
+  @WithMockUser("1")
+  @DisplayName("deleteOrLeaveGroup(): 존재하지 않는 그룹은 삭제/탈퇴할 수 없다.")
+  void failDeleteOrLeaveGroup_notFoundGroup() throws Exception {
+    // given
+    final String url = "/v1/groups/{groupId}";
+
+    // when
+    ResultActions result = mockMvc.perform(delete(url, 1L));
+
+    // then
+    result.andExpect(status().isNotFound());
+  }
+
+  @Test
+  @DisplayName("deleteOrLeaveGroup(): 인증되지 않은 사용자는 그룹을 삭제/탈퇴할 수 없다.")
+  void failDeleteOrLeaveGroup_unauthorized() throws Exception {
+    // given
+    final String url = "/v1/groups/{groupId}";
+    Group group = groupRepository.save(createGroup("test group", testUser));
+
+    // when
+    ResultActions result = mockMvc.perform(delete(url, group.getId()));
+
+    // then
+    result.andExpect(status().isForbidden());
+  }
+
+  @Test
+  @WithMockUser("1")
+  @DisplayName("deleteOrLeaveGroup(): 그룹의 멤버가 아닌 사용자는 탈퇴할 수 없다.")
+  void failDeleteOrLeaveGroup_notMember() throws Exception {
+    // given
+    final String url = "/v1/groups/{groupId}";
+    User hostUser = userRepository.save(createUser("host@mail.com", "host user", "2"));
+    Group group = groupRepository.save(createGroup("test group", hostUser));
+
+    // when
+    ResultActions result = mockMvc.perform(
+        delete(url, group.getId())
+    );
+
+    // then
+    result.andExpect(status().isBadRequest());
   }
 }

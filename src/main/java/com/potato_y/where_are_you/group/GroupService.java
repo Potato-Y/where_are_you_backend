@@ -141,4 +141,19 @@ public class GroupService {
 
     return responses;
   }
+
+  @Transactional
+  public void deleteOrLeaveGroup(Long groupId) {
+    User user = currentUserProvider.getCurrentUser();
+
+    Group group = groupRepository.findById(groupId).orElseThrow(NotFoundException::new);
+    if (group.getHostUser().equals(user)) {
+      groupRepository.delete(group);
+      return;
+    }
+
+    GroupMember groupMember = groupMemberRepository.findByGroupAndUser(group, user)
+        .orElseThrow(() -> new BadRequestException("사용자가 그룹의 멤버가 아닙니다."));
+    groupMemberRepository.delete(groupMember);
+  }
 }

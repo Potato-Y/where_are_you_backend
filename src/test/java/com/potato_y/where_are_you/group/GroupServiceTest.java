@@ -9,6 +9,8 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 
 import com.potato_y.where_are_you.authentication.CurrentUserProvider;
 import com.potato_y.where_are_you.error.exception.BadRequestException;
@@ -377,5 +379,54 @@ class GroupServiceTest {
     assertThat(responses.get(1).groupName()).isEqualTo(memberGroup.getGroupName());
     assertThat(responses.get(1).userResponse().getNickname()).isEqualTo(otherUser.getNickname());
     assertThat(responses.get(1).memberNumber()).isEqualTo(2); // 호스트 + 멤버 1명}
+  }
+
+  @Test
+  @DisplayName("deleteOrLeaveGroup(): 호스트 사용자는 그룹을 삭제할 수 있다.")
+  void successDeleteOrLeaveGroup_hostUser() {
+    // given
+    User hostUser = createUser("host@mail.com", "host user", "1");
+    Group group = createGroup("test group", hostUser);
+
+    given(currentUserProvider.getCurrentUser()).willReturn(hostUser);
+    given(groupRepository.findById(any(Long.class))).willReturn(Optional.of(group));
+
+    // when
+    groupService.deleteOrLeaveGroup(1L);
+
+    // then
+    verify(groupRepository, times(1)).delete(group);
+  }
+
+  @Test
+  @DisplayName("deleteOrLeaveGroup(): 멤버 사용자는 그룹에서 탈퇴할 수 있다.")
+  void successDeleteOrLeaveGroup_memberUser() {
+    // given
+    User hostUser = createUser("host@mail.com", "host user", "1");
+    Group group = createGroup("test group", hostUser);
+    GroupMember groupMember = createGroupMember(group, testUser);
+
+    given(currentUserProvider.getCurrentUser()).willReturn(testUser);
+    given(groupRepository.findById(any(Long.class))).willReturn(Optional.of(group));
+    given(groupMemberRepository.findByGroupAndUser(group, testUser))
+        .willReturn(Optional.of(groupMember));
+
+    // when
+    groupService.deleteOrLeaveGroup(1L);
+
+    // then
+    verify(groupMemberRepository, times(1)).delete(groupMember);
+  }
+
+  @Test
+  @DisplayName("deleteOrLeaveGroup(): 존재하지 않는 그룹은 삭제/탈퇴할 수 없다.")
+  void failDeleteOrLeaveGroup_notFoundGroup() {
+    // given
+    given(currentUserProvider.getCurrentUser()).willReturn(testUser);
+    given(groupRepository.findById(any(Long.class))).willReturn(Optional.empty());
+
+    // when, then
+    assertThatThrownBy(() -> groupService.deleteOrLeaveGroup(1L))
+        .isInstanceOf(NotFoundException.class);
   }
 }
