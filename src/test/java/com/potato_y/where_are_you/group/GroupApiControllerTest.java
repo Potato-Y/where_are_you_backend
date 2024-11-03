@@ -395,4 +395,67 @@ class GroupApiControllerTest {
     result
         .andExpect(status().isForbidden());
   }
+
+  @Test
+  @WithMockUser("1")
+  @DisplayName("getGroupList(): 사용자의 그룹 목록을 조회할 수 있다.")
+  void successGetGroupList() throws Exception {
+    // given
+    final String url = "/v1/groups";
+
+    Group hostGroup = groupRepository.save(createGroup("host group", testUser));
+
+    // 멤버로 있는 그룹 생성
+    User otherUser = userRepository.save(createUser("other@mail.com", "other user", "2"));
+    Group memberGroup = groupRepository.save(createGroup("member group", otherUser));
+    groupMemberRepository.save(createGroupMember(memberGroup, testUser));
+
+    // when
+    ResultActions result = mockMvc.perform(get(url));
+
+    // then
+    result
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$").isArray())
+        .andExpect(jsonPath("$[0].id").value(hostGroup.getId()))
+        .andExpect(jsonPath("$[0].groupName").value(hostGroup.getGroupName()))
+        .andExpect(jsonPath("$[0].userResponse.userId").value(testUser.getId()))
+        .andExpect(jsonPath("$[0].userResponse.nickname").value(testUser.getNickname()))
+        .andExpect(jsonPath("$[0].memberNumber").value(1))
+        .andExpect(jsonPath("$[1].id").value(memberGroup.getId()))
+        .andExpect(jsonPath("$[1].groupName").value(memberGroup.getGroupName()))
+        .andExpect(jsonPath("$[1].userResponse.userId").value(otherUser.getId()))
+        .andExpect(jsonPath("$[1].userResponse.nickname").value(otherUser.getNickname()))
+        .andExpect(jsonPath("$[1].memberNumber").value(2));
+  }
+
+  @Test
+  @WithMockUser("1")
+  @DisplayName("getGroupList(): 그룹이 없는 경우 빈 배열을 반환한다.")
+  void successGetGroupList_empty() throws Exception {
+    // given
+    final String url = "/v1/groups";
+
+    // when
+    ResultActions result = mockMvc.perform(get(url));
+
+    // then
+    result
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$").isArray())
+        .andExpect(jsonPath("$").isEmpty());
+  }
+
+  @Test
+  @DisplayName("getGroupList(): 인증되지 않은 사용자는 그룹 목록을 조회할 수 없다.")
+  void failGetGroupList_withoutAuthentication() throws Exception {
+    // given
+    final String url = "/v1/groups";
+
+    // when
+    ResultActions result = mockMvc.perform(get(url));
+
+    // then
+    result.andExpect(status().isForbidden());
+  }
 }

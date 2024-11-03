@@ -3,6 +3,7 @@ package com.potato_y.where_are_you.group;
 import com.potato_y.where_are_you.group.dto.CreateGroupRequest;
 import com.potato_y.where_are_you.group.dto.GroupInviteCodeResponse;
 import com.potato_y.where_are_you.group.dto.GroupResponse;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -57,5 +58,12 @@ public class GroupApiController {
     GroupResponse response = groupService.signupGroup(inviteCode);
 
     return ResponseEntity.status(HttpStatus.CREATED).body(response);
+  }
+
+  @GetMapping("")
+  public ResponseEntity<List<GroupResponse>> getGroupList() {
+    List<GroupResponse> responses = groupService.getGroupList();
+
+    return ResponseEntity.status(HttpStatus.OK).body(responses);
   }
 }

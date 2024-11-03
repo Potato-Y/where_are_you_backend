@@ -16,6 +16,7 @@ import com.potato_y.where_are_you.group.dto.CreateGroupRequest;
 import com.potato_y.where_are_you.group.dto.GroupInviteCodeResponse;
 import com.potato_y.where_are_you.group.dto.GroupResponse;
 import com.potato_y.where_are_you.user.domain.User;
+import java.util.ArrayList;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -123,5 +124,21 @@ public class GroupService {
         .build());
 
     return new GroupResponse(group, getGroupMembers(group).size() + 1);
+  }
+
+  @Transactional(readOnly = true)
+  public List<GroupResponse> getGroupList() {
+    User user = currentUserProvider.getCurrentUser();
+
+    List<GroupResponse> responses = new ArrayList<>();
+
+    List<Group> hostGroups = groupRepository.findByHostUser(user);
+    hostGroups.forEach(it -> responses.add(new GroupResponse(it, getGroupMembers(it).size() + 1)));
+
+    List<GroupMember> inGroups = groupMemberRepository.findByUser(user);
+    inGroups.forEach(it -> responses.add(
+        new GroupResponse(it.getGroup(), getGroupMembers(it.getGroup()).size() + 1)));
+
+    return responses;
   }
 }

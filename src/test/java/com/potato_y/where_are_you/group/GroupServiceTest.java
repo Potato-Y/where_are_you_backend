@@ -322,4 +322,60 @@ class GroupServiceTest {
     assertThatThrownBy(() -> groupService.signupGroup(code))
         .isInstanceOf(BadRequestException.class);
   }
+
+  @Test
+  @DisplayName("getGroupList(): 가입한 그룹이 없으면 빈 리스트를 반환한다.")
+  void successGetGroupList_empty() {
+    // given
+    User testUser = createUser("test@mail.com", "test user", "1");
+
+    given(currentUserProvider.getCurrentUser()).willReturn(testUser);
+    given(groupRepository.findByHostUser(any(User.class))).willReturn(Collections.emptyList());
+
+    // when
+    List<GroupResponse> responses = groupService.getGroupList();
+
+    // then
+    assertThat(responses).isEmpty();
+  }
+
+  @Test
+  @DisplayName("getGroupList(): 사용자가 가입한 그룹 목록을 조회할 수 있다.")
+  void successGetGroupList() {
+    // given
+    User user = createUser("test@mail.com", "test user", "1");
+    User otherUser = createUser("other@mail.com", "other user", "2");
+
+    // 호스트로 있는 그룹
+    Group hostGroup = createGroup("host group", user);
+    groupRepository.save(hostGroup);
+
+    // 멤버로 있는 그룹
+    Group memberGroup = createGroup("member group", otherUser);
+    groupRepository.save(memberGroup);
+    GroupMember member = createGroupMember(memberGroup, user);
+    groupMemberRepository.save(member);
+
+    given(currentUserProvider.getCurrentUser()).willReturn(user);
+    given(groupRepository.findByHostUser(user)).willReturn(List.of(hostGroup));
+    given(groupMemberRepository.findByUser(user)).willReturn(List.of(member));
+    given(groupMemberRepository.findByGroup(hostGroup)).willReturn(Collections.emptyList());
+    given(groupMemberRepository.findByGroup(memberGroup)).willReturn(List.of(member));
+
+    // when
+    List<GroupResponse> responses = groupService.getGroupList();
+
+    // then
+    assertThat(responses).hasSize(2);
+
+    // 호스트 그룹 검증
+    assertThat(responses.get(0).groupName()).isEqualTo(hostGroup.getGroupName());
+    assertThat(responses.get(0).userResponse().getNickname()).isEqualTo(user.getNickname());
+    assertThat(responses.get(0).memberNumber()).isEqualTo(1); // 호스트만 있는 경우
+
+    // 멤버 그룹 검증
+    assertThat(responses.get(1).groupName()).isEqualTo(memberGroup.getGroupName());
+    assertThat(responses.get(1).userResponse().getNickname()).isEqualTo(otherUser.getNickname());
+    assertThat(responses.get(1).memberNumber()).isEqualTo(2); // 호스트 + 멤버 1명}
+  }
 }
