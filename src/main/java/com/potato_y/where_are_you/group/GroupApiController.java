@@ -52,5 +52,10 @@ public class GroupApiController {
     return ResponseEntity.status(HttpStatus.CREATED).body(response);
   }
 
+  @PostMapping("/signup/{inviteCode}")
+  public ResponseEntity<GroupResponse> signupGroup(@PathVariable String inviteCode) {
+    GroupResponse response = groupService.signupGroup(inviteCode);
 
+    return ResponseEntity.status(HttpStatus.CREATED).body(response);
+  }
 }

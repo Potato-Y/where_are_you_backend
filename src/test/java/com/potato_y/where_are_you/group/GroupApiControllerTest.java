@@ -1,6 +1,7 @@
 package com.potato_y.where_are_you.group;
 
 import static com.potato_y.where_are_you.group.GroupTestUtils.createGroup;
+import static com.potato_y.where_are_you.group.GroupTestUtils.createGroupMember;
 import static com.potato_y.where_are_you.group.GroupTestUtils.createUser;
 import static org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers.springSecurity;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -11,6 +12,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.potato_y.where_are_you.group.domain.Group;
+import com.potato_y.where_are_you.group.domain.GroupInviteCode;
+import com.potato_y.where_are_you.group.domain.GroupInviteCodeRepository;
 import com.potato_y.where_are_you.group.domain.GroupMemberRepository;
 import com.potato_y.where_are_you.group.domain.GroupRepository;
 import com.potato_y.where_are_you.group.dto.CreateGroupRequest;
@@ -53,12 +56,16 @@ class GroupApiControllerTest {
   @Autowired
   private GroupMemberRepository groupMemberRepository;
 
+  @Autowired
+  private GroupInviteCodeRepository groupInviteCodeRepository;
+
   private User testUser;
 
   @BeforeEach
   void setUp() {
     this.mockMvc = MockMvcBuilders.webAppContextSetup(context).apply(springSecurity()).build();
 
+    groupInviteCodeRepository.deleteAll();
     groupMemberRepository.deleteAll();
     groupRepository.deleteAll();
     userRepository.deleteAll();
@@ -264,6 +271,124 @@ class GroupApiControllerTest {
         put(url + 1)
             .contentType(MediaType.APPLICATION_JSON_VALUE)
             .content(requestBody));
+
+    // then
+    result
+        .andExpect(status().isForbidden());
+  }
+
+  @Test
+  @WithMockUser("1")
+  @DisplayName("signupGroup(): 그룹에 가입할 수 있다.")
+  void successSignupGroup() throws Exception {
+    // given
+    final String url = "/v1/groups/signup/";
+    final String groupName = "group";
+    final String code = "code";
+    final User hostUser = userRepository.save(createUser("host@mail.com", "host", "1"));
+
+    Group group = groupRepository.save(
+        Group.builder().groupName(groupName).hostUser(hostUser).build());
+    groupInviteCodeRepository.save(
+        GroupInviteCode.builder().group(group).code(code).createUser(hostUser).build());
+
+    // when
+    ResultActions result = mockMvc.perform(post(url + code));
+
+    // then
+    result
+        .andExpect(status().isCreated())
+        .andExpect(jsonPath("$.id").isNotEmpty())
+        .andExpect(jsonPath("$.groupName").value(groupName))
+        .andExpect(jsonPath("$.userResponse.userId").value(hostUser.getId()))
+        .andExpect(jsonPath("$.userResponse.nickname").value(hostUser.getNickname()))
+        .andExpect(jsonPath("$.memberNumber").value(2));
+  }
+
+  @Test
+  @WithMockUser("1")
+  @DisplayName("signupGroup(): 호스트 사용자는 그룹에 가입할 수 없다.")
+  void failSignupGroup_hostUser() throws Exception {
+    // given
+    final String url = "/v1/groups/signup/";
+    final String groupName = "group";
+    final String code = "code";
+
+    Group group = groupRepository.save(
+        Group.builder().groupName(groupName).hostUser(testUser).build());
+    groupInviteCodeRepository.save(
+        GroupInviteCode.builder().group(group).code(code).createUser(testUser).build());
+
+    // when
+    ResultActions result = mockMvc.perform(post(url + code));
+
+    // then
+    result
+        .andExpect(status().isBadRequest());
+  }
+
+  @Test
+  @WithMockUser("1")
+  @DisplayName("signupGroup(): 호스트 사용자는 그룹에 가입할 수 없다.")
+  void failSignupGroup_notFoundCode() throws Exception {
+    // given
+    final String url = "/v1/groups/signup/";
+    final String groupName = "group";
+    final User hostUser = userRepository.save(createUser("host@mail.com", "host", "1"));
+
+    Group group = groupRepository.save(
+        Group.builder().groupName(groupName).hostUser(hostUser).build());
+    groupInviteCodeRepository.save(
+        GroupInviteCode.builder().group(group).code("code").createUser(hostUser).build());
+
+    // when
+    ResultActions result = mockMvc.perform(post(url + "codes"));
+
+    // then
+    result
+        .andExpect(status().isNotFound());
+  }
+
+  @Test
+  @WithMockUser("1")
+  @DisplayName("signupGroup(): 이미 그룹에 가입한 사용자는 가입할 수 없다.")
+  void failSignupGroup_inMember() throws Exception {
+    // given
+    final String url = "/v1/groups/signup/";
+    final String groupName = "group";
+    final String code = "code";
+    final User hostUser = userRepository.save(createUser("host@mail.com", "host", "1"));
+
+    Group group = groupRepository.save(
+        Group.builder().groupName(groupName).hostUser(hostUser).build());
+    groupInviteCodeRepository.save(
+        GroupInviteCode.builder().group(group).code(code).createUser(hostUser).build());
+    groupMemberRepository.save(createGroupMember(group, testUser));
+
+    // when
+    ResultActions result = mockMvc.perform(post(url + code));
+
+    // then
+    result
+        .andExpect(status().isBadRequest());
+  }
+
+  @Test
+  @DisplayName("signupGroup(): 인증이 없는 사용자는 가입할 수 없다.")
+  void failSignupGroup_notForbidden() throws Exception {
+    // given
+    final String url = "/v1/groups/signup/";
+    final String groupName = "group";
+    final String code = "code";
+    final User hostUser = userRepository.save(createUser("host@mail.com", "host", "1"));
+
+    Group group = groupRepository.save(
+        Group.builder().groupName(groupName).hostUser(hostUser).build());
+    groupInviteCodeRepository.save(
+        GroupInviteCode.builder().group(group).code(code).createUser(hostUser).build());
+
+    // when
+    ResultActions result = mockMvc.perform(post(url + code));
 
     // then
     result

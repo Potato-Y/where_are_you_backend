@@ -4,6 +4,7 @@ import static com.potato_y.where_are_you.common.utils.CodeMaker.createCode;
 import static com.potato_y.where_are_you.group.GroupValidator.validateGroupHostUser;
 
 import com.potato_y.where_are_you.authentication.CurrentUserProvider;
+import com.potato_y.where_are_you.error.exception.BadRequestException;
 import com.potato_y.where_are_you.error.exception.NotFoundException;
 import com.potato_y.where_are_you.group.domain.Group;
 import com.potato_y.where_are_you.group.domain.GroupInviteCode;
@@ -95,6 +96,31 @@ public class GroupService {
     validateGroupHostUser(group, user);
 
     group.updateGroupName(request.groupName());
+
+    return new GroupResponse(group, getGroupMembers(group).size() + 1);
+  }
+
+  @Transactional
+  public GroupResponse signupGroup(String inviteCode) {
+    User user = currentUserProvider.getCurrentUser();
+
+    GroupInviteCode codeInfo = groupInviteCodeRepository.findByCode(inviteCode)
+        .orElseThrow(NotFoundException::new);
+    Group group = codeInfo.getGroup();
+
+    groupMemberRepository.findByGroupAndUser(group, user)
+        .ifPresent(v -> {
+          throw new BadRequestException("이미 가입된 사용자입니다.");
+        });
+
+    if (group.getHostUser().equals(user)) {
+      throw new BadRequestException("호스트는 가입할 수 없습니다.");
+    }
+
+    groupMemberRepository.save(GroupMember.builder()
+        .group(group)
+        .user(user)
+        .build());
 
     return new GroupResponse(group, getGroupMembers(group).size() + 1);
   }

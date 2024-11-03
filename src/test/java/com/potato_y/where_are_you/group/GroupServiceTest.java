@@ -8,9 +8,11 @@ import static com.potato_y.where_are_you.group.GroupTestUtils.createUser;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.BDDMockito.given;
 
 import com.potato_y.where_are_you.authentication.CurrentUserProvider;
+import com.potato_y.where_are_you.error.exception.BadRequestException;
 import com.potato_y.where_are_you.error.exception.ForbiddenException;
 import com.potato_y.where_are_you.error.exception.NotFoundException;
 import com.potato_y.where_are_you.group.domain.Group;
@@ -259,5 +261,67 @@ class GroupServiceTest {
     // when, then
     assertThatThrownBy(() -> groupService.updateGroup(1L, request))
         .isInstanceOf(ForbiddenException.class);
+  }
+
+  @Test
+  @DisplayName("signupGroup(): 그룹 가입에 성공한다.")
+  void successSignupGroup() {
+    final String groupName = "group";
+    final String code = "code";
+    User user = createUser("other@mail.com", "other", "2");
+    Group group = createGroup(groupName, testUser);
+    List<GroupMember> members = List.of(createGroupMember(group, user));
+
+    given(currentUserProvider.getCurrentUser()).willReturn(user);
+    given(groupInviteCodeRepository.findByCode(anyString())).willReturn(
+        Optional.ofNullable(createGroupInviteCode(group, testUser, code)));
+    given(groupMemberRepository.findByGroupAndUser(any(Group.class), any(User.class))).willReturn(
+        Optional.empty());
+    given(groupMemberRepository.findByGroup(group)).willReturn(members);
+
+    // when
+    GroupResponse response = groupService.signupGroup(code);
+
+    // then
+    assertThat(response.groupName()).isEqualTo(groupName);
+    assertThat(response.userResponse().getNickname()).isEqualTo(testUser.getNickname());
+    assertThat(response.memberNumber()).isEqualTo(2);
+  }
+
+  @Test
+  @DisplayName("signupGroup(): 호스트 유저는 그룹 가입에 실패한다.")
+  void failSignupGroup_hostUser() {
+    final String groupName = "group";
+    final String code = "code";
+    Group group = createGroup(groupName, testUser);
+
+    given(currentUserProvider.getCurrentUser()).willReturn(testUser);
+    given(groupInviteCodeRepository.findByCode(anyString())).willReturn(
+        Optional.ofNullable(createGroupInviteCode(group, testUser, code)));
+
+    // when, then
+    assertThatThrownBy(() -> groupService.signupGroup(code))
+        .isInstanceOf(BadRequestException.class);
+  }
+
+
+  @Test
+  @DisplayName("signupGroup(): 이미 가입한 사용자는 그룹 가입에 실패한다.")
+  void failSignupGroup_inMember() {
+    final String groupName = "group";
+    final String code = "code";
+    User user = createUser("other@mail.com", "other", "2");
+    Group group = createGroup(groupName, testUser);
+    GroupMember member = createGroupMember(group, user);
+
+    given(currentUserProvider.getCurrentUser()).willReturn(user);
+    given(groupInviteCodeRepository.findByCode(anyString())).willReturn(
+        Optional.ofNullable(createGroupInviteCode(group, testUser, code)));
+    given(groupMemberRepository.findByGroupAndUser(any(Group.class), any(User.class))).willReturn(
+        Optional.ofNullable(member));
+
+    // when, then
+    assertThatThrownBy(() -> groupService.signupGroup(code))
+        .isInstanceOf(BadRequestException.class);
   }
 }
