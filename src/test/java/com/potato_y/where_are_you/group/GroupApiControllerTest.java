@@ -27,6 +27,7 @@ import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMock
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
 import org.springframework.security.test.context.support.WithMockUser;
+import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
@@ -35,6 +36,7 @@ import org.springframework.web.context.WebApplicationContext;
 
 @SpringBootTest
 @AutoConfigureMockMvc
+@DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
 @ActiveProfiles("test")
 class GroupApiControllerTest {
 
@@ -68,7 +70,6 @@ class GroupApiControllerTest {
     groupInviteCodeRepository.deleteAll();
     groupMemberRepository.deleteAll();
     groupRepository.deleteAll();
-    userRepository.deleteAll();
 
     testUser = userRepository.save(createUser("test@mail.com", "test user", "1"));
   }
