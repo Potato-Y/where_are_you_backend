@@ -48,4 +48,10 @@ public class Group {
     this.hostUser = hostUser;
     this.groupName = groupName;
   }
+
+  public Group updateGroupName(String groupName) {
+    this.groupName = groupName;
+
+    return this;
+  }
 }

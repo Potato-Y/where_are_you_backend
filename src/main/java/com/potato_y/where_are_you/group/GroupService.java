@@ -86,4 +86,16 @@ public class GroupService {
 
     return code;
   }
+
+  @Transactional
+  public GroupResponse updateGroup(Long groupId, CreateGroupRequest request) {
+    User user = currentUserProvider.getCurrentUser();
+    Group group = groupRepository.findById(groupId).orElseThrow(NotFoundException::new);
+
+    validateGroupHostUser(group, user);
+
+    group.updateGroupName(request.groupName());
+
+    return new GroupResponse(group, getGroupMembers(group).size() + 1);
+  }
 }

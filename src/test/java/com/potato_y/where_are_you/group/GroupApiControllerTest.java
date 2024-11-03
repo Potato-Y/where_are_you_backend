@@ -5,6 +5,7 @@ import static com.potato_y.where_are_you.group.GroupTestUtils.createUser;
 import static org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers.springSecurity;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -191,6 +192,81 @@ class GroupApiControllerTest {
 
     // when, then
     mockMvc.perform(get("/v1/groups/1"))
+        .andExpect(status().isForbidden());
+  }
+
+  @Test
+  @WithMockUser("1")
+  @DisplayName("updateGroup(): 그룹 정보를 변경할 수 있다.")
+  void successUpdateGroup() throws Exception {
+    // given
+    final String url = "/v1/groups/";
+    final String groupName = "new group";
+
+    Group group = groupRepository.save(
+        Group.builder().groupName("group").hostUser(testUser).build());
+
+    CreateGroupRequest request = new CreateGroupRequest(groupName);
+    final String requestBody = objectMapper.writeValueAsString(request);
+
+    // when
+    ResultActions result = mockMvc.perform(
+        put(url + group.getId())
+            .contentType(MediaType.APPLICATION_JSON_VALUE)
+            .content(requestBody));
+
+    // then
+    result
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$.id").isNotEmpty())
+        .andExpect(jsonPath("$.groupName").value(groupName))
+        .andExpect(jsonPath("$.userResponse.userId").value(testUser.getId()))
+        .andExpect(jsonPath("$.userResponse.nickname").value(testUser.getNickname()))
+        .andExpect(jsonPath("$.memberNumber").value(1));
+  }
+
+  @Test
+  @WithMockUser("1")
+  @DisplayName("updateGroup(): 없는 그룹은 정보를 변경할 수 없다.")
+  void failUpdateGroup_notFoundGroup() throws Exception {
+    // given
+    final String url = "/v1/groups/";
+    final String groupName = "new group";
+
+    CreateGroupRequest request = new CreateGroupRequest(groupName);
+    final String requestBody = objectMapper.writeValueAsString(request);
+
+    // when
+    ResultActions result = mockMvc.perform(
+        put(url + 1)
+            .contentType(MediaType.APPLICATION_JSON_VALUE)
+            .content(requestBody));
+
+    // then
+    result
+        .andExpect(status().isNotFound());
+  }
+
+  @Test
+  @DisplayName("updateGroup(): 권한이 없는 경우 실패한다.")
+  void failUpdateGroup_notForbidden() throws Exception {
+    // given
+    final String url = "/v1/groups/";
+
+    Group group = groupRepository.save(
+        Group.builder().groupName("group").hostUser(testUser).build());
+
+    CreateGroupRequest request = new CreateGroupRequest("new group");
+    final String requestBody = objectMapper.writeValueAsString(request);
+
+    // when
+    ResultActions result = mockMvc.perform(
+        put(url + 1)
+            .contentType(MediaType.APPLICATION_JSON_VALUE)
+            .content(requestBody));
+
+    // then
+    result
         .andExpect(status().isForbidden());
   }
 }

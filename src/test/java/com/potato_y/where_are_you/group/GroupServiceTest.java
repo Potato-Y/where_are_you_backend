@@ -223,4 +223,41 @@ class GroupServiceTest {
     // then
     assertThat(result).isEqualTo(code);
   }
+
+  @Test
+  @DisplayName("updateGroup(): 그룹 정보를 변경할 수 있다.")
+  void successUpdateGroup() {
+    // given
+    String groupName = "new name";
+    Group group = createGroup("test_group", testUser);
+
+    given(currentUserProvider.getCurrentUser()).willReturn(testUser);
+    given(groupRepository.findById(any(Long.class))).willReturn(Optional.of(group));
+    given(groupMemberRepository.findByGroup(group)).willReturn(Collections.emptyList());
+
+    CreateGroupRequest request = new CreateGroupRequest(groupName);
+
+    // when
+    GroupResponse response = groupService.updateGroup(1L, request);
+
+    // then
+    assertThat(response.groupName()).isEqualTo(groupName);
+  }
+
+  @Test
+  @DisplayName("updateGroup(): 호스트 사용자가 아니라면 그룹 정보를 수정할 수 없다.")
+  void failUpdateGroup_notHostUser() {
+    // given
+    User otherUser = createUser("other@mail.com", "other user", "32");
+    Group group = createGroup("test_group", testUser);
+
+    CreateGroupRequest request = new CreateGroupRequest("groupName");
+
+    given(currentUserProvider.getCurrentUser()).willReturn(otherUser);
+    given(groupRepository.findById(any(Long.class))).willReturn(Optional.of(group));
+
+    // when, then
+    assertThatThrownBy(() -> groupService.updateGroup(1L, request))
+        .isInstanceOf(ForbiddenException.class);
+  }
 }
