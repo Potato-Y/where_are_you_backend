@@ -1,6 +1,8 @@
 package com.potato_y.where_are_you.group;
 
+import static com.potato_y.where_are_you.common.utils.CodeMaker.createCode;
 import static com.potato_y.where_are_you.group.GroupTestUtils.createGroup;
+import static com.potato_y.where_are_you.group.GroupTestUtils.createGroupInviteCode;
 import static com.potato_y.where_are_you.group.GroupTestUtils.createGroupMember;
 import static com.potato_y.where_are_you.group.GroupTestUtils.createUser;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -9,12 +11,16 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
 
 import com.potato_y.where_are_you.authentication.CurrentUserProvider;
+import com.potato_y.where_are_you.error.exception.ForbiddenException;
 import com.potato_y.where_are_you.error.exception.NotFoundException;
 import com.potato_y.where_are_you.group.domain.Group;
+import com.potato_y.where_are_you.group.domain.GroupInviteCode;
+import com.potato_y.where_are_you.group.domain.GroupInviteCodeRepository;
 import com.potato_y.where_are_you.group.domain.GroupMember;
 import com.potato_y.where_are_you.group.domain.GroupMemberRepository;
 import com.potato_y.where_are_you.group.domain.GroupRepository;
 import com.potato_y.where_are_you.group.dto.CreateGroupRequest;
+import com.potato_y.where_are_you.group.dto.GroupInviteCodeResponse;
 import com.potato_y.where_are_you.group.dto.GroupResponse;
 import com.potato_y.where_are_you.user.domain.User;
 import java.util.Collections;
@@ -39,6 +45,9 @@ class GroupServiceTest {
 
   @Mock
   private GroupMemberRepository groupMemberRepository;
+
+  @Mock
+  private GroupInviteCodeRepository groupInviteCodeRepository;
 
   @Mock
   private CurrentUserProvider currentUserProvider;
@@ -162,5 +171,56 @@ class GroupServiceTest {
     // then
     assertThat(result.get(0).getUser().getNickname()).isEqualTo(user1.getNickname());
     assertThat(result.get(1).getUser().getNickname()).isEqualTo(user2.getNickname());
+  }
+
+  @Test
+  @DisplayName("createInviteCode(): 초대 코드를 생성할 수 있다.")
+  void successCreateInviteCode() {
+    // given
+    Group group = createGroup("test_group", testUser);
+    String code = "1234567890";
+
+    given(currentUserProvider.getCurrentUser()).willReturn(testUser);
+    given(groupRepository.findById(any(Long.class))).willReturn(Optional.of(group));
+    given(groupInviteCodeRepository.findByCode(any(String.class))).willReturn(Optional.empty());
+    given(groupInviteCodeRepository.save(any(GroupInviteCode.class))).willReturn(
+        createGroupInviteCode(group, testUser, code));
+
+    // when
+    GroupInviteCodeResponse response = groupService.createInviteCode(1L);
+
+    // then
+    assertThat(response.inviteCode()).isEqualTo(code);
+  }
+
+  @Test
+  @DisplayName("createInviteCode(): 호스트 사용자가 아니라면 초대 코드를 생성할 수 없다.")
+  void failCreateInviteCode_otherUser() {
+    // given
+    User otherUser = createUser("other@mail.com", "other user", "32");
+    Group group = createGroup("test_group", testUser);
+
+    given(currentUserProvider.getCurrentUser()).willReturn(otherUser);
+    given(groupRepository.findById(any(Long.class))).willReturn(Optional.of(group));
+
+    // when, then
+    assertThatThrownBy(() -> groupService.createInviteCode(1L))
+        .isInstanceOf(ForbiddenException.class);
+  }
+
+  @Test
+  @DisplayName("getUniqueInviteCode(): 고유한 코드를 생성할 수 있다.")
+  void successGetUniqueInviteCode() {
+    // given
+    String code = "1234567890";
+
+    given(createCode(any(Integer.class))).willReturn(code);
+    given(groupInviteCodeRepository.findByCode(any(String.class))).willReturn(Optional.empty());
+
+    // when
+    String result = groupService.getUniqueInviteCode();
+
+    // then
+    assertThat(result).isEqualTo(code);
   }
 }

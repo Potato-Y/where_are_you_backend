@@ -2,6 +2,7 @@ package com.potato_y.where_are_you.group;
 
 import com.potato_y.where_are_you.authentication.domain.oauth.OAuthProvider;
 import com.potato_y.where_are_you.group.domain.Group;
+import com.potato_y.where_are_you.group.domain.GroupInviteCode;
 import com.potato_y.where_are_you.group.domain.GroupMember;
 import com.potato_y.where_are_you.user.domain.User;
 
@@ -27,6 +28,14 @@ public class GroupTestUtils {
     return GroupMember.builder()
         .group(group)
         .user(user)
+        .build();
+  }
+
+  public static GroupInviteCode createGroupInviteCode(Group group, User user, String code) {
+    return GroupInviteCode.builder()
+        .group(group)
+        .createUser(user)
+        .code(code)
         .build();
   }
 }

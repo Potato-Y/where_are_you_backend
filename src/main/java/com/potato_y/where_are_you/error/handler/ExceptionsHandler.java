@@ -2,6 +2,7 @@ package com.potato_y.where_are_you.error.handler;
 
 import com.potato_y.where_are_you.error.dto.ErrorResponse;
 import com.potato_y.where_are_you.error.exception.BadRequestException;
+import com.potato_y.where_are_you.error.exception.ForbiddenException;
 import com.potato_y.where_are_you.error.exception.NotFoundException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -20,6 +21,13 @@ public class ExceptionsHandler {
   public ErrorResponse handleException(BadRequestException e) {
     return new ErrorResponse(HttpStatus.BAD_REQUEST.value(), e.getMessage());
   }
+
+  @ExceptionHandler(ForbiddenException.class)
+  @ResponseStatus(HttpStatus.FORBIDDEN) // status: 403
+  public ErrorResponse handleException(ForbiddenException e) {
+    return new ErrorResponse(HttpStatus.FORBIDDEN.value(), e.getMessage());
+  }
+
 
   @ExceptionHandler(NotFoundException.class)
   @ResponseStatus(HttpStatus.NOT_FOUND) // status: 404

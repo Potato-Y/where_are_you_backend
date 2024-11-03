@@ -1,12 +1,18 @@
 package com.potato_y.where_are_you.group;
 
+import static com.potato_y.where_are_you.common.utils.CodeMaker.createCode;
+import static com.potato_y.where_are_you.group.GroupValidator.validateGroupHostUser;
+
 import com.potato_y.where_are_you.authentication.CurrentUserProvider;
 import com.potato_y.where_are_you.error.exception.NotFoundException;
 import com.potato_y.where_are_you.group.domain.Group;
+import com.potato_y.where_are_you.group.domain.GroupInviteCode;
+import com.potato_y.where_are_you.group.domain.GroupInviteCodeRepository;
 import com.potato_y.where_are_you.group.domain.GroupMember;
 import com.potato_y.where_are_you.group.domain.GroupMemberRepository;
 import com.potato_y.where_are_you.group.domain.GroupRepository;
 import com.potato_y.where_are_you.group.dto.CreateGroupRequest;
+import com.potato_y.where_are_you.group.dto.GroupInviteCodeResponse;
 import com.potato_y.where_are_you.group.dto.GroupResponse;
 import com.potato_y.where_are_you.user.domain.User;
 import java.util.List;
@@ -18,9 +24,12 @@ import org.springframework.transaction.annotation.Transactional;
 @RequiredArgsConstructor
 public class GroupService {
 
+  private static final int GROUP_INVITE_CODE_LENGTH = 10;
+
   private final GroupRepository groupRepository;
   private final CurrentUserProvider currentUserProvider;
   private final GroupMemberRepository groupMemberRepository;
+  private final GroupInviteCodeRepository groupInviteCodeRepository;
 
   @Transactional
   public GroupResponse createGroup(CreateGroupRequest dto) {
@@ -46,5 +55,35 @@ public class GroupService {
   @Transactional(readOnly = true)
   protected List<GroupMember> getGroupMembers(Group group) {
     return groupMemberRepository.findByGroup(group);
+  }
+
+  @Transactional
+  public GroupInviteCodeResponse createInviteCode(Long groupId) {
+    User user = currentUserProvider.getCurrentUser();
+    Group group = groupRepository.findById(groupId).orElseThrow(NotFoundException::new);
+
+    validateGroupHostUser(group, user);
+
+    String code = getUniqueInviteCode();
+
+    GroupInviteCode groupInviteCode = groupInviteCodeRepository.save(
+        GroupInviteCode.builder()
+            .group(group)
+            .createUser(user)
+            .code(code)
+            .build());
+
+    return new GroupInviteCodeResponse(groupId, groupInviteCode.getCode());
+  }
+
+  @Transactional(readOnly = true)
+  protected String getUniqueInviteCode() {
+    String code = createCode(GROUP_INVITE_CODE_LENGTH);
+
+    while (groupInviteCodeRepository.findByCode(code).isPresent()) {
+      code = createCode(GROUP_INVITE_CODE_LENGTH);
+    }
+
+    return code;
   }
 }

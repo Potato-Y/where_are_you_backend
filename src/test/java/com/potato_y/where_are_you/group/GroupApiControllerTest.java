@@ -159,4 +159,38 @@ class GroupApiControllerTest {
     mockMvc.perform(get("/v1/groups/1"))
         .andExpect(status().isForbidden());
   }
+
+  @Test
+  @WithMockUser("1")
+  @DisplayName("createGroupInviteCode(): 그룹 초대 코드를 생성할 수 있다.")
+  void successCreateGroupInviteCode() throws Exception {
+    // given
+    final String url = "/v1/groups/{groupId}/invite-code";
+    Group group = groupRepository.save(createGroup("test group", testUser));
+
+    // when
+    ResultActions result = mockMvc.perform(
+        post(url.replace("{groupId}", group.getId().toString())));
+
+    // then
+    result
+        .andExpect(jsonPath("$.groupId").value(group.getId()))
+        .andExpect(jsonPath("$.inviteCode").isNotEmpty());
+  }
+
+  @Test
+  @DisplayName("createGroupInviteCode(): 인증되지 않은 사용자는 그룹 초대 코드를 생성할 수 없다.")
+  void failCreateGroupInviteCode() throws Exception {
+    // given
+    final String url = "/v1/groups/{groupId}/invite-code";
+    Group group = groupRepository.save(createGroup("test group", testUser));
+
+    // when
+    ResultActions result = mockMvc.perform(
+        post(url.replace("{groupId}", group.getId().toString())));
+
+    // when, then
+    mockMvc.perform(get("/v1/groups/1"))
+        .andExpect(status().isForbidden());
+  }
 }
