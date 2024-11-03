@@ -49,6 +49,7 @@ class UserApiControllerTest {
     User user = userRepository.save(User.builder()
         .oAuthProvider(OAuthProvider.KAKAO)
         .email("user@mail.com")
+        .password("password")
         .nickname("name")
         .serviceId("2")
         .build());

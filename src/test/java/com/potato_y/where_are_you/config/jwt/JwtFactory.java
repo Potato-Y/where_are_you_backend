@@ -18,14 +18,17 @@ public class JwtFactory {
   private Date issuedAt = new Date();
   private Date expiration = new Date(new Date().getTime() + Duration.ofDays(14).toMillis());
   private Map<String, Object> claims = emptyMap();
+  private TokenType tokenType = TokenType.ACCESS;
 
   // 빌더 패턴을 사용해 설정이 필요한 데이터만 선택 설정
   @Builder
-  public JwtFactory(String subject, Date issuedAt, Date expiration, Map<String, Object> claims) {
+  public JwtFactory(String subject, Date issuedAt, Date expiration, Map<String, Object> claims,
+      TokenType tokenType) {
     this.subject = subject != null ? subject : this.subject;
     this.issuedAt = issuedAt != null ? issuedAt : this.issuedAt;
     this.expiration = expiration != null ? expiration : this.expiration;
     this.claims = claims != null ? claims : this.claims;
+    this.tokenType = tokenType != null ? tokenType : this.tokenType;
   }
 
   public static JwtFactory withDefaultValues() {
@@ -40,6 +43,7 @@ public class JwtFactory {
         .setIssuer(jwtProperties.getIssuer())
         .setExpiration(expiration)
         .addClaims(claims)
+        .claim("token_type", tokenType.getType())
         .signWith(SignatureAlgorithm.HS256, jwtProperties.getSecretKey())
         .compact();
   }

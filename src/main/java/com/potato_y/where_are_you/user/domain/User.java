@@ -8,6 +8,7 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
+import jakarta.validation.constraints.NotNull;
 import java.util.Collection;
 import java.util.List;
 import lombok.Builder;
@@ -33,6 +34,9 @@ public class User implements UserDetails {
 
   private String nickname;
 
+  @NotNull
+  private String password;
+
   @Enumerated(EnumType.STRING)
   private OAuthProvider oAuthProvider;
 
@@ -48,8 +52,7 @@ public class User implements UserDetails {
 
   @Override // 사용자 패스워드 반환
   public String getPassword() {
-    // TODO: 랜덤 값으로 변경하기
-    return "sd43adkfl2Kkejrasd12!@#q135";
+    return password;
   }
 
   @Override
@@ -77,9 +80,11 @@ public class User implements UserDetails {
   }
 
   @Builder
-  public User(String serviceId, String email, String nickname, OAuthProvider oAuthProvider) {
+  public User(String serviceId, String email, String nickname, String password,
+      OAuthProvider oAuthProvider) {
     this.serviceId = serviceId;
     this.email = email;
+    this.password = password;
     this.nickname = nickname;
     this.oAuthProvider = oAuthProvider;
   }
