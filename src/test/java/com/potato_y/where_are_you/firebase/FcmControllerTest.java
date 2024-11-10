@@ -1,6 +1,6 @@
 package com.potato_y.where_are_you.firebase;
 
-import static com.potato_y.where_are_you.group.GroupTestUtils.createUser;
+import static com.potato_y.where_are_you.user.UserTestUtils.createUser;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers.springSecurity;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;

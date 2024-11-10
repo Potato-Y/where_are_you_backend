@@ -3,7 +3,7 @@ package com.potato_y.where_are_you.group;
 import static com.potato_y.where_are_you.group.GroupTestUtils.createGroup;
 import static com.potato_y.where_are_you.group.GroupTestUtils.createGroupInviteCode;
 import static com.potato_y.where_are_you.group.GroupTestUtils.createGroupMember;
-import static com.potato_y.where_are_you.group.GroupTestUtils.createUser;
+import static com.potato_y.where_are_you.user.UserTestUtils.createUser;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;

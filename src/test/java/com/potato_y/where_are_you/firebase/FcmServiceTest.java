@@ -1,6 +1,6 @@
 package com.potato_y.where_are_you.firebase;
 
-import static com.potato_y.where_are_you.group.GroupTestUtils.createUser;
+import static com.potato_y.where_are_you.user.UserTestUtils.createUser;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.verify;
