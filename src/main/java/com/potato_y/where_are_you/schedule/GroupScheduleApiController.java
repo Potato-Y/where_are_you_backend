@@ -2,6 +2,7 @@ package com.potato_y.where_are_you.schedule;
 
 import com.potato_y.where_are_you.schedule.dto.CreateGroupScheduleRequest;
 import com.potato_y.where_are_you.schedule.dto.GroupScheduleResponse;
+import com.potato_y.where_are_you.user.dto.UserResponse;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -51,5 +52,13 @@ public class GroupScheduleApiController {
     groupScheduleService.cancelParticipation(groupId, scheduleId);
 
     return ResponseEntity.status(HttpStatus.OK).build();
+  }
+
+  @GetMapping("/{scheduleId}/participation")
+  public ResponseEntity<List<UserResponse>> getParticipationList(@PathVariable Long groupId,
+      @PathVariable Long scheduleId) {
+    List<UserResponse> responses = groupScheduleService.getParticipationList(groupId, scheduleId);
+
+    return ResponseEntity.status(HttpStatus.OK).body(responses);
   }
 }

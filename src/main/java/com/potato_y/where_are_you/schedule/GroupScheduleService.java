@@ -14,6 +14,7 @@ import com.potato_y.where_are_you.schedule.domain.ParticipationRepository;
 import com.potato_y.where_are_you.schedule.dto.CreateGroupScheduleRequest;
 import com.potato_y.where_are_you.schedule.dto.GroupScheduleResponse;
 import com.potato_y.where_are_you.user.domain.User;
+import com.potato_y.where_are_you.user.dto.UserResponse;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -111,5 +112,20 @@ public class GroupScheduleService {
         .orElseThrow(() -> new NotFoundException("참여 정보를 불러올 수 없습니다"));
 
     participation.updateIsParticipating(false);
+  }
+
+  public List<UserResponse> getParticipationList(Long groupId, Long scheduleId) {
+    User user = currentUserProvider.getCurrentUser();
+    GroupSchedule schedule = getGroupSchedule(scheduleId);
+
+    validateGroupId(schedule.getGroup(), groupId);
+    if (!groupService.checkGroupMember(groupId, user)) {
+      throw new ForbiddenException("사용자가 그룹원이 아닙니다");
+    }
+
+    List<Participation> participations = participationRepository.findBySchedule(schedule);
+
+    return participations.stream().filter(Participation::isParticipating)
+        .map((it) -> new UserResponse(it.getUser())).toList();
   }
 }
