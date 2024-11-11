@@ -55,7 +55,7 @@ public class GroupService {
   }
 
   @Transactional(readOnly = true)
-  protected List<GroupMember> getGroupMembers(Group group) {
+  public List<GroupMember> getGroupMembers(Group group) {
     return groupMemberRepository.findByGroup(group);
   }
 

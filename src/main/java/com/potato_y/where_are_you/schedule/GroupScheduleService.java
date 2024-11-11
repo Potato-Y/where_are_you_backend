@@ -5,8 +5,10 @@ import static com.potato_y.where_are_you.group.GroupValidator.validateGroupId;
 import com.potato_y.where_are_you.authentication.CurrentUserProvider;
 import com.potato_y.where_are_you.error.exception.ForbiddenException;
 import com.potato_y.where_are_you.error.exception.NotFoundException;
+import com.potato_y.where_are_you.firebase.FcmService;
 import com.potato_y.where_are_you.group.GroupService;
 import com.potato_y.where_are_you.group.domain.Group;
+import com.potato_y.where_are_you.group.domain.GroupMember;
 import com.potato_y.where_are_you.schedule.domain.GroupSchedule;
 import com.potato_y.where_are_you.schedule.domain.GroupScheduleRepository;
 import com.potato_y.where_are_you.schedule.domain.Participation;
@@ -28,6 +30,7 @@ public class GroupScheduleService {
   private final CurrentUserProvider currentUserProvider;
   private final GroupScheduleRepository scheduleRepository;
   private final ParticipationRepository participationRepository;
+  private final FcmService fcmService;
 
   @Transactional
   public GroupScheduleResponse createSchedule(Long groupId, CreateGroupScheduleRequest dto) {
@@ -51,6 +54,8 @@ public class GroupScheduleService {
         .locationLatitude(dto.locationLatitude())
         .locationLongitude(dto.locationLongitude())
         .build());
+
+    pushNewSchedule(groupSchedule);
 
     return new GroupScheduleResponse(groupSchedule);
   }
@@ -127,5 +132,12 @@ public class GroupScheduleService {
 
     return participations.stream().filter(Participation::isParticipating)
         .map((it) -> new UserResponse(it.getUser())).toList();
+  }
+
+  private void pushNewSchedule(GroupSchedule schedule) {
+    List<User> groupMembers = groupService.getGroupMembers(schedule.getGroup())
+        .stream().map(GroupMember::getUser).toList();
+
+    fcmService.pushFcmNewSchedule(groupMembers, schedule);
   }
 }
