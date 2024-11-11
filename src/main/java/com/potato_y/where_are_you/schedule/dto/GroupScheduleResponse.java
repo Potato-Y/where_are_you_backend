@@ -4,6 +4,7 @@ import com.potato_y.where_are_you.schedule.domain.GroupSchedule;
 import java.time.LocalDateTime;
 
 public record GroupScheduleResponse(
+    Long scheduleId,
     Long groupId,
     Long createUserId,
     String title,
@@ -18,6 +19,7 @@ public record GroupScheduleResponse(
 
   public GroupScheduleResponse(GroupSchedule groupSchedule) {
     this(
+        groupSchedule.getId(),
         groupSchedule.getGroup().getId(),
         groupSchedule.getUser().getId(),
         groupSchedule.getTitle(),
