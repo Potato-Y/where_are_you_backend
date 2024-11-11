@@ -429,4 +429,7 @@ class GroupServiceTest {
     assertThatThrownBy(() -> groupService.deleteOrLeaveGroup(1L))
         .isInstanceOf(NotFoundException.class);
   }
+
+  // TODO: 그룹원 확인에 대한 테스트 코드 추가
+  // TODO: findByGroup에 대한 테스트 추가
 }
