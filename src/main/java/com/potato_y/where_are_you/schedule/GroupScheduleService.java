@@ -97,4 +97,22 @@ public class GroupScheduleService {
   private GroupSchedule getGroupSchedule(Long id) {
     return scheduleRepository.findById(id).orElseThrow(() -> new NotFoundException("일정이 없습니다."));
   }
+
+  @Transactional
+  public void cancelParticipation(Long groupId, Long scheduleId) {
+    User user = currentUserProvider.getCurrentUser();
+    GroupSchedule schedule = getGroupSchedule(scheduleId);
+
+    if (!schedule.getGroup().getId().equals(groupId)) {
+      throw new BadRequestException("일정과 그룹 id가 일치하지 않습니다");
+    }
+    if (!groupService.checkGroupMember(groupId, user)) {
+      throw new ForbiddenException("사용자가 그룹원이 아닙니다");
+    }
+
+    Participation participation = participationRepository.findByUserAndSchedule(user, schedule)
+        .orElseThrow(() -> new NotFoundException("참여 정보를 불러올 수 없습니다"));
+
+    participation.updateIsParticipating(false);
+  }
 }
