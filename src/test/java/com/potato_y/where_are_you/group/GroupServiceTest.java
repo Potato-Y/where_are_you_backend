@@ -78,7 +78,7 @@ class GroupServiceTest {
 
     // then
     assertThat(response.groupName()).isEqualTo(groupName);
-    assertThat(response.userResponse().getNickname()).isEqualTo(testUser.getNickname());
+    assertThat(response.hostUser().getNickname()).isEqualTo(testUser.getNickname());
     assertThat(response.memberNumber()).isEqualTo(1);
   }
 
@@ -97,7 +97,7 @@ class GroupServiceTest {
 
     // then
     assertThat(response.groupName()).isEqualTo(group.getGroupName());
-    assertThat(response.userResponse().getNickname()).isEqualTo(testUser.getNickname());
+    assertThat(response.hostUser().getNickname()).isEqualTo(testUser.getNickname());
     assertThat(response.memberNumber()).isEqualTo(1);
   }
 
@@ -120,7 +120,7 @@ class GroupServiceTest {
 
     // then
     assertThat(response.groupName()).isEqualTo(group.getGroupName());
-    assertThat(response.userResponse().getNickname()).isEqualTo(testUser.getNickname());
+    assertThat(response.hostUser().getNickname()).isEqualTo(testUser.getNickname());
     assertThat(response.memberNumber()).isEqualTo(4);
   }
 
@@ -284,7 +284,7 @@ class GroupServiceTest {
 
     // then
     assertThat(response.groupName()).isEqualTo(groupName);
-    assertThat(response.userResponse().getNickname()).isEqualTo(testUser.getNickname());
+    assertThat(response.hostUser().getNickname()).isEqualTo(testUser.getNickname());
     assertThat(response.memberNumber()).isEqualTo(2);
   }
 
@@ -372,12 +372,12 @@ class GroupServiceTest {
 
     // 호스트 그룹 검증
     assertThat(responses.get(0).groupName()).isEqualTo(hostGroup.getGroupName());
-    assertThat(responses.get(0).userResponse().getNickname()).isEqualTo(user.getNickname());
+    assertThat(responses.get(0).hostUser().getNickname()).isEqualTo(user.getNickname());
     assertThat(responses.get(0).memberNumber()).isEqualTo(1); // 호스트만 있는 경우
 
     // 멤버 그룹 검증
     assertThat(responses.get(1).groupName()).isEqualTo(memberGroup.getGroupName());
-    assertThat(responses.get(1).userResponse().getNickname()).isEqualTo(otherUser.getNickname());
+    assertThat(responses.get(1).hostUser().getNickname()).isEqualTo(otherUser.getNickname());
     assertThat(responses.get(1).memberNumber()).isEqualTo(2); // 호스트 + 멤버 1명}
   }
 
