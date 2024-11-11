@@ -135,6 +135,23 @@ public class GroupScheduleService {
         .map((it) -> new UserResponse(it.getUser())).toList();
   }
 
+  @Transactional(readOnly = true)
+  public List<User> getParticipationUsers(GroupSchedule schedule) {
+    return participationRepository.findBySchedule(schedule).stream()
+        .filter(Participation::isParticipating).map(Participation::getUser).toList();
+  }
+
+  @Transactional(readOnly = true)
+  public GroupSchedule getSchedule(Long scheduleId) {
+    return scheduleRepository.findById(scheduleId)
+        .orElseThrow(() -> new NotFoundException("스케줄을 찾을 수 없음"));
+  }
+
+  @Transactional(readOnly = true)
+  public boolean checkParticipation(User user, GroupSchedule schedule) {
+    return participationRepository.findByUserAndSchedule(user, schedule).isPresent();
+  }
+
   private void pushNewSchedule(GroupSchedule schedule) {
     List<User> groupMembers = groupService.getGroupMembers(schedule.getGroup())
         .stream().map(GroupMember::getUser).toList();
