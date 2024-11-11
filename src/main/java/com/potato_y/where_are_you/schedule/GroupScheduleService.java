@@ -1,7 +1,8 @@
 package com.potato_y.where_are_you.schedule;
 
+import static com.potato_y.where_are_you.group.GroupValidator.validateGroupId;
+
 import com.potato_y.where_are_you.authentication.CurrentUserProvider;
-import com.potato_y.where_are_you.error.exception.BadRequestException;
 import com.potato_y.where_are_you.error.exception.ForbiddenException;
 import com.potato_y.where_are_you.error.exception.NotFoundException;
 import com.potato_y.where_are_you.group.GroupService;
@@ -71,9 +72,7 @@ public class GroupScheduleService {
     User user = currentUserProvider.getCurrentUser();
     GroupSchedule schedule = getGroupSchedule(scheduleId);
 
-    if (!schedule.getGroup().getId().equals(groupId)) {
-      throw new BadRequestException("일정과 그룹 id가 일치하지 않습니다");
-    }
+    validateGroupId(schedule.getGroup(), groupId);
     if (!groupService.checkGroupMember(groupId, user)) {
       throw new ForbiddenException("사용자가 그룹원이 아닙니다");
     }
@@ -103,9 +102,7 @@ public class GroupScheduleService {
     User user = currentUserProvider.getCurrentUser();
     GroupSchedule schedule = getGroupSchedule(scheduleId);
 
-    if (!schedule.getGroup().getId().equals(groupId)) {
-      throw new BadRequestException("일정과 그룹 id가 일치하지 않습니다");
-    }
+    validateGroupId(schedule.getGroup(), groupId);
     if (!groupService.checkGroupMember(groupId, user)) {
       throw new ForbiddenException("사용자가 그룹원이 아닙니다");
     }
