@@ -97,8 +97,8 @@ class GroupApiControllerTest {
         .andExpect(status().isCreated())
         .andExpect(jsonPath("$.id").isNotEmpty())
         .andExpect(jsonPath("$.groupName").value(groupName))
-        .andExpect(jsonPath("$.userResponse.userId").value(testUser.getId()))
-        .andExpect(jsonPath("$.userResponse.nickname").value(testUser.getNickname()))
+        .andExpect(jsonPath("$.hostUser.userId").value(testUser.getId()))
+        .andExpect(jsonPath("$.hostUser.nickname").value(testUser.getNickname()))
         .andExpect(jsonPath("$.memberNumber").value(1));
   }
 
@@ -155,8 +155,8 @@ class GroupApiControllerTest {
         .andExpect(status().isOk())
         .andExpect(jsonPath("$.id").isNotEmpty())
         .andExpect(jsonPath("$.groupName").value(groupName))
-        .andExpect(jsonPath("$.userResponse.userId").value(testUser.getId()))
-        .andExpect(jsonPath("$.userResponse.nickname").value(testUser.getNickname()))
+        .andExpect(jsonPath("$.hostUser.userId").value(testUser.getId()))
+        .andExpect(jsonPath("$.hostUser.nickname").value(testUser.getNickname()))
         .andExpect(jsonPath("$.memberNumber").value(1));
   }
 
@@ -230,8 +230,8 @@ class GroupApiControllerTest {
         .andExpect(status().isOk())
         .andExpect(jsonPath("$.id").isNotEmpty())
         .andExpect(jsonPath("$.groupName").value(groupName))
-        .andExpect(jsonPath("$.userResponse.userId").value(testUser.getId()))
-        .andExpect(jsonPath("$.userResponse.nickname").value(testUser.getNickname()))
+        .andExpect(jsonPath("$.hostUser.userId").value(testUser.getId()))
+        .andExpect(jsonPath("$.hostUser.nickname").value(testUser.getNickname()))
         .andExpect(jsonPath("$.memberNumber").value(1));
   }
 
@@ -303,8 +303,8 @@ class GroupApiControllerTest {
         .andExpect(status().isCreated())
         .andExpect(jsonPath("$.id").isNotEmpty())
         .andExpect(jsonPath("$.groupName").value(groupName))
-        .andExpect(jsonPath("$.userResponse.userId").value(hostUser.getId()))
-        .andExpect(jsonPath("$.userResponse.nickname").value(hostUser.getNickname()))
+        .andExpect(jsonPath("$.hostUser.userId").value(hostUser.getId()))
+        .andExpect(jsonPath("$.hostUser.nickname").value(hostUser.getNickname()))
         .andExpect(jsonPath("$.memberNumber").value(2));
   }
 
@@ -421,13 +421,13 @@ class GroupApiControllerTest {
         .andExpect(jsonPath("$").isArray())
         .andExpect(jsonPath("$[0].id").value(hostGroup.getId()))
         .andExpect(jsonPath("$[0].groupName").value(hostGroup.getGroupName()))
-        .andExpect(jsonPath("$[0].userResponse.userId").value(testUser.getId()))
-        .andExpect(jsonPath("$[0].userResponse.nickname").value(testUser.getNickname()))
+        .andExpect(jsonPath("$[0].hostUser.userId").value(testUser.getId()))
+        .andExpect(jsonPath("$[0].hostUser.nickname").value(testUser.getNickname()))
         .andExpect(jsonPath("$[0].memberNumber").value(1))
         .andExpect(jsonPath("$[1].id").value(memberGroup.getId()))
         .andExpect(jsonPath("$[1].groupName").value(memberGroup.getGroupName()))
-        .andExpect(jsonPath("$[1].userResponse.userId").value(otherUser.getId()))
-        .andExpect(jsonPath("$[1].userResponse.nickname").value(otherUser.getNickname()))
+        .andExpect(jsonPath("$[1].hostUser.userId").value(otherUser.getId()))
+        .andExpect(jsonPath("$[1].hostUser.nickname").value(otherUser.getNickname()))
         .andExpect(jsonPath("$[1].memberNumber").value(2));
   }
 
