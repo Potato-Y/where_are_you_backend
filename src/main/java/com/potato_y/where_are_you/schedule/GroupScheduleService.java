@@ -9,6 +9,7 @@ import com.potato_y.where_are_you.schedule.domain.GroupScheduleRepository;
 import com.potato_y.where_are_you.schedule.dto.CreateGroupScheduleRequest;
 import com.potato_y.where_are_you.schedule.dto.GroupScheduleResponse;
 import com.potato_y.where_are_you.user.domain.User;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -45,5 +46,18 @@ public class GroupScheduleService {
         .build());
 
     return new GroupScheduleResponse(groupSchedule);
+  }
+
+  @Transactional(readOnly = true)
+  public List<GroupScheduleResponse> getSchedules(Long groupId) {
+    User user = currentUserProvider.getCurrentUser();
+    if (!groupService.checkGroupMember(groupId, user)) {
+      throw new ForbiddenException("사용자가 그룹원이 아닙니다");
+    }
+
+    Group group = groupService.findByGroup(groupId);
+    List<GroupSchedule> schedules = scheduleRepository.findByGroup(group);
+
+    return schedules.stream().map(GroupScheduleResponse::new).toList();
   }
 }
