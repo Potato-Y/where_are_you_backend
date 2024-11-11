@@ -2,12 +2,14 @@ package com.potato_y.where_are_you.schedule;
 
 import com.potato_y.where_are_you.schedule.dto.CreateGroupScheduleRequest;
 import com.potato_y.where_are_you.schedule.dto.GroupScheduleResponse;
+import com.potato_y.where_are_you.user.dto.UserResponse;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -32,6 +34,30 @@ public class GroupScheduleApiController {
   @GetMapping("")
   public ResponseEntity<List<GroupScheduleResponse>> getGroupSchedules(@PathVariable Long groupId) {
     List<GroupScheduleResponse> responses = groupScheduleService.getSchedules(groupId);
+
+    return ResponseEntity.status(HttpStatus.OK).body(responses);
+  }
+
+  @PostMapping("/{scheduleId}/participation")
+  public ResponseEntity<Void> registerParticipation(@PathVariable Long groupId,
+      @PathVariable Long scheduleId) {
+    groupScheduleService.registerParticipation(groupId, scheduleId);
+
+    return ResponseEntity.status(HttpStatus.OK).build();
+  }
+
+  @PatchMapping("/{scheduleId}/participation")
+  public ResponseEntity<Void> cancelParticipation(@PathVariable Long groupId,
+      @PathVariable Long scheduleId) {
+    groupScheduleService.cancelParticipation(groupId, scheduleId);
+
+    return ResponseEntity.status(HttpStatus.OK).build();
+  }
+
+  @GetMapping("/{scheduleId}/participation")
+  public ResponseEntity<List<UserResponse>> getParticipationList(@PathVariable Long groupId,
+      @PathVariable Long scheduleId) {
+    List<UserResponse> responses = groupScheduleService.getParticipationList(groupId, scheduleId);
 
     return ResponseEntity.status(HttpStatus.OK).body(responses);
   }
