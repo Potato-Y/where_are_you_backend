@@ -35,4 +35,12 @@ public class GroupScheduleApiController {
 
     return ResponseEntity.status(HttpStatus.OK).body(responses);
   }
+
+  @PostMapping("/{scheduleId}/participation")
+  public ResponseEntity<Void> registerParticipation(@PathVariable Long groupId,
+      @PathVariable Long scheduleId) {
+    groupScheduleService.registerParticipation(groupId, scheduleId);
+
+    return ResponseEntity.status(HttpStatus.OK).build();
+  }
 }

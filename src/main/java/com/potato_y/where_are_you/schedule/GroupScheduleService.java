@@ -1,11 +1,15 @@
 package com.potato_y.where_are_you.schedule;
 
 import com.potato_y.where_are_you.authentication.CurrentUserProvider;
+import com.potato_y.where_are_you.error.exception.BadRequestException;
 import com.potato_y.where_are_you.error.exception.ForbiddenException;
+import com.potato_y.where_are_you.error.exception.NotFoundException;
 import com.potato_y.where_are_you.group.GroupService;
 import com.potato_y.where_are_you.group.domain.Group;
 import com.potato_y.where_are_you.schedule.domain.GroupSchedule;
 import com.potato_y.where_are_you.schedule.domain.GroupScheduleRepository;
+import com.potato_y.where_are_you.schedule.domain.Participation;
+import com.potato_y.where_are_you.schedule.domain.ParticipationRepository;
 import com.potato_y.where_are_you.schedule.dto.CreateGroupScheduleRequest;
 import com.potato_y.where_are_you.schedule.dto.GroupScheduleResponse;
 import com.potato_y.where_are_you.user.domain.User;
@@ -21,6 +25,7 @@ public class GroupScheduleService {
   private final GroupService groupService;
   private final CurrentUserProvider currentUserProvider;
   private final GroupScheduleRepository scheduleRepository;
+  private final ParticipationRepository participationRepository;
 
   @Transactional
   public GroupScheduleResponse createSchedule(Long groupId, CreateGroupScheduleRequest dto) {
@@ -59,5 +64,37 @@ public class GroupScheduleService {
     List<GroupSchedule> schedules = scheduleRepository.findByGroup(group);
 
     return schedules.stream().map(GroupScheduleResponse::new).toList();
+  }
+
+  @Transactional
+  public void registerParticipation(Long groupId, Long scheduleId) {
+    User user = currentUserProvider.getCurrentUser();
+    GroupSchedule schedule = getGroupSchedule(scheduleId);
+
+    if (!schedule.getGroup().getId().equals(groupId)) {
+      throw new BadRequestException("일정과 그룹 id가 일치하지 않습니다");
+    }
+    if (!groupService.checkGroupMember(groupId, user)) {
+      throw new ForbiddenException("사용자가 그룹원이 아닙니다");
+    }
+
+    Participation participation = participationRepository.findByUserAndSchedule(user, schedule)
+        .orElseGet(() -> createParticipation(user, schedule));
+
+    if (!participation.isParticipating()) {
+      participation.updateIsParticipating(true);
+    }
+  }
+
+  private Participation createParticipation(User user, GroupSchedule schedule) {
+    return participationRepository.save(Participation.builder()
+        .user(user)
+        .schedule(schedule)
+        .isParticipating(true)
+        .build());
+  }
+
+  private GroupSchedule getGroupSchedule(Long id) {
+    return scheduleRepository.findById(id).orElseThrow(() -> new NotFoundException("일정이 없습니다."));
   }
 }
