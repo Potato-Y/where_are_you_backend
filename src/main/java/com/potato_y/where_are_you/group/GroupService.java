@@ -156,4 +156,20 @@ public class GroupService {
         .orElseThrow(() -> new BadRequestException("사용자가 그룹의 멤버가 아닙니다."));
     groupMemberRepository.delete(groupMember);
   }
+
+  @Transactional(readOnly = true)
+  public Boolean checkGroupMember(Long groupId, User user) {
+    Group group = findByGroup(groupId);
+    if (!group.getHostUser().equals(user)) {
+      return groupMemberRepository.findByGroupAndUser(group, user).isPresent();
+    }
+
+    return true;
+  }
+
+  @Transactional(readOnly = true)
+  public Group findByGroup(Long groupId) {
+    return groupRepository.findById(groupId)
+        .orElseThrow(() -> new NotFoundException("그룹을 찾을 수 없습니다."));
+  }
 }
