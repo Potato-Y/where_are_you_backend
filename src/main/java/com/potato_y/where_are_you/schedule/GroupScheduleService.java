@@ -119,6 +119,7 @@ public class GroupScheduleService {
     participation.updateIsParticipating(false);
   }
 
+  @Transactional(readOnly = true)
   public List<UserResponse> getParticipationList(Long groupId, Long scheduleId) {
     User user = currentUserProvider.getCurrentUser();
     GroupSchedule schedule = getGroupSchedule(scheduleId);
