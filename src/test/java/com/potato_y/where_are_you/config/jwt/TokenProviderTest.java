@@ -44,6 +44,8 @@ public class TokenProviderTest {
     User testUser = userRepository.save(User.builder()
         .serviceId("1")
         .email("user@email.com")
+        .password("password")
+        .oAuthProvider(OAuthProvider.KAKAO)
         .nickname("test user")
         .build());
 
@@ -71,6 +73,8 @@ public class TokenProviderTest {
     User testUser = userRepository.save(User.builder()
         .serviceId("1")
         .email("user@email.com")
+        .password("password")
+        .oAuthProvider(OAuthProvider.KAKAO)
         .nickname("test user")
         .build());
 
@@ -162,6 +166,7 @@ public class TokenProviderTest {
     userRepository.save(User.builder()
         .serviceId("1")
         .email("test@mail.com")
+        .password("password")
         .oAuthProvider(OAuthProvider.KAKAO)
         .nickname("test_user")
         .build());
