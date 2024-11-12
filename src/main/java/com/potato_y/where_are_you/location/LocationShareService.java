@@ -31,12 +31,8 @@ public class LocationShareService {
     User user = currentUserProvider.getCurrentUser();
 
     GroupSchedule schedule = groupScheduleService.getSchedule(scheduleId);
-    if (!groupScheduleService.checkParticipation(user, schedule)) {
-      throw new BadRequestException("위치 공유 대상자가 아닙니다");
-    }
-    if (!checkLocationShareTime(schedule)) {
-      throw new BadRequestException("위치 공유 시간이 아닙니다");
-    }
+    validateParticipation(user, schedule);
+    validateLocationShareTime(schedule);
 
     UserLocation userLocation = userLocationRepository.findByUser(user)
         .orElseGet(() -> createUserLocation(user));
@@ -49,12 +45,8 @@ public class LocationShareService {
     User user = currentUserProvider.getCurrentUser();
 
     GroupSchedule schedule = groupScheduleService.getSchedule(scheduleId);
-    if (!groupScheduleService.checkParticipation(user, schedule)) {
-      throw new BadRequestException("위치 공유 대상자가 아닙니다");
-    }
-    if (!checkLocationShareTime(schedule)) {
-      throw new BadRequestException("위치 공유 시간이 아닙니다");
-    }
+    validateParticipation(user, schedule);
+    validateLocationShareTime(schedule);
 
     return getUserLocationResponses(schedule);
   }
@@ -77,6 +69,18 @@ public class LocationShareService {
 
   private UserLocation createUserLocation(User user) {
     return userLocationRepository.save(UserLocation.builder().user(user).build());
+  }
+
+  private void validateParticipation(User user, GroupSchedule schedule) {
+    if (!groupScheduleService.checkParticipation(user, schedule)) {
+      throw new BadRequestException("위치 공유 대상자가 아닙니다");
+    }
+  }
+
+  private void validateLocationShareTime(GroupSchedule schedule) {
+    if (!checkLocationShareTime(schedule)) {
+      throw new BadRequestException("위치 공유 시간이 아닙니다");
+    }
   }
 
   private boolean checkLocationShareTime(GroupSchedule schedule) {
