@@ -27,10 +27,10 @@ public class LocationShareService {
   private final CurrentUserProvider currentUserProvider;
 
   @Transactional
-  public List<UserLocationResponse> updateUserLocation(UpdateUserLocationRequest dto) {
+  public void updateUserLocation(Long scheduleId, UpdateUserLocationRequest dto) {
     User user = currentUserProvider.getCurrentUser();
 
-    GroupSchedule schedule = groupScheduleService.getSchedule(dto.scheduleId());
+    GroupSchedule schedule = groupScheduleService.getSchedule(scheduleId);
     if (!groupScheduleService.checkParticipation(user, schedule)) {
       throw new BadRequestException("위치 공유 대상자가 아닙니다");
     }
@@ -42,8 +42,6 @@ public class LocationShareService {
         .orElseGet(() -> createUserLocation(user));
 
     userLocation.updateLocation(dto.locationLatitude(), dto.locationLongitude());
-
-    return getUserLocationResponses(schedule);
   }
 
   @Transactional(readOnly = true)
