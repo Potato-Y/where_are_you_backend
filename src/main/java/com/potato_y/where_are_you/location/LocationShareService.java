@@ -46,6 +46,21 @@ public class LocationShareService {
     return getUserLocationResponses(schedule);
   }
 
+  @Transactional(readOnly = true)
+  public List<UserLocationResponse> getScheduleMemberLocations(Long scheduleId) {
+    User user = currentUserProvider.getCurrentUser();
+
+    GroupSchedule schedule = groupScheduleService.getSchedule(scheduleId);
+    if (!groupScheduleService.checkParticipation(user, schedule)) {
+      throw new BadRequestException("위치 공유 대상자가 아닙니다");
+    }
+    if (!checkLocationShareTime(schedule)) {
+      throw new BadRequestException("위치 공유 시간이 아닙니다");
+    }
+
+    return getUserLocationResponses(schedule);
+  }
+
   private List<UserLocationResponse> getUserLocationResponses(GroupSchedule schedule) {
     List<User> users = groupScheduleService.getParticipationUsers(schedule);
 
