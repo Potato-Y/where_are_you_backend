@@ -4,6 +4,8 @@ import com.potato_y.where_are_you.user.domain.User;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EntityListeners;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -42,14 +44,19 @@ public class GroupMember {
   @OnDelete(action = OnDeleteAction.CASCADE)
   private User user;
 
+  @NotNull
+  @Enumerated(EnumType.STRING)
+  private GroupMemberType memberType;
+
   @CreatedDate
   @NotNull
   @Column(name = "created_at", updatable = false)
   private LocalDateTime createdAt;
 
   @Builder
-  public GroupMember(Group group, User user) {
+  public GroupMember(Group group, User user, GroupMemberType memberType) {
     this.group = group;
     this.user = user;
+    this.memberType = memberType;
   }
 }
