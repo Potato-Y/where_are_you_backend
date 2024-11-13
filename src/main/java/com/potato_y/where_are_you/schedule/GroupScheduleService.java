@@ -176,13 +176,13 @@ public class GroupScheduleService {
     List<User> groupMembers = groupService.getGroupMembers(schedule.getGroup())
         .stream().map(GroupMember::getUser).toList();
 
-    fcmService.pushSchedule(groupMembers, schedule, FcmChannelId.ALARM_SCHEDULE);
+    fcmService.pushSchedule(groupMembers, schedule, FcmChannelId.SCHEDULE_BEFORE_ALARM);
   }
 
   private void pushNewSchedule(GroupSchedule schedule) {
     List<User> groupMembers = groupService.getGroupMembers(schedule.getGroup())
         .stream().map(GroupMember::getUser).toList();
 
-    fcmService.pushSchedule(groupMembers, schedule, FcmChannelId.CREATE_SCHEDULE);
+    fcmService.pushSchedule(groupMembers, schedule, FcmChannelId.SCHEDULE_CREATE);
   }
 }
