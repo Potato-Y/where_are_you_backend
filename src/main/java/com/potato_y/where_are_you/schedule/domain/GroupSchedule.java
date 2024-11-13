@@ -60,7 +60,7 @@ public class GroupSchedule {
   @NotNull
   @ColumnDefault("false")
   @Column(name = "is_alarm_enabled")
-  private Boolean isAlarmEnabled;
+  private boolean isAlarmEnabled;
 
   @NotNull
   @ColumnDefault("1")

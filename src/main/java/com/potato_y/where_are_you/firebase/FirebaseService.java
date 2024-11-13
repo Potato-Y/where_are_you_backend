@@ -19,7 +19,7 @@ import org.springframework.stereotype.Service;
 @Slf4j
 @Service
 @RequiredArgsConstructor
-public class FcmService {
+public class FirebaseService {
 
   private final FcmTokenRepository fcmTokenRepository;
   private final CurrentUserProvider currentUserProvider;
@@ -35,7 +35,8 @@ public class FcmService {
   }
 
   @Transactional
-  public void pushFcmNewSchedule(List<User> users, GroupSchedule schedule) {
+  public void pushFcmNotificationForSchedule(List<User> users, GroupSchedule schedule,
+      FcmChannelId channelId) {
     users.forEach(it -> {
       fcmTokenRepository.findByUser(it).ifPresent(token -> {
         try {
@@ -44,9 +45,10 @@ public class FcmService {
                   .setToken(token.getToken())
                   .putData("groupId", schedule.getGroup().getId().toString())
                   .putData("groupName", schedule.getGroup().getGroupName())
+                  .putData("scheduleId", schedule.getId().toString())
                   .putData("scheduleTitle", schedule.getTitle())
                   .putData("scheduleStartTime", schedule.getStartTime().toString())
-                  .putData("channelId", FcmChannelId.CREATE_SCHEDULE.getValue())
+                  .putData("channelId", channelId.getValue())
                   .build());
         } catch (FirebaseMessagingException e) {
           log.warn(e.getMessage());

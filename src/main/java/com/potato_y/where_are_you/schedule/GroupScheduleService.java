@@ -1,14 +1,18 @@
 package com.potato_y.where_are_you.schedule;
 
+import static com.potato_y.where_are_you.common.utils.DateTimeUtils.clearSecondAndNano;
 import static com.potato_y.where_are_you.group.GroupValidator.validateGroupId;
 
 import com.potato_y.where_are_you.authentication.CurrentUserProvider;
 import com.potato_y.where_are_you.error.exception.ForbiddenException;
 import com.potato_y.where_are_you.error.exception.NotFoundException;
-import com.potato_y.where_are_you.firebase.FcmService;
+import com.potato_y.where_are_you.firebase.FirebaseService;
+import com.potato_y.where_are_you.firebase.domain.FcmChannelId;
 import com.potato_y.where_are_you.group.GroupService;
 import com.potato_y.where_are_you.group.domain.Group;
 import com.potato_y.where_are_you.group.domain.GroupMember;
+import com.potato_y.where_are_you.schedule.domain.AlarmSchedule;
+import com.potato_y.where_are_you.schedule.domain.AlarmScheduleRepository;
 import com.potato_y.where_are_you.schedule.domain.GroupSchedule;
 import com.potato_y.where_are_you.schedule.domain.GroupScheduleRepository;
 import com.potato_y.where_are_you.schedule.domain.Participation;
@@ -17,6 +21,7 @@ import com.potato_y.where_are_you.schedule.dto.CreateGroupScheduleRequest;
 import com.potato_y.where_are_you.schedule.dto.GroupScheduleResponse;
 import com.potato_y.where_are_you.user.domain.User;
 import com.potato_y.where_are_you.user.dto.UserResponse;
+import java.time.LocalDateTime;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -29,8 +34,9 @@ public class GroupScheduleService {
   private final GroupService groupService;
   private final CurrentUserProvider currentUserProvider;
   private final GroupScheduleRepository scheduleRepository;
+  private final AlarmScheduleRepository alarmScheduleRepository;
   private final ParticipationRepository participationRepository;
-  private final FcmService fcmService;
+  private final FirebaseService firebaseService;
 
   @Transactional
   public GroupScheduleResponse createSchedule(Long groupId, CreateGroupScheduleRequest dto) {
@@ -46,8 +52,8 @@ public class GroupScheduleService {
         .group(group)
         .user(user)
         .title(dto.title())
-        .startTime(dto.startTime())
-        .endTime(dto.endTime())
+        .startTime(clearSecondAndNano(dto.startTime()))
+        .endTime(clearSecondAndNano(dto.endTime()))
         .isAlarmEnabled(dto.isAlarmEnabled())
         .alarmBeforeHours(dto.alarmBeforeHours())
         .location(dto.location())
@@ -55,9 +61,22 @@ public class GroupScheduleService {
         .locationLongitude(dto.locationLongitude())
         .build());
 
+    if (groupSchedule.isAlarmEnabled()) {
+      createAlarmSchedule(groupSchedule);
+    }
+
     pushNewSchedule(groupSchedule);
 
     return new GroupScheduleResponse(groupSchedule);
+  }
+
+  private void createAlarmSchedule(GroupSchedule schedule) {
+    LocalDateTime alarmTime = schedule.getStartTime().minusHours(schedule.getAlarmBeforeHours());
+
+    alarmScheduleRepository.save(AlarmSchedule.builder()
+        .schedule(schedule)
+        .dateTime(alarmTime)
+        .build());
   }
 
   @Transactional(readOnly = true)
@@ -152,10 +171,20 @@ public class GroupScheduleService {
     return participationRepository.findByUserAndSchedule(user, schedule).isPresent();
   }
 
+  @Transactional(readOnly = true)
+  void pushScheduleAlarm(GroupSchedule schedule) {
+    List<User> groupMembers = groupService.getGroupMembers(schedule.getGroup())
+        .stream().map(GroupMember::getUser).toList();
+
+    firebaseService.pushFcmNotificationForSchedule(groupMembers, schedule,
+        FcmChannelId.SCHEDULE_BEFORE_ALARM);
+  }
+
   private void pushNewSchedule(GroupSchedule schedule) {
     List<User> groupMembers = groupService.getGroupMembers(schedule.getGroup())
         .stream().map(GroupMember::getUser).toList();
 
-    fcmService.pushFcmNewSchedule(groupMembers, schedule);
+    firebaseService.pushFcmNotificationForSchedule(groupMembers, schedule,
+        FcmChannelId.SCHEDULE_CREATE);
   }
 }

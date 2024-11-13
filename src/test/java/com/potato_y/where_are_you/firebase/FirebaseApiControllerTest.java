@@ -31,7 +31,7 @@ import org.springframework.web.context.WebApplicationContext;
 @AutoConfigureMockMvc
 @DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
 @ActiveProfiles("test")
-class FcmControllerTest {
+class FirebaseApiControllerTest {
 
   @Autowired
   protected MockMvc mockMvc;
