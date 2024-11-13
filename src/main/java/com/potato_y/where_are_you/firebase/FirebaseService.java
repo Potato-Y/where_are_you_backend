@@ -35,7 +35,8 @@ public class FirebaseService {
   }
 
   @Transactional
-  public void pushSchedule(List<User> users, GroupSchedule schedule, FcmChannelId channelId) {
+  public void pushFcmNotificationForSchedule(List<User> users, GroupSchedule schedule,
+      FcmChannelId channelId) {
     users.forEach(it -> {
       fcmTokenRepository.findByUser(it).ifPresent(token -> {
         try {
