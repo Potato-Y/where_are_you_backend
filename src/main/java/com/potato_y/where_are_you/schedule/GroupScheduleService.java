@@ -7,6 +7,7 @@ import com.potato_y.where_are_you.common.constants.Number;
 import com.potato_y.where_are_you.error.exception.ForbiddenException;
 import com.potato_y.where_are_you.error.exception.NotFoundException;
 import com.potato_y.where_are_you.firebase.FcmService;
+import com.potato_y.where_are_you.firebase.domain.FcmChannelId;
 import com.potato_y.where_are_you.group.GroupService;
 import com.potato_y.where_are_you.group.domain.Group;
 import com.potato_y.where_are_you.group.domain.GroupMember;
@@ -168,6 +169,14 @@ public class GroupScheduleService {
   @Transactional(readOnly = true)
   public boolean checkParticipation(User user, GroupSchedule schedule) {
     return participationRepository.findByUserAndSchedule(user, schedule).isPresent();
+  }
+
+  @Transactional(readOnly = true)
+  void pushScheduleAlarm(GroupSchedule schedule) {
+    List<User> groupMembers = groupService.getGroupMembers(schedule.getGroup())
+        .stream().map(GroupMember::getUser).toList();
+
+    fcmService.pushSchedule(groupMembers, schedule, FcmChannelId.ALARM_SCHEDULE);
   }
 
   private void pushNewSchedule(GroupSchedule schedule) {
