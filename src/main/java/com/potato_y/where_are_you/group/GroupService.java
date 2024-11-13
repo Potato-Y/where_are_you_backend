@@ -165,11 +165,8 @@ public class GroupService {
   @Transactional(readOnly = true)
   public Boolean checkGroupMember(Long groupId, User user) {
     Group group = findByGroup(groupId);
-    if (!group.getHostUser().equals(user)) {
-      return groupMemberRepository.findByGroupAndUser(group, user).isPresent();
-    }
 
-    return true;
+    return groupMemberRepository.findByGroupAndUser(group, user).isPresent();
   }
 
   @Transactional(readOnly = true)
