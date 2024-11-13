@@ -3,6 +3,7 @@ package com.potato_y.where_are_you.schedule;
 import static com.potato_y.where_are_you.group.GroupValidator.validateGroupId;
 
 import com.potato_y.where_are_you.authentication.CurrentUserProvider;
+import com.potato_y.where_are_you.common.constants.Number;
 import com.potato_y.where_are_you.error.exception.ForbiddenException;
 import com.potato_y.where_are_you.error.exception.NotFoundException;
 import com.potato_y.where_are_you.firebase.FcmService;
@@ -46,8 +47,8 @@ public class GroupScheduleService {
         .group(group)
         .user(user)
         .title(dto.title())
-        .startTime(dto.startTime())
-        .endTime(dto.endTime())
+        .startTime(dto.startTime().withSecond(Number.ZERO.getValue()))
+        .endTime(dto.endTime().withSecond(Number.ZERO.getValue()))
         .isAlarmEnabled(dto.isAlarmEnabled())
         .alarmBeforeHours(dto.alarmBeforeHours())
         .location(dto.location())
