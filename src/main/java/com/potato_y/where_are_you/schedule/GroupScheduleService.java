@@ -10,6 +10,8 @@ import com.potato_y.where_are_you.firebase.FcmService;
 import com.potato_y.where_are_you.group.GroupService;
 import com.potato_y.where_are_you.group.domain.Group;
 import com.potato_y.where_are_you.group.domain.GroupMember;
+import com.potato_y.where_are_you.schedule.domain.AlarmSchedule;
+import com.potato_y.where_are_you.schedule.domain.AlarmScheduleRepository;
 import com.potato_y.where_are_you.schedule.domain.GroupSchedule;
 import com.potato_y.where_are_you.schedule.domain.GroupScheduleRepository;
 import com.potato_y.where_are_you.schedule.domain.Participation;
@@ -18,6 +20,7 @@ import com.potato_y.where_are_you.schedule.dto.CreateGroupScheduleRequest;
 import com.potato_y.where_are_you.schedule.dto.GroupScheduleResponse;
 import com.potato_y.where_are_you.user.domain.User;
 import com.potato_y.where_are_you.user.dto.UserResponse;
+import java.time.LocalDateTime;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -30,6 +33,7 @@ public class GroupScheduleService {
   private final GroupService groupService;
   private final CurrentUserProvider currentUserProvider;
   private final GroupScheduleRepository scheduleRepository;
+  private final AlarmScheduleRepository alarmScheduleRepository;
   private final ParticipationRepository participationRepository;
   private final FcmService fcmService;
 
@@ -56,9 +60,22 @@ public class GroupScheduleService {
         .locationLongitude(dto.locationLongitude())
         .build());
 
+    if (groupSchedule.isAlarmEnabled()) {
+      createAlarmSchedule(groupSchedule);
+    }
+
     pushNewSchedule(groupSchedule);
 
     return new GroupScheduleResponse(groupSchedule);
+  }
+
+  private void createAlarmSchedule(GroupSchedule schedule) {
+    LocalDateTime alarmTime = schedule.getStartTime().minusHours(schedule.getAlarmBeforeHours());
+
+    alarmScheduleRepository.save(AlarmSchedule.builder()
+        .schedule(schedule)
+        .dateTime(alarmTime)
+        .build());
   }
 
   @Transactional(readOnly = true)
