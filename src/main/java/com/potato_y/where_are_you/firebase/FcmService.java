@@ -35,27 +35,6 @@ public class FcmService {
   }
 
   @Transactional
-  public void pushFcmNewSchedule(List<User> users, GroupSchedule schedule) {
-    users.forEach(it -> {
-      fcmTokenRepository.findByUser(it).ifPresent(token -> {
-        try {
-          FirebaseMessaging.getInstance().send(
-              Message.builder()
-                  .setToken(token.getToken())
-                  .putData("groupId", schedule.getGroup().getId().toString())
-                  .putData("groupName", schedule.getGroup().getGroupName())
-                  .putData("scheduleTitle", schedule.getTitle())
-                  .putData("scheduleStartTime", schedule.getStartTime().toString())
-                  .putData("channelId", FcmChannelId.CREATE_SCHEDULE.getValue())
-                  .build());
-        } catch (FirebaseMessagingException e) {
-          log.warn(e.getMessage());
-        }
-      });
-    });
-  }
-
-  @Transactional
   public void pushSchedule(List<User> users, GroupSchedule schedule, FcmChannelId channelId) {
     users.forEach(it -> {
       fcmTokenRepository.findByUser(it).ifPresent(token -> {

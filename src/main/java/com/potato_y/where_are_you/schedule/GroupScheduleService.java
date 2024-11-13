@@ -183,6 +183,6 @@ public class GroupScheduleService {
     List<User> groupMembers = groupService.getGroupMembers(schedule.getGroup())
         .stream().map(GroupMember::getUser).toList();
 
-    fcmService.pushFcmNewSchedule(groupMembers, schedule);
+    fcmService.pushSchedule(groupMembers, schedule, FcmChannelId.CREATE_SCHEDULE);
   }
 }
