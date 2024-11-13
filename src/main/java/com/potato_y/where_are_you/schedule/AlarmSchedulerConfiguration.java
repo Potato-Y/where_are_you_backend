@@ -1,6 +1,7 @@
 package com.potato_y.where_are_you.schedule;
 
-import com.potato_y.where_are_you.common.constants.Number;
+import static com.potato_y.where_are_you.common.utils.DateTimeUtils.clearSecondAndNano;
+
 import com.potato_y.where_are_you.schedule.domain.AlarmSchedule;
 import com.potato_y.where_are_you.schedule.domain.AlarmScheduleRepository;
 import java.time.LocalDateTime;
@@ -22,8 +23,7 @@ public class AlarmSchedulerConfiguration {
   @Scheduled(fixedDelay = 60000)
   @Transactional(readOnly = true)
   public void run() {
-    LocalDateTime dateTime = LocalDateTime.now().withSecond(Number.ZERO.getValue())
-        .withNano(Number.ZERO.getValue());
+    LocalDateTime dateTime = clearSecondAndNano(LocalDateTime.now());
     List<AlarmSchedule> schedules = alarmScheduleRepository.findByDateTime(dateTime);
 
     schedules.forEach(it -> groupScheduleService.pushScheduleAlarm(it.getSchedule()));
