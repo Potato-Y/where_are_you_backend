@@ -25,7 +25,7 @@ public record GroupScheduleResponse(
         groupSchedule.getTitle(),
         groupSchedule.getStartTime(),
         groupSchedule.getEndTime(),
-        groupSchedule.getIsAlarmEnabled(),
+        groupSchedule.isAlarmEnabled(),
         groupSchedule.getAlarmBeforeHours(),
         groupSchedule.getLocation(),
         groupSchedule.getLocationLatitude(),
