@@ -13,14 +13,14 @@ import org.springframework.web.bind.annotation.RestController;
 @RequiredArgsConstructor
 @RestController
 @RequestMapping("/v1/fcm")
-public class FcmController {
+public class FirebaseApiController {
 
-  private final FcmService fcmService;
+  private final FirebaseService firebaseService;
 
   @PostMapping("")
   public ResponseEntity<Void> saveOrUpdateFcmToken(
       @Validated @RequestBody FcmTokenRequest request) {
-    fcmService.saveOrUpdateFcmToken(request);
+    firebaseService.saveOrUpdateFcmToken(request);
 
     return ResponseEntity.status(HttpStatus.OK).build();
   }

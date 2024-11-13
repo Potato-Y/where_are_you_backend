@@ -20,10 +20,10 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 @ExtendWith(MockitoExtension.class)
-class FcmServiceTest {
+class FirebaseServiceTest {
 
   @InjectMocks
-  private FcmService fcmService;
+  private FirebaseService firebaseService;
 
   @Mock
   private FcmTokenRepository fcmTokenRepository;
@@ -47,7 +47,7 @@ class FcmServiceTest {
     given(currentUserProvider.getCurrentUser()).willReturn(testUser);
     given(fcmTokenRepository.findByUser(testUser)).willReturn(Optional.of(token));
 
-    fcmService.saveOrUpdateFcmToken(new FcmTokenRequest(fcmToken));
+    firebaseService.saveOrUpdateFcmToken(new FcmTokenRequest(fcmToken));
 
     verify(fcmTokenRepository).findByUser(testUser);
   }
@@ -60,7 +60,7 @@ class FcmServiceTest {
     given(currentUserProvider.getCurrentUser()).willReturn(testUser);
     given(fcmTokenRepository.findByUser(testUser)).willReturn(Optional.empty());
 
-    fcmService.saveOrUpdateFcmToken(new FcmTokenRequest(fcmToken));
+    firebaseService.saveOrUpdateFcmToken(new FcmTokenRequest(fcmToken));
 
     verify(fcmTokenRepository).findByUser(testUser);
     verify(fcmTokenRepository).save(any(FcmToken.class));

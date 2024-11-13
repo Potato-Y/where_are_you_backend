@@ -19,7 +19,7 @@ import org.springframework.stereotype.Service;
 @Slf4j
 @Service
 @RequiredArgsConstructor
-public class FcmService {
+public class FirebaseService {
 
   private final FcmTokenRepository fcmTokenRepository;
   private final CurrentUserProvider currentUserProvider;

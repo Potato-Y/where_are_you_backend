@@ -6,7 +6,7 @@ import static com.potato_y.where_are_you.group.GroupValidator.validateGroupId;
 import com.potato_y.where_are_you.authentication.CurrentUserProvider;
 import com.potato_y.where_are_you.error.exception.ForbiddenException;
 import com.potato_y.where_are_you.error.exception.NotFoundException;
-import com.potato_y.where_are_you.firebase.FcmService;
+import com.potato_y.where_are_you.firebase.FirebaseService;
 import com.potato_y.where_are_you.firebase.domain.FcmChannelId;
 import com.potato_y.where_are_you.group.GroupService;
 import com.potato_y.where_are_you.group.domain.Group;
@@ -36,7 +36,7 @@ public class GroupScheduleService {
   private final GroupScheduleRepository scheduleRepository;
   private final AlarmScheduleRepository alarmScheduleRepository;
   private final ParticipationRepository participationRepository;
-  private final FcmService fcmService;
+  private final FirebaseService firebaseService;
 
   @Transactional
   public GroupScheduleResponse createSchedule(Long groupId, CreateGroupScheduleRequest dto) {
@@ -176,13 +176,13 @@ public class GroupScheduleService {
     List<User> groupMembers = groupService.getGroupMembers(schedule.getGroup())
         .stream().map(GroupMember::getUser).toList();
 
-    fcmService.pushSchedule(groupMembers, schedule, FcmChannelId.SCHEDULE_BEFORE_ALARM);
+    firebaseService.pushSchedule(groupMembers, schedule, FcmChannelId.SCHEDULE_BEFORE_ALARM);
   }
 
   private void pushNewSchedule(GroupSchedule schedule) {
     List<User> groupMembers = groupService.getGroupMembers(schedule.getGroup())
         .stream().map(GroupMember::getUser).toList();
 
-    fcmService.pushSchedule(groupMembers, schedule, FcmChannelId.SCHEDULE_CREATE);
+    firebaseService.pushSchedule(groupMembers, schedule, FcmChannelId.SCHEDULE_CREATE);
   }
 }
