@@ -1,6 +1,7 @@
 package com.potato_y.where_are_you.group;
 
 import static com.potato_y.where_are_you.group.GroupTestUtils.createGroup;
+import static com.potato_y.where_are_you.group.GroupTestUtils.createGroupHost;
 import static com.potato_y.where_are_you.group.GroupTestUtils.createGroupMember;
 import static com.potato_y.where_are_you.user.UserTestUtils.createUser;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -146,6 +147,7 @@ class GroupApiControllerTest {
     final String url = "/v1/groups/{groupId}";
     final String groupName = "test group";
     final Group group = groupRepository.save(createGroup(groupName, testUser));
+    groupMemberRepository.save(createGroupHost(group, testUser));
 
     // when
     ResultActions result = mockMvc.perform(get(url, group.getId()));
@@ -215,6 +217,7 @@ class GroupApiControllerTest {
 
     Group group = groupRepository.save(
         Group.builder().groupName("group").hostUser(testUser).build());
+    groupMemberRepository.save(createGroupHost(group, testUser));
 
     CreateGroupRequest request = new CreateGroupRequest(groupName);
     final String requestBody = objectMapper.writeValueAsString(request);
@@ -292,6 +295,7 @@ class GroupApiControllerTest {
 
     Group group = groupRepository.save(
         Group.builder().groupName(groupName).hostUser(hostUser).build());
+    groupMemberRepository.save(createGroupHost(group, hostUser));
     groupInviteCodeRepository.save(
         GroupInviteCode.builder().group(group).code(code).createUser(hostUser).build());
 
@@ -406,10 +410,12 @@ class GroupApiControllerTest {
     final String url = "/v1/groups";
 
     Group hostGroup = groupRepository.save(createGroup("host group", testUser));
+    groupMemberRepository.save(createGroupHost(hostGroup, testUser));
 
     // 멤버로 있는 그룹 생성
     User otherUser = userRepository.save(createUser("other@mail.com", "other user", "2"));
     Group memberGroup = groupRepository.save(createGroup("member group", otherUser));
+    groupMemberRepository.save(createGroupHost(memberGroup, otherUser));
     groupMemberRepository.save(createGroupMember(memberGroup, testUser));
 
     // when

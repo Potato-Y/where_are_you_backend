@@ -3,6 +3,7 @@ package com.potato_y.where_are_you.group;
 import com.potato_y.where_are_you.group.domain.Group;
 import com.potato_y.where_are_you.group.domain.GroupInviteCode;
 import com.potato_y.where_are_you.group.domain.GroupMember;
+import com.potato_y.where_are_you.group.domain.GroupMemberType;
 import com.potato_y.where_are_you.user.domain.User;
 
 public class GroupTestUtils {
@@ -14,10 +15,19 @@ public class GroupTestUtils {
         .build();
   }
 
+  public static GroupMember createGroupHost(Group group, User user) {
+    return GroupMember.builder()
+        .group(group)
+        .user(user)
+        .memberType(GroupMemberType.HOST)
+        .build();
+  }
+
   public static GroupMember createGroupMember(Group group, User user) {
     return GroupMember.builder()
         .group(group)
         .user(user)
+        .memberType(GroupMemberType.MEMBER)
         .build();
   }
 
