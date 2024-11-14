@@ -1,6 +1,7 @@
 package com.potato_y.where_are_you.schedule;
 
 import com.potato_y.where_are_you.schedule.dto.CreateGroupScheduleRequest;
+import com.potato_y.where_are_you.schedule.dto.GetGroupScheduleListResponse;
 import com.potato_y.where_are_you.schedule.dto.GroupScheduleResponse;
 import com.potato_y.where_are_you.user.dto.UserResponse;
 import java.util.List;
@@ -32,8 +33,9 @@ public class GroupScheduleApiController {
   }
 
   @GetMapping("")
-  public ResponseEntity<List<GroupScheduleResponse>> getGroupSchedules(@PathVariable Long groupId) {
-    List<GroupScheduleResponse> responses = groupScheduleService.getSchedules(groupId);
+  public ResponseEntity<List<GetGroupScheduleListResponse>> getGroupSchedules(
+      @PathVariable Long groupId) {
+    List<GetGroupScheduleListResponse> responses = groupScheduleService.getSchedules(groupId);
 
     return ResponseEntity.status(HttpStatus.OK).body(responses);
   }

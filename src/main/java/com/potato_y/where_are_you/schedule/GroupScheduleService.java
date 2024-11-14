@@ -18,6 +18,7 @@ import com.potato_y.where_are_you.schedule.domain.GroupScheduleRepository;
 import com.potato_y.where_are_you.schedule.domain.Participation;
 import com.potato_y.where_are_you.schedule.domain.ParticipationRepository;
 import com.potato_y.where_are_you.schedule.dto.CreateGroupScheduleRequest;
+import com.potato_y.where_are_you.schedule.dto.GetGroupScheduleListResponse;
 import com.potato_y.where_are_you.schedule.dto.GroupScheduleResponse;
 import com.potato_y.where_are_you.user.domain.User;
 import com.potato_y.where_are_you.user.dto.UserResponse;
@@ -81,7 +82,7 @@ public class GroupScheduleService {
   }
 
   @Transactional(readOnly = true)
-  public List<GroupScheduleResponse> getSchedules(Long groupId) {
+  public List<GetGroupScheduleListResponse> getSchedules(Long groupId) {
     User user = currentUserProvider.getCurrentUser();
     if (!groupService.checkGroupMember(groupId, user)) {
       throw new ForbiddenException("사용자가 그룹원이 아닙니다");
@@ -90,7 +91,16 @@ public class GroupScheduleService {
     Group group = groupService.findByGroup(groupId);
     List<GroupSchedule> schedules = scheduleRepository.findByGroup(group);
 
-    return schedules.stream().map(GroupScheduleResponse::new).toList();
+    return schedules.stream().map(it -> {
+      boolean isParticipating = false;
+      Optional<Participation> participation = participationRepository.findByUserAndSchedule(user,
+          it);
+      if (participation.isPresent() && participation.get().isParticipating()) {
+        isParticipating = true;
+      }
+
+      return new GetGroupScheduleListResponse(it, isParticipating);
+    }).toList();
   }
 
   @Transactional
