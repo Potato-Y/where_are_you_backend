@@ -219,8 +219,6 @@ class GroupServiceTest {
   @DisplayName("getUniqueInviteCode(): 고유한 코드를 생성할 수 있다.")
   void successGetUniqueInviteCode() {
     // given
-    String code = "1234567890";
-
     given(groupInviteCodeRepository.findByCode(any(String.class))).willReturn(Optional.empty());
 
     // when
