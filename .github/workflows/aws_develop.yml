@@ -64,4 +64,4 @@ jobs:
             docker pull ${ECR_REGISTRY}/${ECR_REPOSITORY}:${IMAGE_TAG}
             docker container stop ${{ secrets.DEV_CONTAINER_NAME }} || true
             docker container rm ${{ secrets.DEV_CONTAINER_NAME }} || true
-            docker run -d --name ${{ secrets.DEV_CONTAINER_NAME }} --network ${{ secrets.DEV_NETWORK_NAME }} -p 8080:8080 ${ECR_REGISTRY}/${ECR_REPOSITORY}:${IMAGE_TAG}
+            docker run -d --name ${{ secrets.DEV_CONTAINER_NAME }} --network ${{ secrets.DEV_NETWORK_NAME }} -p 8080:8080 -e TZ=Asia/Seoul ${ECR_REGISTRY}/${ECR_REPOSITORY}:${IMAGE_TAG}
