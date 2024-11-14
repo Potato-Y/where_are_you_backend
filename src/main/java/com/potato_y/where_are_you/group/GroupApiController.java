@@ -69,7 +69,7 @@ public class GroupApiController {
   }
 
   @DeleteMapping("/{groupId}")
-  public ResponseEntity deleteOrLeaveGroup(@PathVariable Long groupId) {
+  public ResponseEntity<Void> deleteOrLeaveGroup(@PathVariable Long groupId) {
     groupService.deleteOrLeaveGroup(groupId);
 
     return ResponseEntity.status(HttpStatus.OK).build();

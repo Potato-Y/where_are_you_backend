@@ -1,6 +1,7 @@
 package com.potato_y.where_are_you.group;
 
 import static com.potato_y.where_are_you.group.GroupTestUtils.createGroup;
+import static com.potato_y.where_are_you.group.GroupTestUtils.createGroupHost;
 import static com.potato_y.where_are_you.group.GroupTestUtils.createGroupMember;
 import static com.potato_y.where_are_you.user.UserTestUtils.createUser;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -97,8 +98,8 @@ class GroupApiControllerTest {
         .andExpect(status().isCreated())
         .andExpect(jsonPath("$.id").isNotEmpty())
         .andExpect(jsonPath("$.groupName").value(groupName))
-        .andExpect(jsonPath("$.userResponse.userId").value(testUser.getId()))
-        .andExpect(jsonPath("$.userResponse.nickname").value(testUser.getNickname()))
+        .andExpect(jsonPath("$.hostUser.userId").value(testUser.getId()))
+        .andExpect(jsonPath("$.hostUser.nickname").value(testUser.getNickname()))
         .andExpect(jsonPath("$.memberNumber").value(1));
   }
 
@@ -146,6 +147,7 @@ class GroupApiControllerTest {
     final String url = "/v1/groups/{groupId}";
     final String groupName = "test group";
     final Group group = groupRepository.save(createGroup(groupName, testUser));
+    groupMemberRepository.save(createGroupHost(group, testUser));
 
     // when
     ResultActions result = mockMvc.perform(get(url, group.getId()));
@@ -155,8 +157,8 @@ class GroupApiControllerTest {
         .andExpect(status().isOk())
         .andExpect(jsonPath("$.id").isNotEmpty())
         .andExpect(jsonPath("$.groupName").value(groupName))
-        .andExpect(jsonPath("$.userResponse.userId").value(testUser.getId()))
-        .andExpect(jsonPath("$.userResponse.nickname").value(testUser.getNickname()))
+        .andExpect(jsonPath("$.hostUser.userId").value(testUser.getId()))
+        .andExpect(jsonPath("$.hostUser.nickname").value(testUser.getNickname()))
         .andExpect(jsonPath("$.memberNumber").value(1));
   }
 
@@ -215,6 +217,7 @@ class GroupApiControllerTest {
 
     Group group = groupRepository.save(
         Group.builder().groupName("group").hostUser(testUser).build());
+    groupMemberRepository.save(createGroupHost(group, testUser));
 
     CreateGroupRequest request = new CreateGroupRequest(groupName);
     final String requestBody = objectMapper.writeValueAsString(request);
@@ -230,8 +233,8 @@ class GroupApiControllerTest {
         .andExpect(status().isOk())
         .andExpect(jsonPath("$.id").isNotEmpty())
         .andExpect(jsonPath("$.groupName").value(groupName))
-        .andExpect(jsonPath("$.userResponse.userId").value(testUser.getId()))
-        .andExpect(jsonPath("$.userResponse.nickname").value(testUser.getNickname()))
+        .andExpect(jsonPath("$.hostUser.userId").value(testUser.getId()))
+        .andExpect(jsonPath("$.hostUser.nickname").value(testUser.getNickname()))
         .andExpect(jsonPath("$.memberNumber").value(1));
   }
 
@@ -292,6 +295,7 @@ class GroupApiControllerTest {
 
     Group group = groupRepository.save(
         Group.builder().groupName(groupName).hostUser(hostUser).build());
+    groupMemberRepository.save(createGroupHost(group, hostUser));
     groupInviteCodeRepository.save(
         GroupInviteCode.builder().group(group).code(code).createUser(hostUser).build());
 
@@ -303,8 +307,8 @@ class GroupApiControllerTest {
         .andExpect(status().isCreated())
         .andExpect(jsonPath("$.id").isNotEmpty())
         .andExpect(jsonPath("$.groupName").value(groupName))
-        .andExpect(jsonPath("$.userResponse.userId").value(hostUser.getId()))
-        .andExpect(jsonPath("$.userResponse.nickname").value(hostUser.getNickname()))
+        .andExpect(jsonPath("$.hostUser.userId").value(hostUser.getId()))
+        .andExpect(jsonPath("$.hostUser.nickname").value(hostUser.getNickname()))
         .andExpect(jsonPath("$.memberNumber").value(2));
   }
 
@@ -406,10 +410,12 @@ class GroupApiControllerTest {
     final String url = "/v1/groups";
 
     Group hostGroup = groupRepository.save(createGroup("host group", testUser));
+    groupMemberRepository.save(createGroupHost(hostGroup, testUser));
 
     // 멤버로 있는 그룹 생성
     User otherUser = userRepository.save(createUser("other@mail.com", "other user", "2"));
     Group memberGroup = groupRepository.save(createGroup("member group", otherUser));
+    groupMemberRepository.save(createGroupHost(memberGroup, otherUser));
     groupMemberRepository.save(createGroupMember(memberGroup, testUser));
 
     // when
@@ -421,13 +427,13 @@ class GroupApiControllerTest {
         .andExpect(jsonPath("$").isArray())
         .andExpect(jsonPath("$[0].id").value(hostGroup.getId()))
         .andExpect(jsonPath("$[0].groupName").value(hostGroup.getGroupName()))
-        .andExpect(jsonPath("$[0].userResponse.userId").value(testUser.getId()))
-        .andExpect(jsonPath("$[0].userResponse.nickname").value(testUser.getNickname()))
+        .andExpect(jsonPath("$[0].hostUser.userId").value(testUser.getId()))
+        .andExpect(jsonPath("$[0].hostUser.nickname").value(testUser.getNickname()))
         .andExpect(jsonPath("$[0].memberNumber").value(1))
         .andExpect(jsonPath("$[1].id").value(memberGroup.getId()))
         .andExpect(jsonPath("$[1].groupName").value(memberGroup.getGroupName()))
-        .andExpect(jsonPath("$[1].userResponse.userId").value(otherUser.getId()))
-        .andExpect(jsonPath("$[1].userResponse.nickname").value(otherUser.getNickname()))
+        .andExpect(jsonPath("$[1].hostUser.userId").value(otherUser.getId()))
+        .andExpect(jsonPath("$[1].hostUser.nickname").value(otherUser.getNickname()))
         .andExpect(jsonPath("$[1].memberNumber").value(2));
   }
 

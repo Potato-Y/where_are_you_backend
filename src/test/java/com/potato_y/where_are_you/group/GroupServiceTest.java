@@ -1,12 +1,14 @@
 package com.potato_y.where_are_you.group;
 
 import static com.potato_y.where_are_you.group.GroupTestUtils.createGroup;
+import static com.potato_y.where_are_you.group.GroupTestUtils.createGroupHost;
 import static com.potato_y.where_are_you.group.GroupTestUtils.createGroupInviteCode;
 import static com.potato_y.where_are_you.group.GroupTestUtils.createGroupMember;
 import static com.potato_y.where_are_you.user.UserTestUtils.createUser;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.times;
@@ -78,7 +80,7 @@ class GroupServiceTest {
 
     // then
     assertThat(response.groupName()).isEqualTo(groupName);
-    assertThat(response.userResponse().getNickname()).isEqualTo(testUser.getNickname());
+    assertThat(response.hostUser().getNickname()).isEqualTo(testUser.getNickname());
     assertThat(response.memberNumber()).isEqualTo(1);
   }
 
@@ -87,7 +89,8 @@ class GroupServiceTest {
   void successGetGroupResponse_oneMember() {
     // given
     Group group = createGroup("test name", testUser);
-    List<GroupMember> members = Collections.emptyList();
+    GroupMember groupHostMember = createGroupHost(group, testUser);
+    List<GroupMember> members = List.of(groupHostMember);
 
     given(groupRepository.findById(any(Long.class))).willReturn(Optional.of(group));
     given(groupMemberRepository.findByGroup(group)).willReturn(members);
@@ -97,7 +100,7 @@ class GroupServiceTest {
 
     // then
     assertThat(response.groupName()).isEqualTo(group.getGroupName());
-    assertThat(response.userResponse().getNickname()).isEqualTo(testUser.getNickname());
+    assertThat(response.hostUser().getNickname()).isEqualTo(testUser.getNickname());
     assertThat(response.memberNumber()).isEqualTo(1);
   }
 
@@ -109,8 +112,9 @@ class GroupServiceTest {
 
     User memberUser = createUser("member@mail.com", "member 1", "2");
 
+    GroupMember host = createGroupHost(group, testUser);
     GroupMember member = createGroupMember(group, memberUser);
-    List<GroupMember> members = List.of(member, member, member);
+    List<GroupMember> members = List.of(host, member, member, member);
 
     given(groupRepository.findById(any(Long.class))).willReturn(Optional.of(group));
     given(groupMemberRepository.findByGroup(group)).willReturn(members);
@@ -120,7 +124,7 @@ class GroupServiceTest {
 
     // then
     assertThat(response.groupName()).isEqualTo(group.getGroupName());
-    assertThat(response.userResponse().getNickname()).isEqualTo(testUser.getNickname());
+    assertThat(response.hostUser().getNickname()).isEqualTo(testUser.getNickname());
     assertThat(response.memberNumber()).isEqualTo(4);
   }
 
@@ -215,8 +219,6 @@ class GroupServiceTest {
   @DisplayName("getUniqueInviteCode(): 고유한 코드를 생성할 수 있다.")
   void successGetUniqueInviteCode() {
     // given
-    String code = "1234567890";
-
     given(groupInviteCodeRepository.findByCode(any(String.class))).willReturn(Optional.empty());
 
     // when
@@ -270,7 +272,8 @@ class GroupServiceTest {
     final String code = "code";
     User user = createUser("other@mail.com", "other", "2");
     Group group = createGroup(groupName, testUser);
-    List<GroupMember> members = List.of(createGroupMember(group, user));
+    List<GroupMember> members = List.of(createGroupHost(group, testUser),
+        createGroupMember(group, user));
 
     given(currentUserProvider.getCurrentUser()).willReturn(user);
     given(groupInviteCodeRepository.findByCode(anyString())).willReturn(
@@ -284,7 +287,7 @@ class GroupServiceTest {
 
     // then
     assertThat(response.groupName()).isEqualTo(groupName);
-    assertThat(response.userResponse().getNickname()).isEqualTo(testUser.getNickname());
+    assertThat(response.hostUser().getNickname()).isEqualTo(testUser.getNickname());
     assertThat(response.memberNumber()).isEqualTo(2);
   }
 
@@ -332,7 +335,7 @@ class GroupServiceTest {
     User testUser = createUser("test@mail.com", "test user", "1");
 
     given(currentUserProvider.getCurrentUser()).willReturn(testUser);
-    given(groupRepository.findByHostUser(any(User.class))).willReturn(Collections.emptyList());
+    given(groupMemberRepository.findByUser(any(User.class))).willReturn(Collections.emptyList());
 
     // when
     List<GroupResponse> responses = groupService.getGroupList();
@@ -351,18 +354,23 @@ class GroupServiceTest {
     // 호스트로 있는 그룹
     Group hostGroup = createGroup("host group", user);
     groupRepository.save(hostGroup);
+    GroupMember hostGroupHost = createGroupHost(hostGroup, user);
+    groupMemberRepository.save(hostGroupHost);
 
     // 멤버로 있는 그룹
     Group memberGroup = createGroup("member group", otherUser);
     groupRepository.save(memberGroup);
-    GroupMember member = createGroupMember(memberGroup, user);
-    groupMemberRepository.save(member);
+    GroupMember memberGroupHost = createGroupHost(memberGroup, user);
+    GroupMember memberGroupMember = createGroupMember(memberGroup, user);
+    groupMemberRepository.save(memberGroupHost);
+    groupMemberRepository.save(memberGroupMember);
 
     given(currentUserProvider.getCurrentUser()).willReturn(user);
-    given(groupRepository.findByHostUser(user)).willReturn(List.of(hostGroup));
-    given(groupMemberRepository.findByUser(user)).willReturn(List.of(member));
-    given(groupMemberRepository.findByGroup(hostGroup)).willReturn(Collections.emptyList());
-    given(groupMemberRepository.findByGroup(memberGroup)).willReturn(List.of(member));
+    given(groupMemberRepository.findByUser(user)).willReturn(
+        List.of(hostGroupHost, memberGroupMember));
+    given(groupMemberRepository.findByGroup(hostGroup)).willReturn(List.of(hostGroupHost));
+    given(groupMemberRepository.findByGroup(memberGroup)).willReturn(
+        List.of(memberGroupHost, memberGroupMember));
 
     // when
     List<GroupResponse> responses = groupService.getGroupList();
@@ -372,13 +380,13 @@ class GroupServiceTest {
 
     // 호스트 그룹 검증
     assertThat(responses.get(0).groupName()).isEqualTo(hostGroup.getGroupName());
-    assertThat(responses.get(0).userResponse().getNickname()).isEqualTo(user.getNickname());
+    assertThat(responses.get(0).hostUser().getNickname()).isEqualTo(user.getNickname());
     assertThat(responses.get(0).memberNumber()).isEqualTo(1); // 호스트만 있는 경우
 
     // 멤버 그룹 검증
     assertThat(responses.get(1).groupName()).isEqualTo(memberGroup.getGroupName());
-    assertThat(responses.get(1).userResponse().getNickname()).isEqualTo(otherUser.getNickname());
-    assertThat(responses.get(1).memberNumber()).isEqualTo(2); // 호스트 + 멤버 1명}
+    assertThat(responses.get(1).hostUser().getNickname()).isEqualTo(otherUser.getNickname());
+    assertThat(responses.get(1).memberNumber()).isEqualTo(2); // 호스트 + 멤버 1명
   }
 
   @Test
@@ -430,6 +438,63 @@ class GroupServiceTest {
         .isInstanceOf(NotFoundException.class);
   }
 
-  // TODO: 그룹원 확인에 대한 테스트 코드 추가
-  // TODO: findByGroup에 대한 테스트 추가
+  @Test
+  @DisplayName("checkGroupMember(): 그룹 멤버 여부를 확인한다. - 호스트 true")
+  void successCheckGroupMember_hostMember() {
+    Group group = createGroup("test_group", testUser);
+    GroupMember groupMember = createGroupHost(group, testUser);
+
+    given(groupRepository.findById(anyLong())).willReturn(Optional.of(group));
+    given(groupMemberRepository.findByGroupAndUser(group, testUser)).willReturn(
+        Optional.of(groupMember));
+
+    assertThat(groupService.checkGroupMember(1L, testUser)).isTrue();
+  }
+
+  @Test
+  @DisplayName("checkGroupMember(): 그룹 멤버 여부를 확인한다. - 그룹원 true")
+  void successCheckGroupMember_groupMember() {
+    User hostUser = createUser("host@mail.com", "host", "123");
+    Group group = createGroup("test_group", hostUser);
+    GroupMember groupMember = createGroupMember(group, testUser);
+
+    given(groupRepository.findById(anyLong())).willReturn(Optional.of(group));
+    given(groupMemberRepository.findByGroupAndUser(group, testUser)).willReturn(
+        Optional.of(groupMember));
+
+    assertThat(groupService.checkGroupMember(1L, testUser)).isTrue();
+  }
+
+  @Test
+  @DisplayName("checkGroupMember(): 그룹 멤버 여부를 확인한다. - false")
+  void successCheckGroupMember_notGroupMember() {
+    Group group = createGroup("test_group", testUser);
+
+    given(groupRepository.findById(anyLong())).willReturn(Optional.of(group));
+    given(groupMemberRepository.findByGroupAndUser(group, testUser)).willReturn(
+        Optional.empty());
+
+    assertThat(groupService.checkGroupMember(1L, testUser)).isFalse();
+  }
+
+  @Test
+  @DisplayName("findByGroup(): 그룹을 찾는데 성공한다.")
+  void successFindByGroup() {
+    Group group = createGroup("test_group", testUser);
+
+    given(groupRepository.findById(anyLong())).willReturn(Optional.of(group));
+
+    Group resultGroup = groupService.findByGroup(1L);
+
+    assertThat(resultGroup).isEqualTo(group);
+  }
+
+  @Test
+  @DisplayName("findByGroup(): 그룹이 없으면 예외가 발생한다.")
+  void failFindByGroup() {
+    given(groupRepository.findById(anyLong())).willReturn(Optional.empty());
+
+    assertThatThrownBy(() -> groupService.findByGroup(1L))
+        .isInstanceOf(NotFoundException.class);
+  }
 }

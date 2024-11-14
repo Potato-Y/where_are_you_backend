@@ -11,6 +11,7 @@ import com.potato_y.where_are_you.group.domain.GroupInviteCode;
 import com.potato_y.where_are_you.group.domain.GroupInviteCodeRepository;
 import com.potato_y.where_are_you.group.domain.GroupMember;
 import com.potato_y.where_are_you.group.domain.GroupMemberRepository;
+import com.potato_y.where_are_you.group.domain.GroupMemberType;
 import com.potato_y.where_are_you.group.domain.GroupRepository;
 import com.potato_y.where_are_you.group.dto.CreateGroupRequest;
 import com.potato_y.where_are_you.group.dto.GroupInviteCodeResponse;
@@ -43,6 +44,12 @@ public class GroupService {
         .build();
 
     groupRepository.save(group);
+    groupMemberRepository.save(GroupMember.builder()
+        .group(group)
+        .user(hostUser)
+        .memberType(GroupMemberType.HOST)
+        .build());
+
     return new GroupResponse(group, 1);
   }
 
@@ -51,7 +58,7 @@ public class GroupService {
     Group group = groupRepository.findById(groupId).orElseThrow(NotFoundException::new);
     int memberCount = getGroupMembers(group).size();
 
-    return new GroupResponse(group, memberCount + 1); // host user 수를 추가
+    return new GroupResponse(group, memberCount); // host user 수를 추가
   }
 
   @Transactional(readOnly = true)
@@ -98,7 +105,7 @@ public class GroupService {
 
     group.updateGroupName(request.groupName());
 
-    return new GroupResponse(group, getGroupMembers(group).size() + 1);
+    return new GroupResponse(group, getGroupMembers(group).size());
   }
 
   @Transactional
@@ -121,9 +128,10 @@ public class GroupService {
     groupMemberRepository.save(GroupMember.builder()
         .group(group)
         .user(user)
+        .memberType(GroupMemberType.MEMBER)
         .build());
 
-    return new GroupResponse(group, getGroupMembers(group).size() + 1);
+    return new GroupResponse(group, getGroupMembers(group).size());
   }
 
   @Transactional(readOnly = true)
@@ -132,12 +140,9 @@ public class GroupService {
 
     List<GroupResponse> responses = new ArrayList<>();
 
-    List<Group> hostGroups = groupRepository.findByHostUser(user);
-    hostGroups.forEach(it -> responses.add(new GroupResponse(it, getGroupMembers(it).size() + 1)));
-
     List<GroupMember> inGroups = groupMemberRepository.findByUser(user);
     inGroups.forEach(it -> responses.add(
-        new GroupResponse(it.getGroup(), getGroupMembers(it.getGroup()).size() + 1)));
+        new GroupResponse(it.getGroup(), getGroupMembers(it.getGroup()).size())));
 
     return responses;
   }
@@ -160,11 +165,8 @@ public class GroupService {
   @Transactional(readOnly = true)
   public Boolean checkGroupMember(Long groupId, User user) {
     Group group = findByGroup(groupId);
-    if (!group.getHostUser().equals(user)) {
-      return groupMemberRepository.findByGroupAndUser(group, user).isPresent();
-    }
 
-    return true;
+    return groupMemberRepository.findByGroupAndUser(group, user).isPresent();
   }
 
   @Transactional(readOnly = true)

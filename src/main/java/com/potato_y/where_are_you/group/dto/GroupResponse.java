@@ -7,7 +7,7 @@ import java.time.LocalDateTime;
 public record GroupResponse(
     Long id,
     String groupName,
-    UserResponse userResponse,
+    UserResponse hostUser,
     LocalDateTime createAt,
     int memberNumber
 ) {
