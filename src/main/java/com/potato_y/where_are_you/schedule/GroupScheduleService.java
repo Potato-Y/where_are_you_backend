@@ -23,6 +23,7 @@ import com.potato_y.where_are_you.user.domain.User;
 import com.potato_y.where_are_you.user.dto.UserResponse;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -168,7 +169,10 @@ public class GroupScheduleService {
 
   @Transactional(readOnly = true)
   public boolean checkParticipation(User user, GroupSchedule schedule) {
-    return participationRepository.findByUserAndSchedule(user, schedule).isPresent();
+    Optional<Participation> participation = participationRepository
+        .findByUserAndSchedule(user, schedule);
+
+    return participation.isPresent() && participation.get().isParticipating();
   }
 
   @Transactional(readOnly = true)
