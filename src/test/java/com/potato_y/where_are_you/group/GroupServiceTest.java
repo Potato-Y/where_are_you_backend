@@ -8,6 +8,7 @@ import static com.potato_y.where_are_you.user.UserTestUtils.createUser;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.times;
@@ -218,8 +219,6 @@ class GroupServiceTest {
   @DisplayName("getUniqueInviteCode(): 고유한 코드를 생성할 수 있다.")
   void successGetUniqueInviteCode() {
     // given
-    String code = "1234567890";
-
     given(groupInviteCodeRepository.findByCode(any(String.class))).willReturn(Optional.empty());
 
     // when
@@ -439,6 +438,63 @@ class GroupServiceTest {
         .isInstanceOf(NotFoundException.class);
   }
 
-  // TODO: 그룹원 확인에 대한 테스트 코드 추가
-  // TODO: findByGroup에 대한 테스트 추가
+  @Test
+  @DisplayName("checkGroupMember(): 그룹 멤버 여부를 확인한다. - 호스트 true")
+  void successCheckGroupMember_hostMember() {
+    Group group = createGroup("test_group", testUser);
+    GroupMember groupMember = createGroupHost(group, testUser);
+
+    given(groupRepository.findById(anyLong())).willReturn(Optional.of(group));
+    given(groupMemberRepository.findByGroupAndUser(group, testUser)).willReturn(
+        Optional.of(groupMember));
+
+    assertThat(groupService.checkGroupMember(1L, testUser)).isTrue();
+  }
+
+  @Test
+  @DisplayName("checkGroupMember(): 그룹 멤버 여부를 확인한다. - 그룹원 true")
+  void successCheckGroupMember_groupMember() {
+    User hostUser = createUser("host@mail.com", "host", "123");
+    Group group = createGroup("test_group", hostUser);
+    GroupMember groupMember = createGroupMember(group, testUser);
+
+    given(groupRepository.findById(anyLong())).willReturn(Optional.of(group));
+    given(groupMemberRepository.findByGroupAndUser(group, testUser)).willReturn(
+        Optional.of(groupMember));
+
+    assertThat(groupService.checkGroupMember(1L, testUser)).isTrue();
+  }
+
+  @Test
+  @DisplayName("checkGroupMember(): 그룹 멤버 여부를 확인한다. - false")
+  void successCheckGroupMember_notGroupMember() {
+    Group group = createGroup("test_group", testUser);
+
+    given(groupRepository.findById(anyLong())).willReturn(Optional.of(group));
+    given(groupMemberRepository.findByGroupAndUser(group, testUser)).willReturn(
+        Optional.empty());
+
+    assertThat(groupService.checkGroupMember(1L, testUser)).isFalse();
+  }
+
+  @Test
+  @DisplayName("findByGroup(): 그룹을 찾는데 성공한다.")
+  void successFindByGroup() {
+    Group group = createGroup("test_group", testUser);
+
+    given(groupRepository.findById(anyLong())).willReturn(Optional.of(group));
+
+    Group resultGroup = groupService.findByGroup(1L);
+
+    assertThat(resultGroup).isEqualTo(group);
+  }
+
+  @Test
+  @DisplayName("findByGroup(): 그룹이 없으면 예외가 발생한다.")
+  void failFindByGroup() {
+    given(groupRepository.findById(anyLong())).willReturn(Optional.empty());
+
+    assertThatThrownBy(() -> groupService.findByGroup(1L))
+        .isInstanceOf(NotFoundException.class);
+  }
 }
