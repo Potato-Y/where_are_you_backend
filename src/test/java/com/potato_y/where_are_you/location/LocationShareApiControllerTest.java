@@ -7,6 +7,7 @@ import static com.potato_y.where_are_you.schedule.GroupScheduleUtils.createParti
 import static com.potato_y.where_are_you.schedule.GroupScheduleUtils.createScheduleCase1;
 import static com.potato_y.where_are_you.schedule.GroupScheduleUtils.createScheduleCase2;
 import static com.potato_y.where_are_you.user.UserTestUtils.createUser;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers.springSecurity;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
@@ -92,7 +93,7 @@ class LocationShareApiControllerTest {
   @Test
   @WithMockUser("1")
   @DisplayName("updateUserLocation(): 사용자 위치를 업데이트 할 수 있다.")
-  void successUpdateUserLocation() throws Exception {
+  void successUpdateUserLocation_noData() throws Exception {
     // given
     final String url = "/v1/locations/{scheduleId}";
 
@@ -101,7 +102,7 @@ class LocationShareApiControllerTest {
     GroupSchedule schedule = scheduleRepository.save(createScheduleCase1(group, testUser));
     participationRepository.save(createParticipation(schedule, testUser, true));
 
-    UpdateUserLocationRequest request = new UpdateUserLocationRequest(1, 3);
+    UpdateUserLocationRequest request = new UpdateUserLocationRequest(1, 3, "메시지");
     final String requestBody = objectMapper.writeValueAsString(request);
 
     // when
@@ -111,6 +112,48 @@ class LocationShareApiControllerTest {
 
     // then
     result.andExpect(status().isOk());
+
+    assertThat(userLocationRepository.findByUser(testUser).isPresent()).isTrue();
+    assertThat(userLocationRepository.findByUser(testUser).get().getLocationLatitude()).isEqualTo(
+        request.locationLatitude());
+    assertThat(userLocationRepository.findByUser(testUser).get().getLocationLongitude()).isEqualTo(
+        request.locationLongitude());
+    assertThat(userLocationRepository.findByUser(testUser).get().getStateMessage()).isEqualTo(
+        request.stateMessage());
+  }
+
+  @Test
+  @WithMockUser("1")
+  @DisplayName("updateUserLocation(): 사용자 위치를 업데이트 할 수 있다.")
+  void successUpdateUserLocation_updateData() throws Exception {
+    // given
+    final String url = "/v1/locations/{scheduleId}";
+
+    Group group = groupRepository.save(createGroup("test group", testUser));
+    groupMemberRepository.save(createGroupHost(group, testUser));
+    GroupSchedule schedule = scheduleRepository.save(createScheduleCase1(group, testUser));
+    participationRepository.save(createParticipation(schedule, testUser, true));
+    userLocationRepository.save(
+        UserLocation.builder().user(testUser).locationLatitude(1).locationLongitude(2).build());
+
+    UpdateUserLocationRequest request = new UpdateUserLocationRequest(1, 3, "메시지");
+    final String requestBody = objectMapper.writeValueAsString(request);
+
+    // when
+    ResultActions result = mockMvc.perform(
+        put(url, schedule.getId()).contentType(MediaType.APPLICATION_JSON_VALUE)
+            .content(requestBody));
+
+    // then
+    result.andExpect(status().isOk());
+
+    assertThat(userLocationRepository.findByUser(testUser).isPresent()).isTrue();
+    assertThat(userLocationRepository.findByUser(testUser).get().getLocationLatitude()).isEqualTo(
+        request.locationLatitude());
+    assertThat(userLocationRepository.findByUser(testUser).get().getLocationLongitude()).isEqualTo(
+        request.locationLongitude());
+    assertThat(userLocationRepository.findByUser(testUser).get().getStateMessage()).isEqualTo(
+        request.stateMessage());
   }
 
   @Test
@@ -125,7 +168,7 @@ class LocationShareApiControllerTest {
     GroupSchedule schedule = scheduleRepository.save(createScheduleCase1(group, testUser));
     participationRepository.save(createParticipation(schedule, testUser, false));
 
-    UpdateUserLocationRequest request = new UpdateUserLocationRequest(1, 3);
+    UpdateUserLocationRequest request = new UpdateUserLocationRequest(1, 3, "메시지");
     final String requestBody = objectMapper.writeValueAsString(request);
 
     // when
@@ -148,7 +191,7 @@ class LocationShareApiControllerTest {
     groupMemberRepository.save(createGroupHost(group, testUser));
     GroupSchedule schedule = scheduleRepository.save(createScheduleCase1(group, testUser));
 
-    UpdateUserLocationRequest request = new UpdateUserLocationRequest(1, 3);
+    UpdateUserLocationRequest request = new UpdateUserLocationRequest(1, 3, "메시지");
     final String requestBody = objectMapper.writeValueAsString(request);
 
     // when
@@ -172,7 +215,7 @@ class LocationShareApiControllerTest {
     GroupSchedule schedule = scheduleRepository.save(createScheduleCase2(group, testUser));
     participationRepository.save(createParticipation(schedule, testUser, true));
 
-    UpdateUserLocationRequest request = new UpdateUserLocationRequest(1, 3);
+    UpdateUserLocationRequest request = new UpdateUserLocationRequest(1, 3, "메시지");
     final String requestBody = objectMapper.writeValueAsString(request);
 
     // when
@@ -220,22 +263,31 @@ class LocationShareApiControllerTest {
     // then
     result
         .andExpect(status().isOk())
-        .andExpect(jsonPath("$").isArray())
-        .andExpect(jsonPath("$[0].user.userId").value(testUser.getId()))
-        .andExpect(jsonPath("$[0].user.nickname").value(testUser.getNickname()))
-        .andExpect(jsonPath("$[0].user.email").value(testUser.getEmail()))
-        .andExpect(jsonPath("$[0].location.locationLatitude").value(
-            testUserLocation.getLocationLatitude()))
-        .andExpect(jsonPath("$[0].location.locationLongitude").value(
-            testUserLocation.getLocationLongitude()))
+        .andExpect(
+            jsonPath("$.targetLocation.location").value(schedule.getLocation()))
+        .andExpect(jsonPath("$.targetLocation.coordinate.longitude").value(
+            schedule.getLocationLongitude()))
+        .andExpect(
+            jsonPath("$.targetLocation.coordinate.latitude").value(schedule.getLocationLatitude()))
 
-        .andExpect(jsonPath("$[1].user.userId").value(memberUser.getId()))
-        .andExpect(jsonPath("$[1].user.nickname").value(memberUser.getNickname()))
-        .andExpect(jsonPath("$[1].user.email").value(memberUser.getEmail()))
-        .andExpect(jsonPath("$[1].location.locationLatitude").value(
+        .andExpect(jsonPath("$.data").isArray())
+        .andExpect(jsonPath("$.data[0].user.userId").value(testUser.getId()))
+        .andExpect(jsonPath("$.data[0].user.nickname").value(testUser.getNickname()))
+        .andExpect(jsonPath("$.data[0].user.email").value(testUser.getEmail()))
+        .andExpect(jsonPath("$.data[0].location.latitude").value(
+            testUserLocation.getLocationLatitude()))
+        .andExpect(jsonPath("$.data[0].location.longitude").value(
+            testUserLocation.getLocationLongitude()))
+        .andExpect(jsonPath("$.data[0].stateMessage").value(testUserLocation.getStateMessage()))
+
+        .andExpect(jsonPath("$.data[1].user.userId").value(memberUser.getId()))
+        .andExpect(jsonPath("$.data[1].user.nickname").value(memberUser.getNickname()))
+        .andExpect(jsonPath("$.data[1].user.email").value(memberUser.getEmail()))
+        .andExpect(jsonPath("$.data[1].location.latitude").value(
             memberUserLocation.getLocationLatitude()))
-        .andExpect(jsonPath("$[1].location.locationLongitude").value(
-            memberUserLocation.getLocationLongitude()));
+        .andExpect(jsonPath("$.data[1].location.longitude").value(
+            memberUserLocation.getLocationLongitude()))
+        .andExpect(jsonPath("$.data[1].stateMessage").value(memberUserLocation.getStateMessage()));
   }
 
   @Test

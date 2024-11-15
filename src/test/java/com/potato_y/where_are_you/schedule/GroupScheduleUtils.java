@@ -12,17 +12,9 @@ public class GroupScheduleUtils {
    * 일반적인 정상 케이스 1 <br> 일정 시작 시각: 25분 뒤 <br> 일정 종료 시각: 1시간 뒤 <br> 알람 활성화: true <br> 알람 시간: 1시간 <br>
    */
   public static GroupSchedule createScheduleCase1(Group group, User user) {
-    return GroupSchedule.builder()
+    return GroupScheduleFactory.builder()
         .group(group)
         .user(user)
-        .title("test group")
-        .startTime(LocalDateTime.now().plusMinutes(25))
-        .endTime(LocalDateTime.now().plusHours(1))
-        .isAlarmEnabled(true)
-        .alarmBeforeHours(1)
-        .location("테스트 장소")
-        .locationLatitude(123.456)
-        .locationLongitude(234.567)
         .build();
   }
 
@@ -31,17 +23,11 @@ public class GroupScheduleUtils {
    * <br>
    */
   public static GroupSchedule createScheduleCase2(Group group, User user) {
-    return GroupSchedule.builder()
+    return GroupScheduleFactory.builder()
         .group(group)
         .user(user)
-        .title("test group")
-        .startTime(LocalDateTime.now().plusDays(25))
-        .endTime(LocalDateTime.now().plusDays(26))
-        .isAlarmEnabled(true)
-        .alarmBeforeHours(1)
-        .location("테스트 장소")
-        .locationLatitude(123.456)
-        .locationLongitude(234.567)
+        .startTime(LocalDateTime.now().plusDays(25).withSecond(0).withNano(0))
+        .endTime(LocalDateTime.now().plusDays(26).withSecond(0).withNano(0))
         .build();
   }
 

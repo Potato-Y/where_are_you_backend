@@ -1,8 +1,7 @@
 package com.potato_y.where_are_you.location;
 
+import com.potato_y.where_are_you.location.dto.ShareLocationResponse;
 import com.potato_y.where_are_you.location.dto.UpdateUserLocationRequest;
-import com.potato_y.where_are_you.location.dto.UserLocationResponse;
-import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -30,9 +29,9 @@ public class LocationShareApiController {
   }
 
   @GetMapping("/{scheduleId}")
-  public ResponseEntity<List<UserLocationResponse>> getScheduleMemberLocations(
+  public ResponseEntity<ShareLocationResponse> getScheduleMemberLocations(
       @PathVariable Long scheduleId) {
-    List<UserLocationResponse> responses = locationShareService.getScheduleMemberLocations(
+    ShareLocationResponse responses = locationShareService.getScheduleMemberLocations(
         scheduleId);
 
     return ResponseEntity.status(HttpStatus.OK).body(responses);

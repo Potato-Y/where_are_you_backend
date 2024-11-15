@@ -4,8 +4,8 @@ import com.potato_y.where_are_you.authentication.CurrentUserProvider;
 import com.potato_y.where_are_you.error.exception.BadRequestException;
 import com.potato_y.where_are_you.location.domain.UserLocation;
 import com.potato_y.where_are_you.location.domain.UserLocationRepository;
+import com.potato_y.where_are_you.location.dto.ShareLocationResponse;
 import com.potato_y.where_are_you.location.dto.UpdateUserLocationRequest;
-import com.potato_y.where_are_you.location.dto.UserLocationResponse;
 import com.potato_y.where_are_you.schedule.GroupScheduleService;
 import com.potato_y.where_are_you.schedule.domain.GroupSchedule;
 import com.potato_y.where_are_you.user.domain.User;
@@ -37,21 +37,23 @@ public class LocationShareService {
     UserLocation userLocation = userLocationRepository.findByUser(user)
         .orElseGet(() -> createUserLocation(user));
 
-    userLocation.updateLocation(dto.locationLatitude(), dto.locationLongitude());
+    userLocation
+        .updateLocation(dto.locationLatitude(), dto.locationLongitude())
+        .updateStateMessage(dto.stateMessage());
   }
 
   @Transactional(readOnly = true)
-  public List<UserLocationResponse> getScheduleMemberLocations(Long scheduleId) {
+  public ShareLocationResponse getScheduleMemberLocations(Long scheduleId) {
     User user = currentUserProvider.getCurrentUser();
 
     GroupSchedule schedule = groupScheduleService.getSchedule(scheduleId);
     validateParticipation(user, schedule);
     validateLocationShareTime(schedule);
 
-    return getUserLocationResponses(schedule);
+    return new ShareLocationResponse(schedule, getUserLocation(schedule));
   }
 
-  private List<UserLocationResponse> getUserLocationResponses(GroupSchedule schedule) {
+  private List<UserLocation> getUserLocation(GroupSchedule schedule) {
     List<User> users = groupScheduleService.getParticipationUsers(schedule);
 
     return users.stream()
@@ -62,9 +64,7 @@ public class LocationShareService {
           LocalDateTime shareRuleTime = updateTime.plusMinutes(LOCATION_SHARE_DURATION_MINUTES);
 
           return LocalDateTime.now().isBefore(shareRuleTime);
-        })
-        .map(UserLocationResponse::new)
-        .toList();
+        }).toList();
   }
 
   private UserLocation createUserLocation(User user) {
