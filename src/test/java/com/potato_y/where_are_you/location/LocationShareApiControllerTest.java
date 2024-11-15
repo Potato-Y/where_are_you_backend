@@ -220,21 +220,28 @@ class LocationShareApiControllerTest {
     // then
     result
         .andExpect(status().isOk())
-        .andExpect(jsonPath("$").isArray())
-        .andExpect(jsonPath("$[0].user.userId").value(testUser.getId()))
-        .andExpect(jsonPath("$[0].user.nickname").value(testUser.getNickname()))
-        .andExpect(jsonPath("$[0].user.email").value(testUser.getEmail()))
-        .andExpect(jsonPath("$[0].location.locationLatitude").value(
+        .andExpect(
+            jsonPath("$.targetLocation.location").value(schedule.getLocation()))
+        .andExpect(jsonPath("$.targetLocation.coordinate.longitude").value(
+            schedule.getLocationLongitude()))
+        .andExpect(
+            jsonPath("$.targetLocation.coordinate.latitude").value(schedule.getLocationLatitude()))
+
+        .andExpect(jsonPath("$.data").isArray())
+        .andExpect(jsonPath("$.data[0].user.userId").value(testUser.getId()))
+        .andExpect(jsonPath("$.data[0].user.nickname").value(testUser.getNickname()))
+        .andExpect(jsonPath("$.data[0].user.email").value(testUser.getEmail()))
+        .andExpect(jsonPath("$.data[0].location.latitude").value(
             testUserLocation.getLocationLatitude()))
-        .andExpect(jsonPath("$[0].location.locationLongitude").value(
+        .andExpect(jsonPath("$.data[0].location.longitude").value(
             testUserLocation.getLocationLongitude()))
 
-        .andExpect(jsonPath("$[1].user.userId").value(memberUser.getId()))
-        .andExpect(jsonPath("$[1].user.nickname").value(memberUser.getNickname()))
-        .andExpect(jsonPath("$[1].user.email").value(memberUser.getEmail()))
-        .andExpect(jsonPath("$[1].location.locationLatitude").value(
+        .andExpect(jsonPath("$.data[1].user.userId").value(memberUser.getId()))
+        .andExpect(jsonPath("$.data[1].user.nickname").value(memberUser.getNickname()))
+        .andExpect(jsonPath("$.data[1].user.email").value(memberUser.getEmail()))
+        .andExpect(jsonPath("$.data[1].location.latitude").value(
             memberUserLocation.getLocationLatitude()))
-        .andExpect(jsonPath("$[1].location.locationLongitude").value(
+        .andExpect(jsonPath("$.data[1].location.longitude").value(
             memberUserLocation.getLocationLongitude()));
   }
 
