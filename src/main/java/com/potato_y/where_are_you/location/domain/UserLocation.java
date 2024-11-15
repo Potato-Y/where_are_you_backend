@@ -42,19 +42,30 @@ public class UserLocation {
   @Column(name = "location_longitude")
   private double locationLongitude;
 
+  @Column(name = "state_message")
+  private String stateMessage;
+
   @LastModifiedDate
   private LocalDateTime updateAt;
 
   @Builder
-  public UserLocation(User user, double locationLatitude, double locationLongitude) {
+  public UserLocation(User user, double locationLatitude, double locationLongitude,
+      String stateMessage) {
     this.user = user;
     this.locationLatitude = locationLatitude;
     this.locationLongitude = locationLongitude;
+    this.stateMessage = stateMessage;
   }
 
   public UserLocation updateLocation(double locationLatitude, double locationLongitude) {
     this.locationLatitude = locationLatitude;
     this.locationLongitude = locationLongitude;
+
+    return this;
+  }
+
+  public UserLocation updateStateMessage(String stateMessage) {
+    this.stateMessage = stateMessage;
 
     return this;
   }

@@ -8,6 +8,7 @@ import static org.mockito.BDDMockito.given;
 import static org.mockito.BDDMockito.then;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 
 import com.potato_y.where_are_you.authentication.CurrentUserProvider;
 import com.potato_y.where_are_you.error.exception.BadRequestException;
@@ -26,6 +27,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 @ExtendWith(MockitoExtension.class)
@@ -68,17 +70,25 @@ class LocationShareServiceTest {
         .alarmBeforeHours(1)
         .build();
 
-    UpdateUserLocationRequest request = new UpdateUserLocationRequest(123.2, 456.1);
+    UpdateUserLocationRequest request = new UpdateUserLocationRequest(123.2, 456.1, "메시지");
+
+    final var userLocation = Mockito.spy(UserLocation.builder()
+        .user(testUser)
+        .locationLatitude(request.locationLatitude())
+        .locationLongitude(request.locationLongitude())
+        .build());
 
     given(groupScheduleService.getSchedule(scheduleId)).willReturn(schedule);
     given(groupScheduleService.checkParticipation(testUser, schedule)).willReturn(true);
     given(userLocationRepository.findByUser(testUser)).willReturn(Optional.empty());
-    given(userLocationRepository.save(any(UserLocation.class))).willAnswer(
-        invocation -> invocation.getArgument(0));
+    given(userLocationRepository.save(any(UserLocation.class))).willReturn(userLocation);
 
     locationShareService.updateUserLocation(scheduleId, request);
 
     then(userLocationRepository).should(times(1)).save(any(UserLocation.class));
+    verify(userLocation, times(1)).updateLocation(request.locationLatitude(),
+        request.locationLongitude());
+    verify(userLocation, times(1)).updateStateMessage(request.stateMessage());
   }
 
   @Test
@@ -100,7 +110,7 @@ class LocationShareServiceTest {
         .locationLongitude(2)
         .build();
 
-    UpdateUserLocationRequest request = new UpdateUserLocationRequest(123.2, 456.1);
+    UpdateUserLocationRequest request = new UpdateUserLocationRequest(123.2, 456.1, "메시지");
 
     given(groupScheduleService.getSchedule(scheduleId)).willReturn(schedule);
     given(groupScheduleService.checkParticipation(testUser, schedule)).willReturn(true);
@@ -125,7 +135,7 @@ class LocationShareServiceTest {
         .alarmBeforeHours(1)
         .build();
 
-    UpdateUserLocationRequest request = new UpdateUserLocationRequest(123.2, 456.1);
+    UpdateUserLocationRequest request = new UpdateUserLocationRequest(123.2, 456.1, "메시지");
 
     given(groupScheduleService.getSchedule(scheduleId)).willReturn(schedule);
     given(groupScheduleService.checkParticipation(testUser, schedule)).willReturn(true);
@@ -149,7 +159,7 @@ class LocationShareServiceTest {
         .alarmBeforeHours(1)
         .build();
 
-    UpdateUserLocationRequest request = new UpdateUserLocationRequest(123.2, 456.1);
+    UpdateUserLocationRequest request = new UpdateUserLocationRequest(123.2, 456.1, "메시지");
 
     given(groupScheduleService.getSchedule(scheduleId)).willReturn(schedule);
     given(groupScheduleService.checkParticipation(testUser, schedule)).willReturn(false);

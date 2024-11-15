@@ -32,14 +32,16 @@ public record ShareLocationResponse(
 
   public record ShareDataResponse(
       UserResponse user,
-      CoordinateResponse location
+      CoordinateResponse location,
+      String stateMessage
   ) {
 
     public ShareDataResponse(UserLocation userLocation) {
       this(
           new UserResponse(userLocation.getUser()),
           new CoordinateResponse(userLocation.getLocationLatitude(),
-              userLocation.getLocationLongitude())
+              userLocation.getLocationLongitude()),
+          userLocation.getStateMessage()
       );
     }
   }

@@ -37,7 +37,9 @@ public class LocationShareService {
     UserLocation userLocation = userLocationRepository.findByUser(user)
         .orElseGet(() -> createUserLocation(user));
 
-    userLocation.updateLocation(dto.locationLatitude(), dto.locationLongitude());
+    userLocation
+        .updateLocation(dto.locationLatitude(), dto.locationLongitude())
+        .updateStateMessage(dto.stateMessage());
   }
 
   @Transactional(readOnly = true)
