@@ -1,7 +1,6 @@
 package com.potato_y.where_are_you.schedule;
 
 import static com.potato_y.where_are_you.common.utils.DateTimeUtils.clearSecondAndNano;
-import static com.potato_y.where_are_you.group.GroupValidator.validateGroupId;
 
 import com.potato_y.where_are_you.authentication.CurrentUserProvider;
 import com.potato_y.where_are_you.error.exception.ForbiddenException;
@@ -9,6 +8,7 @@ import com.potato_y.where_are_you.error.exception.NotFoundException;
 import com.potato_y.where_are_you.firebase.FirebaseService;
 import com.potato_y.where_are_you.firebase.domain.FcmChannelId;
 import com.potato_y.where_are_you.group.GroupService;
+import com.potato_y.where_are_you.group.GroupValidator;
 import com.potato_y.where_are_you.group.domain.Group;
 import com.potato_y.where_are_you.group.domain.GroupMember;
 import com.potato_y.where_are_you.schedule.domain.AlarmSchedule;
@@ -39,6 +39,7 @@ public class GroupScheduleService {
   private final AlarmScheduleRepository alarmScheduleRepository;
   private final ParticipationRepository participationRepository;
   private final FirebaseService firebaseService;
+  private final GroupValidator groupValidator;
 
   @Transactional
   public GroupScheduleResponse createSchedule(Long groupId, CreateGroupScheduleRequest dto) {
@@ -108,7 +109,7 @@ public class GroupScheduleService {
     User user = currentUserProvider.getCurrentUser();
     GroupSchedule schedule = getGroupSchedule(scheduleId);
 
-    validateGroupId(schedule.getGroup(), groupId);
+    groupValidator.groupId(schedule.getGroup(), groupId);
     if (!groupService.checkGroupMember(groupId, user)) {
       throw new ForbiddenException("사용자가 그룹원이 아닙니다");
     }
@@ -138,7 +139,7 @@ public class GroupScheduleService {
     User user = currentUserProvider.getCurrentUser();
     GroupSchedule schedule = getGroupSchedule(scheduleId);
 
-    validateGroupId(schedule.getGroup(), groupId);
+    groupValidator.groupId(schedule.getGroup(), groupId);
     if (!groupService.checkGroupMember(groupId, user)) {
       throw new ForbiddenException("사용자가 그룹원이 아닙니다");
     }
@@ -154,7 +155,7 @@ public class GroupScheduleService {
     User user = currentUserProvider.getCurrentUser();
     GroupSchedule schedule = getGroupSchedule(scheduleId);
 
-    validateGroupId(schedule.getGroup(), groupId);
+    groupValidator.groupId(schedule.getGroup(), groupId);
     if (!groupService.checkGroupMember(groupId, user)) {
       throw new ForbiddenException("사용자가 그룹원이 아닙니다");
     }

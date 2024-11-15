@@ -1,7 +1,6 @@
 package com.potato_y.where_are_you.group;
 
 import static com.potato_y.where_are_you.common.utils.CodeMaker.createCode;
-import static com.potato_y.where_are_you.group.GroupValidator.validateGroupHostUser;
 
 import com.potato_y.where_are_you.authentication.CurrentUserProvider;
 import com.potato_y.where_are_you.error.exception.BadRequestException;
@@ -33,6 +32,7 @@ public class GroupService {
   private final CurrentUserProvider currentUserProvider;
   private final GroupMemberRepository groupMemberRepository;
   private final GroupInviteCodeRepository groupInviteCodeRepository;
+  private final GroupValidator groupValidator;
 
   @Transactional
   public GroupResponse createGroup(CreateGroupRequest dto) {
@@ -71,7 +71,7 @@ public class GroupService {
     User user = currentUserProvider.getCurrentUser();
     Group group = groupRepository.findById(groupId).orElseThrow(NotFoundException::new);
 
-    validateGroupHostUser(group, user);
+    groupValidator.groupHostUser(group, user);
 
     String code = getUniqueInviteCode();
 
@@ -101,7 +101,7 @@ public class GroupService {
     User user = currentUserProvider.getCurrentUser();
     Group group = groupRepository.findById(groupId).orElseThrow(NotFoundException::new);
 
-    validateGroupHostUser(group, user);
+    groupValidator.groupHostUser(group, user);
 
     group.updateGroupName(request.groupName());
 
