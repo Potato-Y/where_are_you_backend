@@ -35,7 +35,7 @@ public class GroupScheduleApiController {
   @GetMapping("")
   public ResponseEntity<List<GetGroupScheduleListResponse>> getGroupSchedules(
       @PathVariable Long groupId) {
-    List<GetGroupScheduleListResponse> responses = groupScheduleService.getSchedules(groupId);
+    List<GetGroupScheduleListResponse> responses = groupScheduleService.getGroupSchedules(groupId);
 
     return ResponseEntity.status(HttpStatus.OK).body(responses);
   }

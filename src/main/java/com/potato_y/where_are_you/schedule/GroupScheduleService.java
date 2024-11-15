@@ -82,7 +82,7 @@ public class GroupScheduleService {
   }
 
   @Transactional(readOnly = true)
-  public List<GetGroupScheduleListResponse> getSchedules(Long groupId) {
+  public List<GetGroupScheduleListResponse> getGroupSchedules(Long groupId) {
     User user = currentUserProvider.getCurrentUser();
     if (!groupService.checkGroupMember(groupId, user)) {
       throw new ForbiddenException("사용자가 그룹원이 아닙니다");
