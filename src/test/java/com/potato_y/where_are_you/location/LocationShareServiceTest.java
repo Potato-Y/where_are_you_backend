@@ -15,6 +15,7 @@ import com.potato_y.where_are_you.error.exception.BadRequestException;
 import com.potato_y.where_are_you.group.domain.Group;
 import com.potato_y.where_are_you.location.domain.UserLocation;
 import com.potato_y.where_are_you.location.domain.UserLocationRepository;
+import com.potato_y.where_are_you.location.dto.StateMessage.StateMessageRequest;
 import com.potato_y.where_are_you.location.dto.UpdateUserLocationRequest;
 import com.potato_y.where_are_you.schedule.GroupScheduleService;
 import com.potato_y.where_are_you.schedule.domain.GroupSchedule;
@@ -70,7 +71,7 @@ class LocationShareServiceTest {
         .alarmBeforeHours(1)
         .build();
 
-    UpdateUserLocationRequest request = new UpdateUserLocationRequest(123.2, 456.1, "메시지");
+    UpdateUserLocationRequest request = new UpdateUserLocationRequest(123.2, 456.1);
 
     final var userLocation = Mockito.spy(UserLocation.builder()
         .user(testUser)
@@ -88,7 +89,6 @@ class LocationShareServiceTest {
     then(userLocationRepository).should(times(1)).save(any(UserLocation.class));
     verify(userLocation, times(1)).updateLocation(request.locationLatitude(),
         request.locationLongitude());
-    verify(userLocation, times(1)).updateStateMessage(request.stateMessage());
   }
 
   @Test
@@ -104,21 +104,23 @@ class LocationShareServiceTest {
         .isAlarmEnabled(true)
         .alarmBeforeHours(1)
         .build();
-    final UserLocation location = UserLocation.builder()
+    final UserLocation userLocation = Mockito.spy(UserLocation.builder()
         .user(testUser)
         .locationLatitude(1)
         .locationLongitude(2)
-        .build();
+        .build());
 
-    UpdateUserLocationRequest request = new UpdateUserLocationRequest(123.2, 456.1, "메시지");
+    UpdateUserLocationRequest request = new UpdateUserLocationRequest(123.2, 456.1);
 
     given(groupScheduleService.getSchedule(scheduleId)).willReturn(schedule);
     given(groupScheduleService.checkParticipation(testUser, schedule)).willReturn(true);
-    given(userLocationRepository.findByUser(testUser)).willReturn(Optional.of(location));
+    given(userLocationRepository.findByUser(testUser)).willReturn(Optional.of(userLocation));
 
     locationShareService.updateUserLocation(scheduleId, request);
 
     then(userLocationRepository).should(never()).save(any(UserLocation.class));
+    verify(userLocation, times(1)).updateLocation(request.locationLatitude(),
+        request.locationLongitude());
   }
 
   @Test
@@ -135,7 +137,7 @@ class LocationShareServiceTest {
         .alarmBeforeHours(1)
         .build();
 
-    UpdateUserLocationRequest request = new UpdateUserLocationRequest(123.2, 456.1, "메시지");
+    UpdateUserLocationRequest request = new UpdateUserLocationRequest(123.2, 456.1);
 
     given(groupScheduleService.getSchedule(scheduleId)).willReturn(schedule);
     given(groupScheduleService.checkParticipation(testUser, schedule)).willReturn(true);
@@ -159,7 +161,7 @@ class LocationShareServiceTest {
         .alarmBeforeHours(1)
         .build();
 
-    UpdateUserLocationRequest request = new UpdateUserLocationRequest(123.2, 456.1, "메시지");
+    UpdateUserLocationRequest request = new UpdateUserLocationRequest(123.2, 456.1);
 
     given(groupScheduleService.getSchedule(scheduleId)).willReturn(schedule);
     given(groupScheduleService.checkParticipation(testUser, schedule)).willReturn(false);
@@ -210,6 +212,114 @@ class LocationShareServiceTest {
 
     assertThatThrownBy(
         () -> locationShareService.getScheduleMemberLocations(scheduleId))
+        .isInstanceOf(BadRequestException.class);
+  }
+
+  @Test
+  @DisplayName("updateStateMessage(): 사용자의 빈 위치 정보를 저장하고 상태 메시지를 업데이트 한다")
+  void successUpdateStateMessage_newLocation() {
+    final var scheduleId = 1L;
+    GroupSchedule schedule = GroupSchedule.builder()
+        .title("스케줄")
+        .startTime(LocalDateTime.now().plusMinutes(25))
+        .endTime(LocalDateTime.now().plusHours(1))
+        .user(testUser)
+        .group(testGroup)
+        .isAlarmEnabled(true)
+        .alarmBeforeHours(1)
+        .build();
+
+    StateMessageRequest request = new StateMessageRequest("상태 메시지");
+
+    final var userLocation = Mockito.spy(UserLocation.builder()
+        .user(testUser)
+        .build());
+
+    given(groupScheduleService.getSchedule(scheduleId)).willReturn(schedule);
+    given(groupScheduleService.checkParticipation(testUser, schedule)).willReturn(true);
+    given(userLocationRepository.findByUser(testUser)).willReturn(Optional.empty());
+    given(userLocationRepository.save(any(UserLocation.class))).willReturn(userLocation);
+
+    locationShareService.updateStateMessage(scheduleId, request);
+
+    then(userLocationRepository).should(times(1)).save(any(UserLocation.class));
+    verify(userLocation, times(1)).updateStateMessage(request.message());
+  }
+
+  @Test
+  @DisplayName("updateStateMessage(): 사용자의 빈 위치 정보를 저장하고 상태 메시지를 업데이트 한다")
+  void successUpdateStateMessage_updateLocation() {
+    final var scheduleId = 1L;
+    GroupSchedule schedule = GroupSchedule.builder()
+        .title("스케줄")
+        .startTime(LocalDateTime.now().plusMinutes(25))
+        .endTime(LocalDateTime.now().plusHours(1))
+        .user(testUser)
+        .group(testGroup)
+        .isAlarmEnabled(true)
+        .alarmBeforeHours(1)
+        .build();
+
+    StateMessageRequest request = new StateMessageRequest("상태 메시지");
+
+    final var userLocation = Mockito.spy(UserLocation.builder()
+        .user(testUser)
+        .build());
+
+    given(groupScheduleService.getSchedule(scheduleId)).willReturn(schedule);
+    given(groupScheduleService.checkParticipation(testUser, schedule)).willReturn(true);
+    given(userLocationRepository.findByUser(testUser)).willReturn(Optional.of(userLocation));
+
+    locationShareService.updateStateMessage(scheduleId, request);
+
+    verify(userLocation, times(1)).updateStateMessage(request.message());
+  }
+
+  @Test
+  @DisplayName("updateStateMessage(): 공유 시간이 아니라면 예외가 발생한다.")
+  void failUpdateStateMessage_notShareTime() {
+    final var scheduleId = 1L;
+    GroupSchedule schedule = GroupSchedule.builder()
+        .title("스케줄")
+        .startTime(LocalDateTime.now().plusDays(25))
+        .endTime(LocalDateTime.now().plusDays(26))
+        .user(testUser)
+        .group(testGroup)
+        .isAlarmEnabled(true)
+        .alarmBeforeHours(1)
+        .build();
+
+    StateMessageRequest request = new StateMessageRequest("변경 메시지");
+
+    given(groupScheduleService.getSchedule(scheduleId)).willReturn(schedule);
+    given(groupScheduleService.checkParticipation(testUser, schedule)).willReturn(true);
+
+    assertThatThrownBy(
+        () -> locationShareService.updateStateMessage(scheduleId, request))
+        .isInstanceOf(BadRequestException.class);
+  }
+
+  @Test
+  @DisplayName("updateStateMessage(): 참여자가 아니라면 예외가 발생한다.")
+  void failUpdateStateMessage_notParticipation() {
+    final var scheduleId = 1L;
+    GroupSchedule schedule = GroupSchedule.builder()
+        .title("스케줄")
+        .startTime(LocalDateTime.now().plusMinutes(25))
+        .endTime(LocalDateTime.now().plusHours(1))
+        .user(testUser)
+        .group(testGroup)
+        .isAlarmEnabled(true)
+        .alarmBeforeHours(1)
+        .build();
+
+    StateMessageRequest request = new StateMessageRequest("변경 메시지");
+
+    given(groupScheduleService.getSchedule(scheduleId)).willReturn(schedule);
+    given(groupScheduleService.checkParticipation(testUser, schedule)).willReturn(false);
+
+    assertThatThrownBy(
+        () -> locationShareService.updateStateMessage(scheduleId, request))
         .isInstanceOf(BadRequestException.class);
   }
 }

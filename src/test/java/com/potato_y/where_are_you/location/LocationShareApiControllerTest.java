@@ -20,6 +20,7 @@ import com.potato_y.where_are_you.group.domain.GroupMemberRepository;
 import com.potato_y.where_are_you.group.domain.GroupRepository;
 import com.potato_y.where_are_you.location.domain.UserLocation;
 import com.potato_y.where_are_you.location.domain.UserLocationRepository;
+import com.potato_y.where_are_you.location.dto.StateMessage.StateMessageRequest;
 import com.potato_y.where_are_you.location.dto.UpdateUserLocationRequest;
 import com.potato_y.where_are_you.schedule.domain.GroupSchedule;
 import com.potato_y.where_are_you.schedule.domain.GroupScheduleRepository;
@@ -102,7 +103,7 @@ class LocationShareApiControllerTest {
     GroupSchedule schedule = scheduleRepository.save(createScheduleCase1(group, testUser));
     participationRepository.save(createParticipation(schedule, testUser, true));
 
-    UpdateUserLocationRequest request = new UpdateUserLocationRequest(1, 3, "메시지");
+    UpdateUserLocationRequest request = new UpdateUserLocationRequest(1, 3);
     final String requestBody = objectMapper.writeValueAsString(request);
 
     // when
@@ -118,8 +119,6 @@ class LocationShareApiControllerTest {
         request.locationLatitude());
     assertThat(userLocationRepository.findByUser(testUser).get().getLocationLongitude()).isEqualTo(
         request.locationLongitude());
-    assertThat(userLocationRepository.findByUser(testUser).get().getStateMessage()).isEqualTo(
-        request.stateMessage());
   }
 
   @Test
@@ -136,7 +135,7 @@ class LocationShareApiControllerTest {
     userLocationRepository.save(
         UserLocation.builder().user(testUser).locationLatitude(1).locationLongitude(2).build());
 
-    UpdateUserLocationRequest request = new UpdateUserLocationRequest(1, 3, "메시지");
+    UpdateUserLocationRequest request = new UpdateUserLocationRequest(1, 3);
     final String requestBody = objectMapper.writeValueAsString(request);
 
     // when
@@ -152,8 +151,6 @@ class LocationShareApiControllerTest {
         request.locationLatitude());
     assertThat(userLocationRepository.findByUser(testUser).get().getLocationLongitude()).isEqualTo(
         request.locationLongitude());
-    assertThat(userLocationRepository.findByUser(testUser).get().getStateMessage()).isEqualTo(
-        request.stateMessage());
   }
 
   @Test
@@ -168,7 +165,7 @@ class LocationShareApiControllerTest {
     GroupSchedule schedule = scheduleRepository.save(createScheduleCase1(group, testUser));
     participationRepository.save(createParticipation(schedule, testUser, false));
 
-    UpdateUserLocationRequest request = new UpdateUserLocationRequest(1, 3, "메시지");
+    UpdateUserLocationRequest request = new UpdateUserLocationRequest(1, 3);
     final String requestBody = objectMapper.writeValueAsString(request);
 
     // when
@@ -191,7 +188,7 @@ class LocationShareApiControllerTest {
     groupMemberRepository.save(createGroupHost(group, testUser));
     GroupSchedule schedule = scheduleRepository.save(createScheduleCase1(group, testUser));
 
-    UpdateUserLocationRequest request = new UpdateUserLocationRequest(1, 3, "메시지");
+    UpdateUserLocationRequest request = new UpdateUserLocationRequest(1, 3);
     final String requestBody = objectMapper.writeValueAsString(request);
 
     // when
@@ -215,7 +212,7 @@ class LocationShareApiControllerTest {
     GroupSchedule schedule = scheduleRepository.save(createScheduleCase2(group, testUser));
     participationRepository.save(createParticipation(schedule, testUser, true));
 
-    UpdateUserLocationRequest request = new UpdateUserLocationRequest(1, 3, "메시지");
+    UpdateUserLocationRequest request = new UpdateUserLocationRequest(1, 3);
     final String requestBody = objectMapper.writeValueAsString(request);
 
     // when
@@ -330,6 +327,139 @@ class LocationShareApiControllerTest {
 
     // when
     ResultActions result = mockMvc.perform(get(url, schedule.getId()));
+
+    // then
+    result.andExpect(status().isBadRequest());
+  }
+
+  @Test
+  @WithMockUser("1")
+  @DisplayName("updateStateMessage(): 사용자 빈 위치를 저장하고, 상태 메시지를 업데이트 할 수 있다")
+  void successUpdateStateMessage_noData() throws Exception {
+    // given
+    final String url = "/v1/locations/{scheduleId}/state-message";
+
+    Group group = groupRepository.save(createGroup("test group", testUser));
+    groupMemberRepository.save(createGroupHost(group, testUser));
+    GroupSchedule schedule = scheduleRepository.save(createScheduleCase1(group, testUser));
+    participationRepository.save(createParticipation(schedule, testUser, true));
+
+    StateMessageRequest request = new StateMessageRequest("상태 메시지");
+    final String requestBody = objectMapper.writeValueAsString(request);
+
+    // when
+    ResultActions result = mockMvc.perform(
+        put(url, schedule.getId()).contentType(MediaType.APPLICATION_JSON_VALUE)
+            .content(requestBody));
+
+    // then
+    result
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$.message").value(request.message()));
+
+    assertThat(userLocationRepository.findByUser(testUser).isPresent()).isTrue();
+    assertThat(userLocationRepository.findByUser(testUser).get().getStateMessage()).isEqualTo(
+        request.message());
+  }
+
+  @Test
+  @WithMockUser("1")
+  @DisplayName("updateStateMessage(): 기존의 사용자 위치로부터 상태 메시지를 업데이트 할 수 있다")
+  void successUpdateStateMessage_updateData() throws Exception {
+    // given
+    final String url = "/v1/locations/{scheduleId}/state-message";
+
+    Group group = groupRepository.save(createGroup("test group", testUser));
+    groupMemberRepository.save(createGroupHost(group, testUser));
+    GroupSchedule schedule = scheduleRepository.save(createScheduleCase1(group, testUser));
+    participationRepository.save(createParticipation(schedule, testUser, true));
+    userLocationRepository.save(
+        UserLocation.builder().user(testUser).stateMessage("기존 메시지").build());
+
+    StateMessageRequest request = new StateMessageRequest("새 상태 메시지");
+    final String requestBody = objectMapper.writeValueAsString(request);
+
+    // when
+    ResultActions result = mockMvc.perform(
+        put(url, schedule.getId()).contentType(MediaType.APPLICATION_JSON_VALUE)
+            .content(requestBody));
+
+    // then
+    result
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$.message").value(request.message()));
+
+    assertThat(userLocationRepository.findByUser(testUser).isPresent()).isTrue();
+    assertThat(userLocationRepository.findByUser(testUser).get().getStateMessage()).isEqualTo(
+        request.message());
+  }
+
+  @Test
+  @WithMockUser("1")
+  @DisplayName("updateStateMessage(): 참여자가 아니라면 업데이트 할 수 없다 1")
+  void failUpdateStateMessage_notParticipation() throws Exception {
+    // given
+    final String url = "/v1/locations/{scheduleId}/state-message";
+
+    Group group = groupRepository.save(createGroup("test group", testUser));
+    groupMemberRepository.save(createGroupHost(group, testUser));
+    GroupSchedule schedule = scheduleRepository.save(createScheduleCase1(group, testUser));
+    participationRepository.save(createParticipation(schedule, testUser, false));
+
+    StateMessageRequest request = new StateMessageRequest("");
+    final String requestBody = objectMapper.writeValueAsString(request);
+
+    // when
+    ResultActions result = mockMvc.perform(
+        put(url, schedule.getId()).contentType(MediaType.APPLICATION_JSON_VALUE)
+            .content(requestBody));
+
+    // then
+    result.andExpect(status().isBadRequest());
+  }
+
+  @Test
+  @WithMockUser("1")
+  @DisplayName("updateStateMessage(): 참여자가 아니라면 업데이트 할 수 없다 2")
+  void failUpdateStateMessage_notParticipationEntity() throws Exception {
+    // given
+    final String url = "/v1/locations/{scheduleId}/state-message";
+
+    Group group = groupRepository.save(createGroup("test group", testUser));
+    groupMemberRepository.save(createGroupHost(group, testUser));
+    GroupSchedule schedule = scheduleRepository.save(createScheduleCase1(group, testUser));
+
+    StateMessageRequest request = new StateMessageRequest("");
+    final String requestBody = objectMapper.writeValueAsString(request);
+
+    // when
+    ResultActions result = mockMvc.perform(
+        put(url, schedule.getId()).contentType(MediaType.APPLICATION_JSON_VALUE)
+            .content(requestBody));
+
+    // then
+    result.andExpect(status().isBadRequest());
+  }
+
+  @Test
+  @WithMockUser("1")
+  @DisplayName("updateStateMessage(): 공유 허용 시간이 아니면 공유할 수 없다")
+  void failUpdateStateMessage_notShareTime() throws Exception {
+    // given
+    final String url = "/v1/locations/{scheduleId}/state-message";
+
+    Group group = groupRepository.save(createGroup("test group", testUser));
+    groupMemberRepository.save(createGroupHost(group, testUser));
+    GroupSchedule schedule = scheduleRepository.save(createScheduleCase2(group, testUser));
+    participationRepository.save(createParticipation(schedule, testUser, true));
+
+    StateMessageRequest request = new StateMessageRequest("");
+    final String requestBody = objectMapper.writeValueAsString(request);
+
+    // when
+    ResultActions result = mockMvc.perform(
+        put(url, schedule.getId()).contentType(MediaType.APPLICATION_JSON_VALUE)
+            .content(requestBody));
 
     // then
     result.andExpect(status().isBadRequest());

@@ -1,6 +1,8 @@
 package com.potato_y.where_are_you.location;
 
 import com.potato_y.where_are_you.location.dto.ShareLocationResponse;
+import com.potato_y.where_are_you.location.dto.StateMessage.StateMessageRequest;
+import com.potato_y.where_are_you.location.dto.StateMessage.StateMessageResponse;
 import com.potato_y.where_are_you.location.dto.UpdateUserLocationRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -26,6 +28,14 @@ public class LocationShareApiController {
     locationShareService.updateUserLocation(scheduleId, request);
 
     return ResponseEntity.status(HttpStatus.OK).build();
+  }
+
+  @PutMapping("/{scheduleId}/state-message")
+  public ResponseEntity<StateMessageResponse> updateStateMessage(@PathVariable Long scheduleId,
+      @RequestBody StateMessageRequest request) {
+    String message = locationShareService.updateStateMessage(scheduleId, request);
+
+    return ResponseEntity.status(HttpStatus.OK).body(new StateMessageResponse(message));
   }
 
   @GetMapping("/{scheduleId}")
