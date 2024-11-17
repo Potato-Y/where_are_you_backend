@@ -4,8 +4,7 @@ import jakarta.validation.constraints.NotNull;
 
 public record UpdateUserLocationRequest(
     @NotNull double locationLatitude,
-    @NotNull double locationLongitude,
-    String stateMessage
+    @NotNull double locationLongitude
 ) {
 
 }

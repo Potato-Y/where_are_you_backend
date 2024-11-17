@@ -5,6 +5,7 @@ import com.potato_y.where_are_you.error.exception.BadRequestException;
 import com.potato_y.where_are_you.location.domain.UserLocation;
 import com.potato_y.where_are_you.location.domain.UserLocationRepository;
 import com.potato_y.where_are_you.location.dto.ShareLocationResponse;
+import com.potato_y.where_are_you.location.dto.StateMessage.StateMessageRequest;
 import com.potato_y.where_are_you.location.dto.UpdateUserLocationRequest;
 import com.potato_y.where_are_you.schedule.GroupScheduleService;
 import com.potato_y.where_are_you.schedule.domain.GroupSchedule;
@@ -37,9 +38,7 @@ public class LocationShareService {
     UserLocation userLocation = userLocationRepository.findByUser(user)
         .orElseGet(() -> createUserLocation(user));
 
-    userLocation
-        .updateLocation(dto.locationLatitude(), dto.locationLongitude())
-        .updateStateMessage(dto.stateMessage());
+    userLocation.updateLocation(dto.locationLatitude(), dto.locationLongitude());
   }
 
   @Transactional(readOnly = true)
@@ -51,6 +50,21 @@ public class LocationShareService {
     validateLocationShareTime(schedule);
 
     return new ShareLocationResponse(schedule, getUserLocation(schedule));
+  }
+
+  @Transactional
+  public String updateStateMessage(Long scheduleId, StateMessageRequest request) {
+    User user = currentUserProvider.getCurrentUser();
+
+    GroupSchedule schedule = groupScheduleService.getSchedule(scheduleId);
+    validateParticipation(user, schedule);
+    validateLocationShareTime(schedule);
+
+    UserLocation userLocation = userLocationRepository.findByUser(user)
+        .orElseGet(() -> createUserLocation(user));
+
+    userLocation.updateStateMessage(request.message());
+    return userLocation.getStateMessage();
   }
 
   private List<UserLocation> getUserLocation(GroupSchedule schedule) {
