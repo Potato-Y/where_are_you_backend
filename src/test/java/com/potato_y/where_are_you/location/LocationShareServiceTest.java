@@ -54,7 +54,6 @@ class LocationShareServiceTest {
   void setUp() {
     testUser = createUser("test@mail.com", "test user", "1");
     testGroup = createGroup("group", testUser);
-    given(currentUserProvider.getCurrentUser()).willReturn(testUser);
   }
 
   @Test
@@ -79,6 +78,7 @@ class LocationShareServiceTest {
         .locationLongitude(request.locationLongitude())
         .build());
 
+    given(currentUserProvider.getCurrentUser()).willReturn(testUser);
     given(groupScheduleService.getSchedule(scheduleId)).willReturn(schedule);
     given(groupScheduleService.checkParticipation(testUser, schedule)).willReturn(true);
     given(userLocationRepository.findByUser(testUser)).willReturn(Optional.empty());
@@ -112,6 +112,7 @@ class LocationShareServiceTest {
 
     UpdateUserLocationRequest request = new UpdateUserLocationRequest(123.2, 456.1);
 
+    given(currentUserProvider.getCurrentUser()).willReturn(testUser);
     given(groupScheduleService.getSchedule(scheduleId)).willReturn(schedule);
     given(groupScheduleService.checkParticipation(testUser, schedule)).willReturn(true);
     given(userLocationRepository.findByUser(testUser)).willReturn(Optional.of(userLocation));
@@ -139,6 +140,7 @@ class LocationShareServiceTest {
 
     UpdateUserLocationRequest request = new UpdateUserLocationRequest(123.2, 456.1);
 
+    given(currentUserProvider.getCurrentUser()).willReturn(testUser);
     given(groupScheduleService.getSchedule(scheduleId)).willReturn(schedule);
     given(groupScheduleService.checkParticipation(testUser, schedule)).willReturn(true);
 
@@ -163,6 +165,7 @@ class LocationShareServiceTest {
 
     UpdateUserLocationRequest request = new UpdateUserLocationRequest(123.2, 456.1);
 
+    given(currentUserProvider.getCurrentUser()).willReturn(testUser);
     given(groupScheduleService.getSchedule(scheduleId)).willReturn(schedule);
     given(groupScheduleService.checkParticipation(testUser, schedule)).willReturn(false);
 
@@ -185,6 +188,7 @@ class LocationShareServiceTest {
         .alarmBeforeHours(1)
         .build();
 
+    given(currentUserProvider.getCurrentUser()).willReturn(testUser);
     given(groupScheduleService.getSchedule(scheduleId)).willReturn(schedule);
     given(groupScheduleService.checkParticipation(testUser, schedule)).willReturn(true);
 
@@ -207,6 +211,7 @@ class LocationShareServiceTest {
         .alarmBeforeHours(1)
         .build();
 
+    given(currentUserProvider.getCurrentUser()).willReturn(testUser);
     given(groupScheduleService.getSchedule(scheduleId)).willReturn(schedule);
     given(groupScheduleService.checkParticipation(testUser, schedule)).willReturn(false);
 
@@ -235,6 +240,7 @@ class LocationShareServiceTest {
         .user(testUser)
         .build());
 
+    given(currentUserProvider.getCurrentUser()).willReturn(testUser);
     given(groupScheduleService.getSchedule(scheduleId)).willReturn(schedule);
     given(groupScheduleService.checkParticipation(testUser, schedule)).willReturn(true);
     given(userLocationRepository.findByUser(testUser)).willReturn(Optional.empty());
@@ -266,6 +272,7 @@ class LocationShareServiceTest {
         .user(testUser)
         .build());
 
+    given(currentUserProvider.getCurrentUser()).willReturn(testUser);
     given(groupScheduleService.getSchedule(scheduleId)).willReturn(schedule);
     given(groupScheduleService.checkParticipation(testUser, schedule)).willReturn(true);
     given(userLocationRepository.findByUser(testUser)).willReturn(Optional.of(userLocation));
@@ -291,6 +298,7 @@ class LocationShareServiceTest {
 
     StateMessageRequest request = new StateMessageRequest("변경 메시지");
 
+    given(currentUserProvider.getCurrentUser()).willReturn(testUser);
     given(groupScheduleService.getSchedule(scheduleId)).willReturn(schedule);
     given(groupScheduleService.checkParticipation(testUser, schedule)).willReturn(true);
 
@@ -315,6 +323,7 @@ class LocationShareServiceTest {
 
     StateMessageRequest request = new StateMessageRequest("변경 메시지");
 
+    given(currentUserProvider.getCurrentUser()).willReturn(testUser);
     given(groupScheduleService.getSchedule(scheduleId)).willReturn(schedule);
     given(groupScheduleService.checkParticipation(testUser, schedule)).willReturn(false);
 
