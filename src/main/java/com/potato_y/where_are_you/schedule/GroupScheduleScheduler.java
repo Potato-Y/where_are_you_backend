@@ -15,14 +15,14 @@ import org.springframework.transaction.annotation.Transactional;
 @Component
 @RequiredArgsConstructor
 @Slf4j
-public class AlarmSchedulerConfiguration {
+public class GroupScheduleScheduler {
 
   private final GroupScheduleService groupScheduleService;
   private final AlarmScheduleRepository alarmScheduleRepository;
 
   @Scheduled(fixedDelay = 60000)
   @Transactional(readOnly = true)
-  public void run() {
+  public void pushAlarm() {
     LocalDateTime dateTime = clearSecondAndNano(LocalDateTime.now());
     List<AlarmSchedule> schedules = alarmScheduleRepository.findByDateTime(dateTime);
 
