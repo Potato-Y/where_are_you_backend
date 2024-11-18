@@ -2,6 +2,7 @@ package com.potato_y.where_are_you.location;
 
 import static com.potato_y.where_are_you.group.GroupTestUtils.createGroup;
 import static com.potato_y.where_are_you.user.UserTestUtils.createUser;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
@@ -330,5 +331,26 @@ class LocationShareServiceTest {
     assertThatThrownBy(
         () -> locationShareService.updateStateMessage(scheduleId, request))
         .isInstanceOf(BadRequestException.class);
+  }
+
+  @Test
+  @DisplayName("resetUserLocation(): 참여자가 아니라면 예외가 발생한다.")
+  void successResetUserLocation() {
+    final var userLocation = Mockito.spy(UserLocation.builder()
+        .user(testUser)
+        .locationLatitude(1.1)
+        .locationLongitude(1.2)
+        .build());
+
+    given(userLocationRepository.findByUser(testUser)).willReturn(Optional.of(userLocation));
+
+    locationShareService.resetUserLocation(testUser);
+
+    verify(userLocation, times(1)).updateLocation(null, null);
+    verify(userLocation, times(1)).updateStateMessage(null);
+
+    assertThat(userLocation.getLocationLatitude()).isNull();
+    assertThat(userLocation.getLocationLongitude()).isNull();
+    assertThat(userLocation.getStateMessage()).isNull();
   }
 }

@@ -67,6 +67,13 @@ public class LocationShareService {
     return userLocation.getStateMessage();
   }
 
+  @Transactional
+  public void resetUserLocation(User user) {
+    userLocationRepository.findByUser(user).ifPresent(it -> it
+        .updateLocation(null, null)
+        .updateStateMessage(null));
+  }
+
   private List<UserLocation> getUserLocation(GroupSchedule schedule) {
     List<User> users = groupScheduleService.getParticipationUsers(schedule);
 
