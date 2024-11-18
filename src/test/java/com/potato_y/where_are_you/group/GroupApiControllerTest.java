@@ -22,6 +22,8 @@ import com.potato_y.where_are_you.group.domain.GroupMemberRepository;
 import com.potato_y.where_are_you.group.domain.GroupRepository;
 import com.potato_y.where_are_you.group.dto.CreateGroupRequest;
 import com.potato_y.where_are_you.user.domain.User;
+import com.potato_y.where_are_you.user.domain.UserLate;
+import com.potato_y.where_are_you.user.domain.UserLateRepository;
 import com.potato_y.where_are_you.user.domain.UserRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -64,6 +66,9 @@ class GroupApiControllerTest {
 
   @Autowired
   private GroupInviteCodeRepository groupInviteCodeRepository;
+
+  @Autowired
+  private UserLateRepository userLateRepository;
 
   private User testUser;
 
@@ -543,6 +548,98 @@ class GroupApiControllerTest {
     ResultActions result = mockMvc.perform(
         delete(url, group.getId())
     );
+
+    // then
+    result.andExpect(status().isBadRequest());
+  }
+
+  @Test
+  @WithMockUser("1")
+  @DisplayName("getMemberInfo(): 그룹원의 지각 정보를 조회할 수 있다 - 새 데이터")
+  void successGetMemberInfo_new() throws Exception {
+    // given
+    final String url = "/v1/groups/{groupId}/members";
+    final String groupName = "test group";
+    final User hostUser = userRepository.save(createUser("host@mail.com", "host", "123"));
+    final Group group = groupRepository.save(createGroup(groupName, testUser));
+    groupMemberRepository.save(createGroupHost(group, hostUser));
+    groupMemberRepository.save(createGroupMember(group, testUser));
+
+    // when
+    ResultActions result = mockMvc.perform(get(url, group.getId())
+        .param("userId", hostUser.getId().toString()));
+
+    // then
+    result
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$.user.userId").value(hostUser.getId()))
+        .andExpect(jsonPath("$.user.email").value(hostUser.getEmail()))
+        .andExpect(jsonPath("$.user.nickname").value(hostUser.getNickname()))
+        .andExpect(jsonPath("$.lateData.participation").value(0L))
+        .andExpect(jsonPath("$.lateData.late").value(0L));
+  }
+
+  @Test
+  @WithMockUser("1")
+  @DisplayName("getMemberInfo(): 그룹원의 지각 정보를 조회할 수 있다 - 기존 데이터")
+  void successGetMemberInfo_get() throws Exception {
+    // given
+    final String url = "/v1/groups/{groupId}/members";
+    final String groupName = "test group";
+    final User hostUser = userRepository.save(createUser("host@mail.com", "host", "123"));
+    final Group group = groupRepository.save(createGroup(groupName, testUser));
+    groupMemberRepository.save(createGroupHost(group, hostUser));
+    groupMemberRepository.save(createGroupMember(group, testUser));
+    final var userLate = userLateRepository.save(
+        UserLate.builder().user(hostUser).build().upCount(true));
+
+    // when
+    ResultActions result = mockMvc.perform(get(url, group.getId())
+        .param("userId", hostUser.getId().toString()));
+
+    // then
+    result
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$.user.userId").value(hostUser.getId()))
+        .andExpect(jsonPath("$.user.email").value(hostUser.getEmail()))
+        .andExpect(jsonPath("$.user.nickname").value(hostUser.getNickname()))
+        .andExpect(jsonPath("$.lateData.participation").value(userLate.getParticipationCount()))
+        .andExpect(jsonPath("$.lateData.late").value(userLate.getLateCount()));
+  }
+
+  @Test
+  @WithMockUser("1")
+  @DisplayName("getMemberInfo(): 그룹원이 아니라면 정보를 조회할 수 없다")
+  void failGetMemberInfo_currentNotMember() throws Exception {
+    // given
+    final String url = "/v1/groups/{groupId}/members";
+    final String groupName = "test group";
+    final User hostUser = userRepository.save(createUser("host@mail.com", "host", "123"));
+    final Group group = groupRepository.save(createGroup(groupName, hostUser));
+    groupMemberRepository.save(createGroupHost(group, hostUser));
+
+    // when
+    ResultActions result = mockMvc.perform(get(url, group.getId())
+        .param("userId", hostUser.getId().toString()));
+
+    // then
+    result.andExpect(status().isForbidden());
+  }
+
+  @Test
+  @WithMockUser("1")
+  @DisplayName("getGroup(): 대상이 그룹원이 아니라면 정보를 조회할 수 없다")
+  void failGetMemberInfo_NotMember() throws Exception {
+    // given
+    final String url = "/v1/groups/{groupId}/members";
+    final String groupName = "test group";
+    final User otherUser = userRepository.save(createUser("host@mail.com", "host", "123"));
+    final Group group = groupRepository.save(createGroup(groupName, testUser));
+    groupMemberRepository.save(createGroupHost(group, testUser));
+
+    // when
+    ResultActions result = mockMvc.perform(get(url, group.getId())
+        .param("userId", otherUser.getId().toString()));
 
     // then
     result.andExpect(status().isBadRequest());

@@ -5,11 +5,15 @@ import static com.potato_y.where_are_you.authentication.utils.RandomStringGenera
 import com.potato_y.where_are_you.authentication.CurrentUserProvider;
 import com.potato_y.where_are_you.authentication.domain.oauth.OAuthInfoResponse;
 import com.potato_y.where_are_you.user.domain.User;
+import com.potato_y.where_are_you.user.domain.UserLate;
+import com.potato_y.where_are_you.user.domain.UserLateRepository;
 import com.potato_y.where_are_you.user.domain.UserRepository;
+import com.potato_y.where_are_you.user.dto.UserLateRequest;
 import com.potato_y.where_are_you.user.dto.UserResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @RequiredArgsConstructor
 @Service
@@ -17,6 +21,7 @@ public class UserService {
 
   private static final int USER_RANDOM_PASSWORD_SIZE = 40;
   private final UserRepository userRepository;
+  private final UserLateRepository userLateRepository;
   private final CurrentUserProvider currentUserProvider;
 
   public User findById(Long userId) {
@@ -40,5 +45,27 @@ public class UserService {
 
   public UserResponse getMyAccount() {
     return new UserResponse(currentUserProvider.getCurrentUser());
+  }
+
+  @Transactional
+  public UserLate updateUserLate(UserLateRequest dto) {
+    User user = currentUserProvider.getCurrentUser();
+    UserLate userLate = userLateRepository.findByUser(user)
+        .orElseGet(() -> createUserLate(user));
+
+    return userLate.upCount(dto.isLate());
+  }
+
+  @Transactional
+  public UserLate getUserLate(Long userId) {
+    User user = findById(userId);
+    return userLateRepository.findByUser(user)
+        .orElseGet(() -> createUserLate(user));
+  }
+
+  private UserLate createUserLate(User user) {
+    return userLateRepository.save(UserLate.builder()
+        .user(user)
+        .build());
   }
 }
