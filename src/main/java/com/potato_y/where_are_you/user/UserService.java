@@ -56,6 +56,13 @@ public class UserService {
     return userLate.upCount(dto.isLate());
   }
 
+  @Transactional
+  public UserLate getUserLate(Long userId) {
+    User user = findById(userId);
+    return userLateRepository.findByUser(user)
+        .orElseGet(() -> createUserLate(user));
+  }
+
   private UserLate createUserLate(User user) {
     return userLateRepository.save(UserLate.builder()
         .user(user)

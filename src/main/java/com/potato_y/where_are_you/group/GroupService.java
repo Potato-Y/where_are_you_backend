@@ -4,6 +4,7 @@ import static com.potato_y.where_are_you.common.utils.CodeMaker.createCode;
 
 import com.potato_y.where_are_you.authentication.CurrentUserProvider;
 import com.potato_y.where_are_you.error.exception.BadRequestException;
+import com.potato_y.where_are_you.error.exception.ForbiddenException;
 import com.potato_y.where_are_you.error.exception.NotFoundException;
 import com.potato_y.where_are_you.group.domain.Group;
 import com.potato_y.where_are_you.group.domain.GroupInviteCode;
@@ -15,7 +16,10 @@ import com.potato_y.where_are_you.group.domain.GroupRepository;
 import com.potato_y.where_are_you.group.dto.CreateGroupRequest;
 import com.potato_y.where_are_you.group.dto.GroupInviteCodeResponse;
 import com.potato_y.where_are_you.group.dto.GroupResponse;
+import com.potato_y.where_are_you.user.UserService;
 import com.potato_y.where_are_you.user.domain.User;
+import com.potato_y.where_are_you.user.domain.UserLate;
+import com.potato_y.where_are_you.user.domain.UserRepository;
 import java.util.ArrayList;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
@@ -29,10 +33,12 @@ public class GroupService {
   private static final int GROUP_INVITE_CODE_LENGTH = 10;
 
   private final GroupRepository groupRepository;
+  private final UserService userService;
   private final CurrentUserProvider currentUserProvider;
   private final GroupMemberRepository groupMemberRepository;
   private final GroupInviteCodeRepository groupInviteCodeRepository;
   private final GroupValidator groupValidator;
+  private final UserRepository userRepository;
 
   @Transactional
   public GroupResponse createGroup(CreateGroupRequest dto) {
@@ -170,8 +176,35 @@ public class GroupService {
   }
 
   @Transactional(readOnly = true)
+  public Boolean checkGroupMember(Long groupId, Long userId) {
+    User user = userService.findById(userId);
+    Group group = findByGroup(groupId);
+
+    return groupMemberRepository.findByGroupAndUser(group, user).isPresent();
+  }
+
+  @Transactional(readOnly = true)
+  public Boolean checkGroupMemberWithCurrent(Long groupId) {
+    User user = currentUserProvider.getCurrentUser();
+
+    return checkGroupMember(groupId, user);
+  }
+
+  @Transactional(readOnly = true)
   public Group findByGroup(Long groupId) {
     return groupRepository.findById(groupId)
         .orElseThrow(() -> new NotFoundException("그룹을 찾을 수 없습니다."));
+  }
+
+  @Transactional
+  public UserLate getMemberLate(Long groupId, Long userId) {
+    if (!checkGroupMemberWithCurrent(groupId)) {
+      throw new ForbiddenException("그룹 멤버가 아닙니다");
+    }
+    if (!checkGroupMember(groupId, userId)) {
+      throw new BadRequestException("그룹원을 찾을 수 없습니다.");
+    }
+
+    return userService.getUserLate(userId);
   }
 }

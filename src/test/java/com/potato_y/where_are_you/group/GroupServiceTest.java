@@ -11,6 +11,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
@@ -27,7 +28,9 @@ import com.potato_y.where_are_you.group.domain.GroupRepository;
 import com.potato_y.where_are_you.group.dto.CreateGroupRequest;
 import com.potato_y.where_are_you.group.dto.GroupInviteCodeResponse;
 import com.potato_y.where_are_you.group.dto.GroupResponse;
+import com.potato_y.where_are_you.user.UserService;
 import com.potato_y.where_are_you.user.domain.User;
+import com.potato_y.where_are_you.user.domain.UserLate;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
@@ -44,6 +47,9 @@ class GroupServiceTest {
 
   @InjectMocks
   private GroupService groupService;
+
+  @Mock
+  private UserService userService;
 
   @Mock
   private GroupRepository groupRepository;
@@ -496,5 +502,121 @@ class GroupServiceTest {
 
     assertThatThrownBy(() -> groupService.findByGroup(1L))
         .isInstanceOf(NotFoundException.class);
+  }
+
+  @Test
+  @DisplayName("checkGroupMember(): GroupId와 userId를 통해 해당 userId가 그룹원인지 확인한다")
+  void successCheckGroupMember_true() {
+    Group group = createGroup("test group", testUser);
+    GroupMember groupMember = createGroupMember(group, testUser);
+
+    given(userService.findById(anyLong())).willReturn(testUser);
+    given(groupRepository.findById(anyLong())).willReturn(Optional.of(group));
+    given(groupMemberRepository.findByGroupAndUser(any(Group.class), any(User.class)))
+        .willReturn(Optional.of(groupMember));
+
+    boolean result = groupService.checkGroupMember(1L, 1L);
+
+    assertThat(result).isTrue();
+  }
+
+  @Test
+  @DisplayName("checkGroupMember(): GroupId와 userId를 통해 해당 userId가 그룹원인지 확인한다")
+  void successCheckGroupMember_false() {
+    Group group = createGroup("test group", testUser);
+
+    given(userService.findById(anyLong())).willReturn(testUser);
+    given(groupRepository.findById(anyLong())).willReturn(Optional.of(group));
+    given(groupMemberRepository.findByGroupAndUser(any(Group.class), any(User.class)))
+        .willReturn(Optional.empty());
+
+    boolean result = groupService.checkGroupMember(1L, 1L);
+
+    assertThat(result).isFalse();
+  }
+
+  @Test
+  @DisplayName("checkGroupMemberWithCurrent(): 요청한 사용자가 그룹원인지 확인한다")
+  void successCheckGroupMemberWithCurrent_true() {
+    Group group = createGroup("test group", testUser);
+    GroupMember groupMember = createGroupMember(group, testUser);
+
+    given(currentUserProvider.getCurrentUser()).willReturn(testUser);
+    given(groupRepository.findById(anyLong())).willReturn(Optional.of(group));
+    given(groupMemberRepository.findByGroupAndUser(any(Group.class), any(User.class)))
+        .willReturn(Optional.of(groupMember));
+
+    boolean result = groupService.checkGroupMemberWithCurrent(1L);
+
+    assertThat(result).isTrue();
+  }
+
+  @Test
+  @DisplayName("checkGroupMemberWithCurrent(): 요청한 사용자가 그룹원인지 확인한다")
+  void successCheckGroupMemberWithCurrent_false() {
+    Group group = createGroup("test group", testUser);
+
+    given(currentUserProvider.getCurrentUser()).willReturn(testUser);
+    given(groupRepository.findById(anyLong())).willReturn(Optional.of(group));
+    given(groupMemberRepository.findByGroupAndUser(any(Group.class), any(User.class)))
+        .willReturn(Optional.empty());
+
+    boolean result = groupService.checkGroupMemberWithCurrent(1L);
+
+    assertThat(result).isFalse();
+  }
+
+  @Test
+  @DisplayName("getMemberLate(): 사용자의 지각 정보를 가져올 수 있다")
+  void successGetMemberLate() {
+    Group group = createGroup("test group", testUser);
+    GroupMember groupMember = createGroupMember(group, testUser);
+    UserLate userLate = UserLate.builder().user(testUser).build();
+
+    given(currentUserProvider.getCurrentUser()).willReturn(testUser);
+    given(groupRepository.findById(anyLong())).willReturn(Optional.of(group));
+    given(groupMemberRepository.findByGroupAndUser(any(Group.class), any(User.class)))
+        .willReturn(Optional.of(groupMember));
+
+    given(userService.findById(anyLong())).willReturn(testUser);
+
+    given(userService.getUserLate(anyLong())).willReturn(userLate);
+
+    UserLate result = groupService.getMemberLate(1L, 1L);
+
+    assertThat(result).isEqualTo(userLate);
+  }
+
+  @Test
+  @DisplayName("getMemberLate(): 그룹원이 아니라면 사용자의 지각 정보를 가져올 수 없다")
+  void failGetMemberLate_currentNotGroupMember() {
+    Group group = createGroup("test group", testUser);
+
+    given(currentUserProvider.getCurrentUser()).willReturn(testUser);
+    given(groupRepository.findById(anyLong())).willReturn(Optional.of(group));
+    given(groupMemberRepository.findByGroupAndUser(any(Group.class), any(User.class)))
+        .willReturn(Optional.empty());
+
+    assertThatThrownBy(() -> groupService.getMemberLate(1L, 1L))
+        .isInstanceOf(ForbiddenException.class)
+        .hasMessage("그룹 멤버가 아닙니다");
+  }
+
+  @Test
+  @DisplayName("getMemberLate(): 대상이 그룹원이 아니라면 사용자의 위치 정보를 가져올 수 없다")
+  void failGetMemberLate_notGroupMember() {
+    Group group = createGroup("test group", testUser);
+    GroupMember groupMember = createGroupMember(group, testUser);
+    UserLate userLate = UserLate.builder().user(testUser).build();
+
+    given(currentUserProvider.getCurrentUser()).willReturn(testUser);
+    given(groupRepository.findById(anyLong())).willReturn(Optional.of(group));
+    doReturn(Optional.of(groupMember))
+        .doReturn(Optional.empty()) // 두 번째 호출부터는 빈 Optional 반환
+        .when(groupMemberRepository).findByGroupAndUser(any(Group.class), any(User.class));
+
+    assertThatThrownBy(() -> groupService.getMemberLate(1L, 1L))
+        .isInstanceOf(BadRequestException.class)
+        .hasMessage("그룹원을 찾을 수 없습니다.");
   }
 }

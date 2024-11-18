@@ -3,6 +3,7 @@ package com.potato_y.where_are_you.user;
 import static com.potato_y.where_are_you.user.UserTestUtils.createUser;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.BDDMockito.given;
 
 import com.potato_y.where_are_you.authentication.CurrentUserProvider;
@@ -132,5 +133,38 @@ class UserServiceTest {
     assertThat(result.getUser().getEmail()).isEqualTo(testUser.getEmail());
     assertThat(result.getParticipationCount()).isEqualTo(1L);
     assertThat(result.getLateCount()).isEqualTo(1L);
+  }
+
+  @Test
+  @DisplayName("getUserLate(): 사용자의 지각 데이터를 반환한다.")
+  void successGetUserLate() {
+    User testUser = createUser("test@mail.com", "test user", "1");
+    UserLate userLate = UserLate.builder().user(testUser).build().upCount(true);
+
+    given(userRepository.findById(anyLong())).willReturn(Optional.of(testUser));
+    given(userLateRepository.save(any(UserLate.class))).willReturn(userLate);
+
+    UserLate result = userService.getUserLate(1L);
+
+    assertThat(result.getUser().getEmail()).isEqualTo(testUser.getEmail());
+    assertThat(result.getParticipationCount()).isEqualTo(1L);
+    assertThat(result.getLateCount()).isEqualTo(1L);
+  }
+
+  @Test
+  @DisplayName("getUserLate(): 사용자의 지각 데이터가 없으면 새로 생성하여 반환한다.")
+  void successGetUserLate_new() {
+    User testUser = createUser("test@mail.com", "test user", "1");
+    UserLate userLate = UserLate.builder().user(testUser).build();
+
+    given(userLateRepository.findByUser(any(User.class))).willReturn(Optional.empty());
+    given(userRepository.findById(anyLong())).willReturn(Optional.of(testUser));
+    given(userLateRepository.save(any(UserLate.class))).willReturn(userLate);
+
+    UserLate result = userService.getUserLate(1L);
+
+    assertThat(result.getUser().getEmail()).isEqualTo(testUser.getEmail());
+    assertThat(result.getParticipationCount()).isEqualTo(0L);
+    assertThat(result.getLateCount()).isEqualTo(0L);
   }
 }

@@ -3,6 +3,8 @@ package com.potato_y.where_are_you.group;
 import com.potato_y.where_are_you.group.dto.CreateGroupRequest;
 import com.potato_y.where_are_you.group.dto.GroupInviteCodeResponse;
 import com.potato_y.where_are_you.group.dto.GroupResponse;
+import com.potato_y.where_are_you.user.domain.UserLate;
+import com.potato_y.where_are_you.user.dto.UserLateResponse;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -15,6 +17,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 @RequiredArgsConstructor
@@ -73,5 +76,13 @@ public class GroupApiController {
     groupService.deleteOrLeaveGroup(groupId);
 
     return ResponseEntity.status(HttpStatus.OK).build();
+  }
+
+  @GetMapping("/{groupId}/members")
+  public ResponseEntity<UserLateResponse> getMemberInfo(@PathVariable Long groupId,
+      @RequestParam Long userId) {
+    UserLate userLate = groupService.getMemberLate(groupId, userId);
+
+    return ResponseEntity.status(HttpStatus.OK).body(new UserLateResponse(userLate));
   }
 }
