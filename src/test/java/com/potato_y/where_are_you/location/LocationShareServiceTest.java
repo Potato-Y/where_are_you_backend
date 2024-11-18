@@ -106,8 +106,8 @@ class LocationShareServiceTest {
         .build();
     final UserLocation userLocation = Mockito.spy(UserLocation.builder()
         .user(testUser)
-        .locationLatitude(1)
-        .locationLongitude(2)
+        .locationLatitude(1.0)
+        .locationLongitude(2.0)
         .build());
 
     UpdateUserLocationRequest request = new UpdateUserLocationRequest(123.2, 456.1);
