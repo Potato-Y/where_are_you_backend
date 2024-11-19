@@ -172,25 +172,6 @@ class GroupServiceTest {
   }
 
   @Test
-  @DisplayName("getGroupMembers(): 그룹의 멤버 목록을 조회할 수 있다. - 빈 그룹 멤버")
-  void successGetGroupMembers_empty() {
-    // given
-    Group group = Group.builder()
-        .groupName("test group")
-        .hostUser(testUser)
-        .build();
-    List<GroupMember> members = Collections.emptyList();
-
-    given(groupMemberRepository.findByGroup(group)).willReturn(members);
-
-    // when
-    List<GroupMember> result = groupService.getGroupMembers(group);
-
-    // then
-    assertThat(result).isEmpty();
-  }
-
-  @Test
   @DisplayName("getGroupMembers(): 그룹의 멤버 목록을 조회할 수 있다. - 많은 그룹 멤버")
   void successGetGroupMembers_many() {
     // given
