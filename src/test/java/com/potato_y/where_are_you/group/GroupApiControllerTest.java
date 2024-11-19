@@ -91,7 +91,7 @@ class GroupApiControllerTest {
     final String url = "/v1/groups";
     final String groupName = "test group";
 
-    CreateGroupRequest request = new CreateGroupRequest(groupName);
+    CreateGroupRequest request = new CreateGroupRequest(groupName, 0);
     final String requestBody = objectMapper.writeValueAsString(request);
 
     // when
@@ -105,6 +105,7 @@ class GroupApiControllerTest {
         .andExpect(jsonPath("$.groupName").value(groupName))
         .andExpect(jsonPath("$.hostUser.userId").value(testUser.getId()))
         .andExpect(jsonPath("$.hostUser.nickname").value(testUser.getNickname()))
+        .andExpect(jsonPath("$.hostUser.coverColor").value(request.coverColor()))
         .andExpect(jsonPath("$.memberNumber").value(1));
   }
 
@@ -115,7 +116,7 @@ class GroupApiControllerTest {
     // given
     final String url = "/v1/groups";
 
-    CreateGroupRequest request = new CreateGroupRequest(null);
+    CreateGroupRequest request = new CreateGroupRequest(null, 0);
     final String requestBody = objectMapper.writeValueAsString(request);
 
     // when
@@ -133,7 +134,7 @@ class GroupApiControllerTest {
     // given
     final String url = "/v1/groups";
 
-    CreateGroupRequest request = new CreateGroupRequest(" ");
+    CreateGroupRequest request = new CreateGroupRequest(" ", null);
     final String requestBody = objectMapper.writeValueAsString(request);
 
     // when
@@ -224,7 +225,7 @@ class GroupApiControllerTest {
         Group.builder().groupName("group").hostUser(testUser).build());
     groupMemberRepository.save(createGroupHost(group, testUser));
 
-    CreateGroupRequest request = new CreateGroupRequest(groupName);
+    CreateGroupRequest request = new CreateGroupRequest(groupName, null);
     final String requestBody = objectMapper.writeValueAsString(request);
 
     // when
@@ -251,7 +252,7 @@ class GroupApiControllerTest {
     final String url = "/v1/groups/{groupId}";
     final String groupName = "new group";
 
-    CreateGroupRequest request = new CreateGroupRequest(groupName);
+    CreateGroupRequest request = new CreateGroupRequest(groupName, null);
     final String requestBody = objectMapper.writeValueAsString(request);
 
     // when
@@ -274,7 +275,7 @@ class GroupApiControllerTest {
     Group group = groupRepository.save(
         Group.builder().groupName("group").hostUser(testUser).build());
 
-    CreateGroupRequest request = new CreateGroupRequest("new group");
+    CreateGroupRequest request = new CreateGroupRequest("new group", null);
     final String requestBody = objectMapper.writeValueAsString(request);
 
     // when

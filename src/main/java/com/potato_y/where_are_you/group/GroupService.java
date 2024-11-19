@@ -47,6 +47,8 @@ public class GroupService {
     Group group = Group.builder()
         .groupName(dto.groupName())
         .hostUser(hostUser)
+        .coverColor(dto.coverColor()
+        )
         .build();
 
     groupRepository.save(group);
@@ -109,7 +111,9 @@ public class GroupService {
 
     groupValidator.groupHostUser(group, user);
 
-    group.updateGroupName(request.groupName());
+    group
+        .updateGroupName(request.groupName())
+        .updateCoverColor(request.coverColor());
 
     return new GroupResponse(group, getGroupMembers(group).size());
   }

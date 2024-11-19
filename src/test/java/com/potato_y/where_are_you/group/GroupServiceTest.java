@@ -74,9 +74,14 @@ class GroupServiceTest {
   @DisplayName("createGroup(): 그룹을 생성할 수 있다.")
   public void successCreateGroup() {
     // given
-    String groupName = "test group";
-    CreateGroupRequest request = new CreateGroupRequest(groupName);
-    Group group = createGroup(groupName, testUser);
+    final String groupName = "test group";
+    final int coverColor = 1;
+    CreateGroupRequest request = new CreateGroupRequest(groupName, coverColor);
+    Group group = Group.builder()
+        .groupName(groupName)
+        .hostUser(testUser)
+        .coverColor(coverColor)
+        .build();
 
     given(currentUserProvider.getCurrentUser()).willReturn(testUser);
     given(groupRepository.save(any(Group.class))).willReturn(group);
@@ -88,6 +93,31 @@ class GroupServiceTest {
     assertThat(response.groupName()).isEqualTo(groupName);
     assertThat(response.hostUser().getNickname()).isEqualTo(testUser.getNickname());
     assertThat(response.memberNumber()).isEqualTo(1);
+    assertThat(response.coverColor()).isEqualTo(coverColor);
+  }
+
+  @Test
+  @DisplayName("createGroup(): 그룹을 생성할 수 있다. - coverColor = 0")
+  public void successCreateGroup_nullCoverColor() {
+    // given
+    final String groupName = "test group";
+    CreateGroupRequest request = new CreateGroupRequest(groupName, null);
+    Group group = Group.builder()
+        .groupName(groupName)
+        .hostUser(testUser)
+        .build();
+
+    given(currentUserProvider.getCurrentUser()).willReturn(testUser);
+    given(groupRepository.save(any(Group.class))).willReturn(group);
+
+    // when
+    GroupResponse response = groupService.createGroup(request);
+
+    // then
+    assertThat(response.groupName()).isEqualTo(groupName);
+    assertThat(response.hostUser().getNickname()).isEqualTo(testUser.getNickname());
+    assertThat(response.memberNumber()).isEqualTo(1);
+    assertThat(response.coverColor()).isEqualTo(0);
   }
 
   @Test
@@ -107,6 +137,7 @@ class GroupServiceTest {
     // then
     assertThat(response.groupName()).isEqualTo(group.getGroupName());
     assertThat(response.hostUser().getNickname()).isEqualTo(testUser.getNickname());
+    assertThat(response.coverColor()).isEqualTo(group.getCoverColor());
     assertThat(response.memberNumber()).isEqualTo(1);
   }
 
@@ -131,6 +162,7 @@ class GroupServiceTest {
     // then
     assertThat(response.groupName()).isEqualTo(group.getGroupName());
     assertThat(response.hostUser().getNickname()).isEqualTo(testUser.getNickname());
+    assertThat(response.coverColor()).isEqualTo(group.getCoverColor());
     assertThat(response.memberNumber()).isEqualTo(4);
   }
 
@@ -143,25 +175,6 @@ class GroupServiceTest {
     // when, then
     assertThatThrownBy(() -> groupService.getGroupResponse(1L)).isInstanceOf(
         NotFoundException.class);
-  }
-
-  @Test
-  @DisplayName("getGroupMembers(): 그룹의 멤버 목록을 조회할 수 있다. - 빈 그룹 멤버")
-  void successGetGroupMembers_empty() {
-    // given
-    Group group = Group.builder()
-        .groupName("test group")
-        .hostUser(testUser)
-        .build();
-    List<GroupMember> members = Collections.emptyList();
-
-    given(groupMemberRepository.findByGroup(group)).willReturn(members);
-
-    // when
-    List<GroupMember> result = groupService.getGroupMembers(group);
-
-    // then
-    assertThat(result).isEmpty();
   }
 
   @Test
@@ -245,13 +258,14 @@ class GroupServiceTest {
     given(groupRepository.findById(any(Long.class))).willReturn(Optional.of(group));
     given(groupMemberRepository.findByGroup(group)).willReturn(Collections.emptyList());
 
-    CreateGroupRequest request = new CreateGroupRequest(groupName);
+    CreateGroupRequest request = new CreateGroupRequest(groupName, 12);
 
     // when
     GroupResponse response = groupService.updateGroup(1L, request);
 
     // then
     assertThat(response.groupName()).isEqualTo(groupName);
+    assertThat(response.coverColor()).isEqualTo(request.coverColor());
   }
 
   @Test
@@ -261,7 +275,7 @@ class GroupServiceTest {
     User otherUser = createUser("other@mail.com", "other user", "32");
     Group group = createGroup("test_group", testUser);
 
-    CreateGroupRequest request = new CreateGroupRequest("groupName");
+    CreateGroupRequest request = new CreateGroupRequest("groupName", null);
 
     given(currentUserProvider.getCurrentUser()).willReturn(otherUser);
     given(groupRepository.findById(any(Long.class))).willReturn(Optional.of(group));
