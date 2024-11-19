@@ -16,6 +16,7 @@ import java.time.LocalDateTime;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.ColumnDefault;
 import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
 import org.springframework.data.annotation.CreatedDate;
@@ -41,19 +42,31 @@ public class Group {
   @Column(name = "group_name", length = 20)
   private String groupName;
 
+  @NotNull
+  @ColumnDefault("1")
+  @Column(name = "cover_color")
+  private int coverColor = 0;
+
   @CreatedDate
   @NotNull
   @Column(name = "created_at", updatable = false)
   private LocalDateTime createdAt;
 
   @Builder
-  public Group(User hostUser, String groupName) {
+  public Group(User hostUser, String groupName, int coverColor) {
     this.hostUser = hostUser;
     this.groupName = groupName;
+    this.coverColor = coverColor;
   }
 
   public Group updateGroupName(String groupName) {
     this.groupName = groupName;
+
+    return this;
+  }
+
+  public Group updateCoverColor(int coverColor) {
+    this.coverColor = coverColor;
 
     return this;
   }

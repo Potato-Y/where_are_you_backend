@@ -8,6 +8,7 @@ public record GroupResponse(
     Long id,
     String groupName,
     UserResponse hostUser,
+    int coverColor,
     LocalDateTime createAt,
     int memberNumber
 ) {
@@ -17,6 +18,7 @@ public record GroupResponse(
         group.getId(),
         group.getGroupName(),
         new UserResponse(group.getHostUser()),
+        group.getCoverColor(),
         group.getCreatedAt(),
         memberNumber
     );
