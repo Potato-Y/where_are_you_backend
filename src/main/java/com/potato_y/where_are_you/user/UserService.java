@@ -9,6 +9,7 @@ import com.potato_y.where_are_you.user.domain.UserLate;
 import com.potato_y.where_are_you.user.domain.UserLateRepository;
 import com.potato_y.where_are_you.user.domain.UserRepository;
 import com.potato_y.where_are_you.user.dto.UserLateRequest;
+import com.potato_y.where_are_you.user.dto.UserLateResponse;
 import com.potato_y.where_are_you.user.dto.UserResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -48,12 +49,13 @@ public class UserService {
   }
 
   @Transactional
-  public UserLate updateUserLate(UserLateRequest dto) {
+  public UserLateResponse updateUserLate(UserLateRequest dto) {
     User user = currentUserProvider.getCurrentUser();
     UserLate userLate = userLateRepository.findByUser(user)
         .orElseGet(() -> createUserLate(user));
 
-    return userLate.upCount(dto.isLate());
+    userLate.upCount(dto.isLate());
+    return new UserLateResponse(userLate);
   }
 
   @Transactional

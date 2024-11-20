@@ -14,6 +14,7 @@ import com.potato_y.where_are_you.user.domain.UserLate;
 import com.potato_y.where_are_you.user.domain.UserLateRepository;
 import com.potato_y.where_are_you.user.domain.UserRepository;
 import com.potato_y.where_are_you.user.dto.UserLateRequest;
+import com.potato_y.where_are_you.user.dto.UserLateResponse;
 import java.util.Optional;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -95,11 +96,11 @@ class UserServiceTest {
     given(currentUserProvider.getCurrentUser()).willReturn(testUser);
     given(userLateRepository.findByUser(any(User.class))).willReturn(Optional.of(userLate));
 
-    UserLate result = userService.updateUserLate(new UserLateRequest(true));
+    UserLateResponse result = userService.updateUserLate(new UserLateRequest(true));
 
-    assertThat(result.getUser().getEmail()).isEqualTo(testUser.getEmail());
-    assertThat(result.getParticipationCount()).isEqualTo(1L);
-    assertThat(result.getLateCount()).isEqualTo(1L);
+    assertThat(result.user().getEmail()).isEqualTo(testUser.getEmail());
+    assertThat(result.lateData().participation()).isEqualTo(1L);
+    assertThat(result.lateData().late()).isEqualTo(1L);
   }
 
   @Test
@@ -111,11 +112,11 @@ class UserServiceTest {
     given(currentUserProvider.getCurrentUser()).willReturn(testUser);
     given(userLateRepository.findByUser(any(User.class))).willReturn(Optional.of(userLate));
 
-    UserLate result = userService.updateUserLate(new UserLateRequest(false));
+    UserLateResponse result = userService.updateUserLate(new UserLateRequest(false));
 
-    assertThat(result.getUser().getEmail()).isEqualTo(testUser.getEmail());
-    assertThat(result.getParticipationCount()).isEqualTo(1L);
-    assertThat(result.getLateCount()).isEqualTo(0L);
+    assertThat(result.user().getEmail()).isEqualTo(testUser.getEmail());
+    assertThat(result.lateData().participation()).isEqualTo(1L);
+    assertThat(result.lateData().late()).isEqualTo(0L);
   }
 
   @Test
@@ -128,11 +129,11 @@ class UserServiceTest {
     given(userLateRepository.findByUser(any(User.class))).willReturn(Optional.empty());
     given(userLateRepository.save(any(UserLate.class))).willReturn(userLate);
 
-    UserLate result = userService.updateUserLate(new UserLateRequest(true));
+    UserLateResponse result = userService.updateUserLate(new UserLateRequest(true));
 
-    assertThat(result.getUser().getEmail()).isEqualTo(testUser.getEmail());
-    assertThat(result.getParticipationCount()).isEqualTo(1L);
-    assertThat(result.getLateCount()).isEqualTo(1L);
+    assertThat(result.user().getEmail()).isEqualTo(testUser.getEmail());
+    assertThat(result.lateData().participation()).isEqualTo(1L);
+    assertThat(result.lateData().late()).isEqualTo(1L);
   }
 
   @Test

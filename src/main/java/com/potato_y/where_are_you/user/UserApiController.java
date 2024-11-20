@@ -1,6 +1,5 @@
 package com.potato_y.where_are_you.user;
 
-import com.potato_y.where_are_you.user.domain.UserLate;
 import com.potato_y.where_are_you.user.dto.UserLateRequest;
 import com.potato_y.where_are_you.user.dto.UserLateResponse;
 import com.potato_y.where_are_you.user.dto.UserResponse;
@@ -29,8 +28,8 @@ public class UserApiController {
   @PostMapping("/late")
   public ResponseEntity<UserLateResponse> upLateCount(
       @Validated @RequestBody UserLateRequest request) {
-    UserLate userLate = userService.updateUserLate(request);
+    UserLateResponse response = userService.updateUserLate(request);
 
-    return ResponseEntity.status(HttpStatus.OK).body(new UserLateResponse(userLate));
+    return ResponseEntity.status(HttpStatus.OK).body(response);
   }
 }
