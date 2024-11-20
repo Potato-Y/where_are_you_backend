@@ -37,10 +37,10 @@ public class UserLocation {
   private User user;
 
   @Column(name = "location_latitude")
-  private double locationLatitude;
+  private Double locationLatitude;
 
   @Column(name = "location_longitude")
-  private double locationLongitude;
+  private Double locationLongitude;
 
   @Column(name = "state_message")
   private String stateMessage;
@@ -49,7 +49,7 @@ public class UserLocation {
   private LocalDateTime updateAt;
 
   @Builder
-  public UserLocation(User user, double locationLatitude, double locationLongitude,
+  public UserLocation(User user, Double locationLatitude, Double locationLongitude,
       String stateMessage) {
     this.user = user;
     this.locationLatitude = locationLatitude;
@@ -57,7 +57,7 @@ public class UserLocation {
     this.stateMessage = stateMessage;
   }
 
-  public UserLocation updateLocation(double locationLatitude, double locationLongitude) {
+  public UserLocation updateLocation(Double locationLatitude, Double locationLongitude) {
     this.locationLatitude = locationLatitude;
     this.locationLongitude = locationLongitude;
 

@@ -133,7 +133,7 @@ class LocationShareApiControllerTest {
     GroupSchedule schedule = scheduleRepository.save(createScheduleCase1(group, testUser));
     participationRepository.save(createParticipation(schedule, testUser, true));
     userLocationRepository.save(
-        UserLocation.builder().user(testUser).locationLatitude(1).locationLongitude(2).build());
+        UserLocation.builder().user(testUser).locationLatitude(1.0).locationLongitude(2.0).build());
 
     UpdateUserLocationRequest request = new UpdateUserLocationRequest(1, 3);
     final String requestBody = objectMapper.writeValueAsString(request);
