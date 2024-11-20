@@ -1,6 +1,7 @@
 package com.potato_y.where_are_you.location;
 
 import com.potato_y.where_are_you.authentication.CurrentUserProvider;
+import com.potato_y.where_are_you.common.constants.Number;
 import com.potato_y.where_are_you.error.exception.BadRequestException;
 import com.potato_y.where_are_you.location.domain.UserLocation;
 import com.potato_y.where_are_you.location.domain.UserLocationRepository;
@@ -22,6 +23,7 @@ import org.springframework.transaction.annotation.Transactional;
 public class LocationShareService {
 
   private static final int LOCATION_SHARE_DURATION_MINUTES = 5;
+  private static final int SHARE_TIME_THRESHOLD_MINUTES = 30;
 
   private final GroupScheduleService groupScheduleService;
   private final UserLocationRepository userLocationRepository;
@@ -106,8 +108,11 @@ public class LocationShareService {
 
   private boolean checkLocationShareTime(GroupSchedule schedule) {
     LocalDateTime startTime = schedule.getStartTime();
-    LocalDateTime shareStartTime = startTime.minusHours(schedule.getAlarmBeforeHours());
+    LocalDateTime shareStartTime = startTime
+        .minusMinutes(SHARE_TIME_THRESHOLD_MINUTES)
+        .minusNanos(Number.ONE.getValue());
 
-    return LocalDateTime.now().isAfter(shareStartTime);
+    LocalDateTime now = LocalDateTime.now();
+    return now.isAfter(shareStartTime) && now.isBefore(startTime);
   }
 }

@@ -4,7 +4,7 @@ import lombok.Getter;
 
 @Getter
 public enum Number {
-  ZERO(0);
+  ZERO(0), ONE(1);
 
   private final int value;
 

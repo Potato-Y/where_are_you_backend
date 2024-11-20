@@ -63,7 +63,7 @@ class LocationShareServiceTest {
     final var scheduleId = 1L;
     GroupSchedule schedule = GroupSchedule.builder()
         .title("스케줄")
-        .startTime(LocalDateTime.now().plusMinutes(25))
+        .startTime(LocalDateTime.now().plusMinutes(30))
         .endTime(LocalDateTime.now().plusHours(1))
         .user(testUser)
         .group(testGroup)
@@ -126,12 +126,37 @@ class LocationShareServiceTest {
   }
 
   @Test
-  @DisplayName("updateUserLocation(): 공유 시간이 아니라면 예외가 발생한다.")
-  void failUpdateUserLocation_notShareTime() {
+  @DisplayName("updateUserLocation(): 공유 시간이 아니라면 예외가 발생한다. - 31분 전")
+  void failUpdateUserLocation_notShareTime_overBefore() {
     final var scheduleId = 1L;
     GroupSchedule schedule = GroupSchedule.builder()
         .title("스케줄")
-        .startTime(LocalDateTime.now().plusDays(25))
+        .startTime(LocalDateTime.now().plusMinutes(31))
+        .endTime(LocalDateTime.now().plusDays(26))
+        .user(testUser)
+        .group(testGroup)
+        .isAlarmEnabled(true)
+        .alarmBeforeHours(1)
+        .build();
+
+    UpdateUserLocationRequest request = new UpdateUserLocationRequest(123.2, 456.1);
+
+    given(currentUserProvider.getCurrentUser()).willReturn(testUser);
+    given(groupScheduleService.getSchedule(scheduleId)).willReturn(schedule);
+    given(groupScheduleService.checkParticipation(testUser, schedule)).willReturn(true);
+
+    assertThatThrownBy(
+        () -> locationShareService.updateUserLocation(scheduleId, request))
+        .isInstanceOf(BadRequestException.class);
+  }
+
+  @Test
+  @DisplayName("updateUserLocation(): 공유 시간이 아니라면 예외가 발생한다. - 일정 시작 시각")
+  void failUpdateUserLocation_notShareTime_startTime() {
+    final var scheduleId = 1L;
+    GroupSchedule schedule = GroupSchedule.builder()
+        .title("스케줄")
+        .startTime(LocalDateTime.now())
         .endTime(LocalDateTime.now().plusDays(26))
         .user(testUser)
         .group(testGroup)
