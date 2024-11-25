@@ -67,6 +67,9 @@ class GroupScheduleServiceTest {
   @Mock
   private GroupValidator groupValidator;
 
+  @Mock
+  private ScheduleValidator scheduleValidator;
+
   private User testUser;
 
   private Group testGroup;
@@ -329,5 +332,39 @@ class GroupScheduleServiceTest {
 
     assertThatThrownBy(() -> scheduleService.cancelParticipation(null, 1L))
         .isInstanceOf(NotFoundException.class);
+  }
+
+  @Test
+  @DisplayName("deleteGroupSchedule(): 그룹 스케줄을 삭제할 수 있다")
+  void successDeleteGroupSchedule() {
+    GroupSchedule schedule = Mockito.spy(GroupScheduleFactory.builder()
+        .group(testGroup)
+        .user(testUser)
+        .title("테스트 스케줄 1")
+        .build());
+
+    given(scheduleRepository.findById(anyLong())).willReturn(Optional.of(schedule));
+    given(groupService.checkGroupMember(eq(testGroup.getId()), eq(testUser))).willReturn(true);
+    doNothing().when(scheduleValidator).scheduleOwner(eq(schedule), eq(testUser));
+
+    scheduleService.deleteGroupSchedule(null, 1L);
+
+    verify(scheduleRepository, times(1)).delete(schedule);
+  }
+
+  @Test
+  @DisplayName("deleteGroupSchedule(): 그룹 멤버가 아니라면 스케줄을 삭제할 수 없다")
+  void failDeleteGroupSchedule_notGroupMember() {
+    GroupSchedule schedule = Mockito.spy(GroupScheduleFactory.builder()
+        .group(testGroup)
+        .user(testUser)
+        .title("테스트 스케줄 1")
+        .build());
+
+    given(scheduleRepository.findById(anyLong())).willReturn(Optional.of(schedule));
+    given(groupService.checkGroupMember(eq(testGroup.getId()), eq(testUser))).willReturn(false);
+
+    assertThatThrownBy(() -> scheduleService.deleteGroupSchedule(null, 1L))
+        .isInstanceOf(ForbiddenException.class);
   }
 }

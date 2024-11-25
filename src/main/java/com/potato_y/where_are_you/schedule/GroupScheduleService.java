@@ -40,6 +40,7 @@ public class GroupScheduleService {
   private final ParticipationRepository participationRepository;
   private final FirebaseService firebaseService;
   private final GroupValidator groupValidator;
+  private final ScheduleValidator scheduleValidator;
 
   @Transactional
   public GroupScheduleResponse createSchedule(Long groupId, CreateGroupScheduleRequest dto) {
@@ -184,6 +185,19 @@ public class GroupScheduleService {
         .findByUserAndSchedule(user, schedule);
 
     return participation.isPresent() && participation.get().isParticipating();
+  }
+
+  @Transactional
+  public void deleteGroupSchedule(Long groupId, Long scheduleId) {
+    User user = currentUserProvider.getCurrentUser();
+    GroupSchedule schedule = getSchedule(scheduleId);
+
+    if (!groupService.checkGroupMember(groupId, user)) {
+      throw new ForbiddenException("그룹 멤버가 아닙니다");
+    }
+    scheduleValidator.scheduleOwner(schedule, user);
+
+    scheduleRepository.delete(schedule);
   }
 
   @Transactional(readOnly = true)
