@@ -7,6 +7,7 @@ import static com.potato_y.where_are_you.user.UserTestUtils.createUser;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.startsWith;
 import static org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers.springSecurity;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -19,6 +20,7 @@ import com.potato_y.where_are_you.group.domain.GroupMemberRepository;
 import com.potato_y.where_are_you.group.domain.GroupRepository;
 import com.potato_y.where_are_you.schedule.domain.AlarmSchedule;
 import com.potato_y.where_are_you.schedule.domain.AlarmScheduleRepository;
+import com.potato_y.where_are_you.schedule.domain.GroupSchedule;
 import com.potato_y.where_are_you.schedule.domain.GroupScheduleRepository;
 import com.potato_y.where_are_you.schedule.domain.Participation;
 import com.potato_y.where_are_you.schedule.domain.ParticipationRepository;
@@ -576,5 +578,84 @@ class GroupScheduleApiControllerTest {
     ResultActions result = mockMvc.perform(get(url, testGroup.getId(), schedule.getId()));
 
     result.andExpect(status().isForbidden());
+  }
+
+  @Test
+  @WithMockUser("1")
+  @DisplayName("deleteGroupSchedule(): 스케줄을 삭제할 수 있다")
+  void successDeleteGroupSchedule() throws Exception {
+    final var url = "/v1/groups/{groupId}/schedule/{scheduleId}";
+
+    Group testGroup = groupRepository.save(createGroup("test group", testUser));
+    groupMemberRepository.save(createGroupHost(testGroup, testUser));
+    GroupSchedule schedule = scheduleRepository.save(GroupScheduleFactory.builder()
+        .group(testGroup)
+        .user(testUser)
+        .build());
+    Participation participation = participationRepository.save(Participation.builder()
+        .isParticipating(true)
+        .schedule(schedule)
+        .user(testUser)
+        .build());
+    AlarmSchedule alarmSchedule = alarmScheduleRepository.save(AlarmSchedule.builder()
+        .schedule(schedule)
+        .dateTime(LocalDateTime.now())
+        .build());
+
+    ResultActions result = mockMvc.perform(
+        delete(url, testGroup.getId(), schedule.getId()).contentType(
+            MediaType.APPLICATION_JSON_VALUE));
+
+    result.andExpect(status().isOk());
+    assertThat(scheduleRepository.findById(schedule.getId())).isEmpty();
+    assertThat(participationRepository.findById(participation.getId())).isEmpty();
+    assertThat(alarmScheduleRepository.findById(alarmSchedule.getId())).isEmpty();
+  }
+
+  @Test
+  @WithMockUser("1")
+  @DisplayName("deleteGroupSchedule(): 그룹 유저가 아니라면 스케줄을 삭제할 수 없다")
+  void failDeleteGroupSchedule_notGroupMember() throws Exception {
+    final var url = "/v1/groups/{groupId}/schedule/{scheduleId}";
+
+    User hostUser = userRepository.save(createUser("host@mail.com", "host", "213"));
+    Group testGroup = groupRepository.save(createGroup("test group", hostUser));
+    groupMemberRepository.save(createGroupHost(testGroup, hostUser));
+    GroupSchedule schedule = scheduleRepository.save(GroupScheduleFactory.builder()
+        .group(testGroup)
+        .user(hostUser)
+        .build());
+
+    ResultActions result = mockMvc.perform(
+        delete(url, testGroup.getId(), schedule.getId()).contentType(
+            MediaType.APPLICATION_JSON_VALUE));
+
+    result.andExpect(status().isForbidden());
+
+    assertThat(scheduleRepository.findById(schedule.getId())).isNotEmpty();
+  }
+
+  @Test
+  @WithMockUser("1")
+  @DisplayName("deleteGroupSchedule(): 스케줄을 생성한 유저가 아니라면 스케줄을 삭제할 수 없다")
+  void failDeleteGroupSchedule_notScheduleOwner() throws Exception {
+    final var url = "/v1/groups/{groupId}/schedule/{scheduleId}";
+
+    User hostUser = userRepository.save(createUser("host@mail.com", "host", "213"));
+    Group testGroup = groupRepository.save(createGroup("test group", hostUser));
+    groupMemberRepository.save(createGroupHost(testGroup, hostUser));
+    groupMemberRepository.save(createGroupMember(testGroup, testUser));
+    GroupSchedule schedule = scheduleRepository.save(GroupScheduleFactory.builder()
+        .group(testGroup)
+        .user(hostUser)
+        .build());
+
+    ResultActions result = mockMvc.perform(
+        delete(url, testGroup.getId(), schedule.getId()).contentType(
+            MediaType.APPLICATION_JSON_VALUE));
+
+    result.andExpect(status().isForbidden());
+
+    assertThat(scheduleRepository.findById(schedule.getId())).isNotEmpty();
   }
 }
