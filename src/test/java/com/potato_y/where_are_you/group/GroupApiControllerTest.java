@@ -100,7 +100,7 @@ class GroupApiControllerTest {
         .andExpect(jsonPath("$.groupName").value(groupName))
         .andExpect(jsonPath("$.hostUser.userId").value(testUser.getId()))
         .andExpect(jsonPath("$.hostUser.nickname").value(testUser.getNickname()))
-        .andExpect(jsonPath("$.hostUser.coverColor").value(request.coverColor()))
+        .andExpect(jsonPath("$.coverColor").value(request.coverColor()))
         .andExpect(jsonPath("$.memberNumber").value(1));
   }
 
