@@ -74,10 +74,10 @@ public class GroupScheduleService {
     return new GroupScheduleResponse(groupSchedule);
   }
 
-  private void createAlarmSchedule(GroupSchedule schedule) {
+  private AlarmSchedule createAlarmSchedule(GroupSchedule schedule) {
     LocalDateTime alarmTime = schedule.getStartTime().minusHours(schedule.getAlarmBeforeHours());
 
-    alarmScheduleRepository.save(AlarmSchedule.builder()
+    return alarmScheduleRepository.save(AlarmSchedule.builder()
         .schedule(schedule)
         .dateTime(alarmTime)
         .build());
@@ -198,6 +198,39 @@ public class GroupScheduleService {
     scheduleValidator.scheduleOwner(schedule, user);
 
     scheduleRepository.delete(schedule);
+  }
+
+  @Transactional
+  public GroupScheduleResponse modifyGroupSchedule(Long groupId, Long scheduleId,
+      CreateGroupScheduleRequest request) {
+    User user = currentUserProvider.getCurrentUser();
+    GroupSchedule schedule = getSchedule(scheduleId);
+
+    if (!groupService.checkGroupMember(groupId, user)) {
+      throw new ForbiddenException("그룹 멤버가 아닙니다");
+    }
+    scheduleValidator.scheduleOwner(schedule, user);
+
+    schedule
+        .updateTitle(request.title())
+        .updateStartTime(request.startTime())
+        .updateEndTime(request.endTime())
+        .updateIsAlarmEnabled(request.isAlarmEnabled())
+        .updateAlarmBeforeHours(request.alarmBeforeHours())
+        .updateLocation(request.location())
+        .updateLocationLatitude(request.locationLatitude())
+        .updateLocationLongitude(request.locationLongitude());
+
+    Optional<AlarmSchedule> maybeAlarmSchedule = alarmScheduleRepository.findBySchedule(schedule);
+    if (request.isAlarmEnabled()) {
+      maybeAlarmSchedule.ifPresentOrElse(
+          it -> it.updateDateTime(request.startTime().minusHours(request.alarmBeforeHours())),
+          () -> createAlarmSchedule(schedule));
+    } else {
+      maybeAlarmSchedule.ifPresent(alarmScheduleRepository::delete);
+    }
+
+    return new GroupScheduleResponse(schedule);
   }
 
   @Transactional(readOnly = true)

@@ -11,6 +11,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -657,5 +658,229 @@ class GroupScheduleApiControllerTest {
     result.andExpect(status().isForbidden());
 
     assertThat(scheduleRepository.findById(schedule.getId())).isNotEmpty();
+  }
+
+  @Test
+  @WithMockUser("1")
+  @Transactional
+  @DisplayName("modifyGroupSchedule(): 그룹 스케줄을 변경할 수 있다 - 이미 알람이 등록된 경우, 알람 시간 업데이트")
+  void successModifyGroupSchedule_updateAlarm() throws Exception {
+    final var url = "/v1/groups/{groupId}/schedule/{scheduleId}";
+
+    Group testGroup = groupRepository.save(createGroup("test group", testUser));
+    groupMemberRepository.save(createGroupHost(testGroup, testUser));
+    GroupSchedule schedule = scheduleRepository.save(GroupScheduleFactory.builder()
+        .group(testGroup)
+        .user(testUser)
+        .build());
+    alarmScheduleRepository.save(AlarmSchedule.builder()
+        .schedule(schedule)
+        .dateTime(LocalDateTime.now())
+        .build());
+
+    CreateGroupScheduleRequest request = new CreateGroupScheduleRequest(
+        "바뀐 이름",
+        LocalDateTime.now().withSecond(0).withNano(0).plusMinutes(10),
+        LocalDateTime.now().withSecond(0).withNano(0).plusHours(1),
+        true,
+        2,
+        "바뀐 위치",
+        12.3,
+        34.1
+    );
+    final var requestBody = objectMapper.writeValueAsString(request);
+
+    ResultActions result = mockMvc.perform(
+        put(url, testGroup.getId(), schedule.getId())
+            .contentType(MediaType.APPLICATION_JSON_VALUE)
+            .content(requestBody));
+
+    result
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$.scheduleId").isNumber())
+        .andExpect(jsonPath("$.groupId").isNumber())
+        .andExpect(jsonPath("$.createUserId").isNumber())
+        .andExpect(jsonPath("$.title").value(request.title()))
+        .andExpect(jsonPath("$.startTime").value(startsWith(request.startTime().toString())))
+        .andExpect(jsonPath("$.endTime").value(startsWith(request.endTime().toString())))
+        .andExpect(jsonPath("$.isAlarmEnabled").value(request.isAlarmEnabled()))
+        .andExpect(jsonPath("$.alarmBeforeHours").value(request.alarmBeforeHours()))
+        .andExpect(jsonPath("$.location").value(request.location()))
+        .andExpect(jsonPath("$.locationLatitude").value(request.locationLatitude()))
+        .andExpect(jsonPath("$.locationLongitude").value(request.locationLongitude()));
+
+    AlarmSchedule alarmSchedule = alarmScheduleRepository.findBySchedule(schedule).get();
+    assertThat(alarmSchedule.getSchedule().getGroup()).isEqualTo(testGroup);
+    assertThat(alarmSchedule.getSchedule().getTitle()).isEqualTo(request.title());
+    assertThat(alarmSchedule.getDateTime())
+        .isEqualTo(request.startTime().minusHours(request.alarmBeforeHours()));
+  }
+
+  @Test
+  @WithMockUser("1")
+  @Transactional
+  @DisplayName("modifyGroupSchedule(): 그룹 스케줄을 변경할 수 있다 - 알람 비활성화")
+  void successModifyGroupSchedule_deleteAlarm() throws Exception {
+    final var url = "/v1/groups/{groupId}/schedule/{scheduleId}";
+
+    Group testGroup = groupRepository.save(createGroup("test group", testUser));
+    groupMemberRepository.save(createGroupHost(testGroup, testUser));
+    GroupSchedule schedule = scheduleRepository.save(GroupScheduleFactory.builder()
+        .group(testGroup)
+        .user(testUser)
+        .build());
+    alarmScheduleRepository.save(AlarmSchedule.builder()
+        .schedule(schedule)
+        .dateTime(LocalDateTime.now())
+        .build());
+
+    CreateGroupScheduleRequest request = new CreateGroupScheduleRequest(
+        "바뀐 이름",
+        LocalDateTime.now().withSecond(0).withNano(0).plusMinutes(10),
+        LocalDateTime.now().withSecond(0).withNano(0).plusHours(1),
+        false,
+        2,
+        "바뀐 위치",
+        12.3,
+        34.1
+    );
+    final var requestBody = objectMapper.writeValueAsString(request);
+
+    ResultActions result = mockMvc.perform(
+        put(url, testGroup.getId(), schedule.getId())
+            .contentType(MediaType.APPLICATION_JSON_VALUE)
+            .content(requestBody));
+
+    result
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$.scheduleId").isNumber())
+        .andExpect(jsonPath("$.groupId").isNumber())
+        .andExpect(jsonPath("$.createUserId").isNumber())
+        .andExpect(jsonPath("$.title").value(request.title()))
+        .andExpect(jsonPath("$.startTime").value(startsWith(request.startTime().toString())))
+        .andExpect(jsonPath("$.endTime").value(startsWith(request.endTime().toString())))
+        .andExpect(jsonPath("$.isAlarmEnabled").value(request.isAlarmEnabled()))
+        .andExpect(jsonPath("$.alarmBeforeHours").value(request.alarmBeforeHours()))
+        .andExpect(jsonPath("$.location").value(request.location()))
+        .andExpect(jsonPath("$.locationLatitude").value(request.locationLatitude()))
+        .andExpect(jsonPath("$.locationLongitude").value(request.locationLongitude()));
+
+    assertThat(alarmScheduleRepository.findBySchedule(schedule)).isEmpty();
+  }
+
+  @Test
+  @WithMockUser("1")
+  @Transactional
+  @DisplayName("modifyGroupSchedule(): 그룹 스케줄을 변경할 수 있다 - 알람 활성화(생성)")
+  void successModifyGroupSchedule_createAlarm() throws Exception {
+    final var url = "/v1/groups/{groupId}/schedule/{scheduleId}";
+
+    Group testGroup = groupRepository.save(createGroup("test group", testUser));
+    groupMemberRepository.save(createGroupHost(testGroup, testUser));
+    GroupSchedule schedule = scheduleRepository.save(GroupScheduleFactory.builder()
+        .group(testGroup)
+        .user(testUser)
+        .build());
+
+    CreateGroupScheduleRequest request = new CreateGroupScheduleRequest(
+        "바뀐 이름",
+        LocalDateTime.now().withSecond(0).withNano(0).plusMinutes(10),
+        LocalDateTime.now().withSecond(0).withNano(0).plusHours(1),
+        true,
+        2,
+        "바뀐 위치",
+        12.3,
+        34.1
+    );
+    final var requestBody = objectMapper.writeValueAsString(request);
+
+    ResultActions result = mockMvc.perform(
+        put(url, testGroup.getId(), schedule.getId())
+            .contentType(MediaType.APPLICATION_JSON_VALUE)
+            .content(requestBody));
+
+    result
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$.scheduleId").isNumber())
+        .andExpect(jsonPath("$.groupId").isNumber())
+        .andExpect(jsonPath("$.createUserId").isNumber())
+        .andExpect(jsonPath("$.title").value(request.title()))
+        .andExpect(jsonPath("$.startTime").value(startsWith(request.startTime().toString())))
+        .andExpect(jsonPath("$.endTime").value(startsWith(request.endTime().toString())))
+        .andExpect(jsonPath("$.isAlarmEnabled").value(request.isAlarmEnabled()))
+        .andExpect(jsonPath("$.alarmBeforeHours").value(request.alarmBeforeHours()))
+        .andExpect(jsonPath("$.location").value(request.location()))
+        .andExpect(jsonPath("$.locationLatitude").value(request.locationLatitude()))
+        .andExpect(jsonPath("$.locationLongitude").value(request.locationLongitude()));
+
+    AlarmSchedule alarmSchedule = alarmScheduleRepository.findBySchedule(schedule).get();
+    assertThat(alarmSchedule.getSchedule().getGroup()).isEqualTo(testGroup);
+    assertThat(alarmSchedule.getSchedule().getTitle()).isEqualTo(request.title());
+    assertThat(alarmSchedule.getDateTime())
+        .isEqualTo(request.startTime().minusHours(request.alarmBeforeHours()));
+  }
+
+  @Test
+  @WithMockUser("1")
+  @DisplayName("modifyGroupSchedule(): 그룹 스케줄을 변경할 수 없다 - 없는 스케줄")
+  void failModifyGroupSchedule_notSchedule() throws Exception {
+    final var url = "/v1/groups/{groupId}/schedule/{scheduleId}";
+
+    Group testGroup = groupRepository.save(createGroup("test group", testUser));
+    groupMemberRepository.save(createGroupHost(testGroup, testUser));
+
+    CreateGroupScheduleRequest request = new CreateGroupScheduleRequest(
+        "바뀐 이름",
+        LocalDateTime.now().withSecond(0).withNano(0).plusMinutes(10),
+        LocalDateTime.now().withSecond(0).withNano(0).plusHours(1),
+        true,
+        2,
+        "바뀐 위치",
+        12.3,
+        34.1
+    );
+    final var requestBody = objectMapper.writeValueAsString(request);
+
+    ResultActions result = mockMvc.perform(
+        put(url, testGroup.getId(), 1L)
+            .contentType(MediaType.APPLICATION_JSON_VALUE)
+            .content(requestBody));
+
+    result.andExpect(status().isNotFound());
+  }
+
+  @Test
+  @WithMockUser("1")
+  @DisplayName("modifyGroupSchedule(): 그룹 스케줄을 변경할 수 없다 - 스케줄 생성자가 아님")
+  void failModifyGroupSchedule_notScheduleOwner() throws Exception {
+    final var url = "/v1/groups/{groupId}/schedule/{scheduleId}";
+
+    User hostUser = userRepository.save(createUser("host@mail.com", "host", "213"));
+    Group testGroup = groupRepository.save(createGroup("test group", testUser));
+    groupMemberRepository.save(createGroupHost(testGroup, hostUser));
+    groupMemberRepository.save(createGroupMember(testGroup, testUser));
+    GroupSchedule schedule = scheduleRepository.save(GroupScheduleFactory.builder()
+        .group(testGroup)
+        .user(hostUser)
+        .build());
+
+    CreateGroupScheduleRequest request = new CreateGroupScheduleRequest(
+        "바뀐 이름",
+        LocalDateTime.now().withSecond(0).withNano(0).plusMinutes(10),
+        LocalDateTime.now().withSecond(0).withNano(0).plusHours(1),
+        true,
+        2,
+        "바뀐 위치",
+        12.3,
+        34.1
+    );
+    final var requestBody = objectMapper.writeValueAsString(request);
+
+    ResultActions result = mockMvc.perform(
+        put(url, testGroup.getId(), 1L)
+            .contentType(MediaType.APPLICATION_JSON_VALUE)
+            .content(requestBody));
+
+    result.andExpect(status().isForbidden());
   }
 }

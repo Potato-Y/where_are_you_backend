@@ -41,4 +41,10 @@ public class AlarmSchedule {
     this.schedule = schedule;
     this.dateTime = dateTime;
   }
+
+  public AlarmSchedule updateDateTime(LocalDateTime dateTime) {
+    this.dateTime = dateTime;
+
+    return this;
+  }
 }

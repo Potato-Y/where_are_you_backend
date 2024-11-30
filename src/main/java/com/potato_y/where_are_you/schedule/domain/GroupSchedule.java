@@ -99,4 +99,52 @@ public class GroupSchedule {
     this.locationLatitude = locationLatitude;
     this.locationLongitude = locationLongitude;
   }
+
+  public GroupSchedule updateTitle(String title) {
+    this.title = title;
+
+    return this;
+  }
+
+  public GroupSchedule updateStartTime(LocalDateTime startTime) {
+    this.startTime = startTime;
+
+    return this;
+  }
+
+  public GroupSchedule updateEndTime(LocalDateTime endTime) {
+    this.endTime = endTime;
+
+    return this;
+  }
+
+  public GroupSchedule updateIsAlarmEnabled(boolean isAlarmEnabled) {
+    this.isAlarmEnabled = isAlarmEnabled;
+
+    return this;
+  }
+
+  public GroupSchedule updateAlarmBeforeHours(int alarmBeforeHours) {
+    this.alarmBeforeHours = alarmBeforeHours;
+
+    return this;
+  }
+
+  public GroupSchedule updateLocation(String location) {
+    this.location = location;
+
+    return this;
+  }
+
+  public GroupSchedule updateLocationLatitude(double locationLatitude) {
+    this.locationLatitude = locationLatitude;
+
+    return this;
+  }
+
+  public GroupSchedule updateLocationLongitude(double locationLongitude) {
+    this.locationLongitude = locationLongitude;
+
+    return this;
+  }
 }
