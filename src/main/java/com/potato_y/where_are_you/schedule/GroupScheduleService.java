@@ -40,6 +40,7 @@ public class GroupScheduleService {
   private final ParticipationRepository participationRepository;
   private final FirebaseService firebaseService;
   private final GroupValidator groupValidator;
+  private final ScheduleValidator scheduleValidator;
 
   @Transactional
   public GroupScheduleResponse createSchedule(Long groupId, CreateGroupScheduleRequest dto) {
@@ -73,10 +74,10 @@ public class GroupScheduleService {
     return new GroupScheduleResponse(groupSchedule);
   }
 
-  private void createAlarmSchedule(GroupSchedule schedule) {
+  private AlarmSchedule createAlarmSchedule(GroupSchedule schedule) {
     LocalDateTime alarmTime = schedule.getStartTime().minusHours(schedule.getAlarmBeforeHours());
 
-    alarmScheduleRepository.save(AlarmSchedule.builder()
+    return alarmScheduleRepository.save(AlarmSchedule.builder()
         .schedule(schedule)
         .dateTime(alarmTime)
         .build());
@@ -184,6 +185,52 @@ public class GroupScheduleService {
         .findByUserAndSchedule(user, schedule);
 
     return participation.isPresent() && participation.get().isParticipating();
+  }
+
+  @Transactional
+  public void deleteGroupSchedule(Long groupId, Long scheduleId) {
+    User user = currentUserProvider.getCurrentUser();
+    GroupSchedule schedule = getSchedule(scheduleId);
+
+    if (!groupService.checkGroupMember(groupId, user)) {
+      throw new ForbiddenException("그룹 멤버가 아닙니다");
+    }
+    scheduleValidator.scheduleOwner(schedule, user);
+
+    scheduleRepository.delete(schedule);
+  }
+
+  @Transactional
+  public GroupScheduleResponse modifyGroupSchedule(Long groupId, Long scheduleId,
+      CreateGroupScheduleRequest request) {
+    User user = currentUserProvider.getCurrentUser();
+    GroupSchedule schedule = getSchedule(scheduleId);
+
+    if (!groupService.checkGroupMember(groupId, user)) {
+      throw new ForbiddenException("그룹 멤버가 아닙니다");
+    }
+    scheduleValidator.scheduleOwner(schedule, user);
+
+    schedule
+        .updateTitle(request.title())
+        .updateStartTime(request.startTime())
+        .updateEndTime(request.endTime())
+        .updateIsAlarmEnabled(request.isAlarmEnabled())
+        .updateAlarmBeforeHours(request.alarmBeforeHours())
+        .updateLocation(request.location())
+        .updateLocationLatitude(request.locationLatitude())
+        .updateLocationLongitude(request.locationLongitude());
+
+    Optional<AlarmSchedule> maybeAlarmSchedule = alarmScheduleRepository.findBySchedule(schedule);
+    if (request.isAlarmEnabled()) {
+      maybeAlarmSchedule.ifPresentOrElse(
+          it -> it.updateDateTime(request.startTime().minusHours(request.alarmBeforeHours())),
+          () -> createAlarmSchedule(schedule));
+    } else {
+      maybeAlarmSchedule.ifPresent(alarmScheduleRepository::delete);
+    }
+
+    return new GroupScheduleResponse(schedule);
   }
 
   @Transactional(readOnly = true)

@@ -29,6 +29,7 @@ import com.potato_y.where_are_you.schedule.dto.CreateGroupScheduleRequest;
 import com.potato_y.where_are_you.schedule.dto.GetGroupScheduleListResponse;
 import com.potato_y.where_are_you.schedule.dto.GroupScheduleResponse;
 import com.potato_y.where_are_you.user.domain.User;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 import org.junit.jupiter.api.BeforeEach;
@@ -66,6 +67,9 @@ class GroupScheduleServiceTest {
 
   @Mock
   private GroupValidator groupValidator;
+
+  @Mock
+  private ScheduleValidator scheduleValidator;
 
   private User testUser;
 
@@ -329,5 +333,161 @@ class GroupScheduleServiceTest {
 
     assertThatThrownBy(() -> scheduleService.cancelParticipation(null, 1L))
         .isInstanceOf(NotFoundException.class);
+  }
+
+  @Test
+  @DisplayName("deleteGroupSchedule(): 그룹 스케줄을 삭제할 수 있다")
+  void successDeleteGroupSchedule() {
+    GroupSchedule schedule = Mockito.spy(GroupScheduleFactory.builder()
+        .group(testGroup)
+        .user(testUser)
+        .title("테스트 스케줄 1")
+        .build());
+
+    given(scheduleRepository.findById(anyLong())).willReturn(Optional.of(schedule));
+    given(groupService.checkGroupMember(eq(testGroup.getId()), eq(testUser))).willReturn(true);
+    doNothing().when(scheduleValidator).scheduleOwner(eq(schedule), eq(testUser));
+
+    scheduleService.deleteGroupSchedule(null, 1L);
+
+    verify(scheduleRepository, times(1)).delete(schedule);
+  }
+
+  @Test
+  @DisplayName("deleteGroupSchedule(): 그룹 멤버가 아니라면 스케줄을 삭제할 수 없다")
+  void failDeleteGroupSchedule_notGroupMember() {
+    GroupSchedule schedule = Mockito.spy(GroupScheduleFactory.builder()
+        .group(testGroup)
+        .user(testUser)
+        .title("테스트 스케줄 1")
+        .build());
+
+    given(scheduleRepository.findById(anyLong())).willReturn(Optional.of(schedule));
+    given(groupService.checkGroupMember(eq(testGroup.getId()), eq(testUser))).willReturn(false);
+
+    assertThatThrownBy(() -> scheduleService.deleteGroupSchedule(null, 1L))
+        .isInstanceOf(ForbiddenException.class);
+  }
+
+  @Test
+  @DisplayName("modifyGroupSchedule: 그룹 스케줄을 변경할 수 있다 - 이미 알람이 등록된 경우, 알람 시간 업데이트")
+  void successModifyGroupSchedule_updateAlarm() {
+    GroupSchedule schedule = Mockito.spy(GroupScheduleFactory.builder()
+        .group(testGroup)
+        .user(testUser)
+        .title("테스트 스케줄 1")
+        .build());
+    AlarmSchedule alarmSchedule = Mockito.spy(AlarmSchedule.builder()
+        .schedule(schedule)
+        .dateTime(LocalDateTime.now())
+        .build());
+    CreateGroupScheduleRequest request = new CreateGroupScheduleRequest(
+        "바뀐 이름",
+        LocalDateTime.now().plusMinutes(10),
+        LocalDateTime.now().plusHours(1),
+        true,
+        2,
+        "바뀐 위치",
+        12.3,
+        34.1
+    );
+
+    given(scheduleRepository.findById(anyLong())).willReturn(Optional.of(schedule));
+    given(groupService.checkGroupMember(eq(testGroup.getId()), eq(testUser))).willReturn(true);
+    doNothing().when(scheduleValidator).scheduleOwner(eq(schedule), eq(testUser));
+    given(alarmScheduleRepository.findBySchedule(any(GroupSchedule.class)))
+        .willReturn(Optional.of(alarmSchedule));
+
+    GroupScheduleResponse response = scheduleService.modifyGroupSchedule(null, 1L, request);
+
+    assertThat(response.title()).isEqualTo(request.title());
+    assertThat(response.startTime()).isEqualTo(request.startTime());
+    assertThat(response.endTime()).isEqualTo(request.endTime());
+    assertThat(response.isAlarmEnabled()).isEqualTo(request.isAlarmEnabled());
+    assertThat(response.alarmBeforeHours()).isEqualTo(request.alarmBeforeHours());
+    assertThat(response.location()).isEqualTo(request.location());
+    assertThat(response.locationLatitude()).isEqualTo(request.locationLatitude());
+    assertThat(response.locationLongitude()).isEqualTo(request.locationLongitude());
+
+    verify(schedule, times(1)).updateTitle(request.title());
+    verify(schedule, times(1)).updateStartTime(request.startTime());
+    verify(schedule, times(1)).updateEndTime(request.endTime());
+    verify(schedule, times(1)).updateIsAlarmEnabled(request.isAlarmEnabled());
+    verify(schedule, times(1)).updateAlarmBeforeHours(request.alarmBeforeHours());
+    verify(schedule, times(1)).updateLocation(request.location());
+    verify(schedule, times(1)).updateLocationLatitude(request.locationLatitude());
+    verify(schedule, times(1)).updateLocationLongitude(request.locationLongitude());
+
+    verify(alarmSchedule, times(1))
+        .updateDateTime(request.startTime().minusHours(request.alarmBeforeHours()));
+  }
+
+  @Test
+  @DisplayName("modifyGroupSchedule: 그룹 스케줄을 변경할 수 있다 - 알람 비활성화")
+  void successModifyGroupSchedule_deleteAlarm() {
+    GroupSchedule schedule = Mockito.spy(GroupScheduleFactory.builder()
+        .group(testGroup)
+        .user(testUser)
+        .title("테스트 스케줄 1")
+        .build());
+    AlarmSchedule alarmSchedule = Mockito.spy(AlarmSchedule.builder()
+        .schedule(schedule)
+        .dateTime(LocalDateTime.now())
+        .build());
+    CreateGroupScheduleRequest request = new CreateGroupScheduleRequest(
+        "바뀐 이름",
+        LocalDateTime.now().plusMinutes(10),
+        LocalDateTime.now().plusHours(1),
+        false,
+        2,
+        "바뀐 위치",
+        12.3,
+        34.1
+    );
+
+    given(scheduleRepository.findById(anyLong())).willReturn(Optional.of(schedule));
+    given(groupService.checkGroupMember(eq(testGroup.getId()), eq(testUser))).willReturn(true);
+    doNothing().when(scheduleValidator).scheduleOwner(eq(schedule), eq(testUser));
+    given(alarmScheduleRepository.findBySchedule(any(GroupSchedule.class)))
+        .willReturn(Optional.of(alarmSchedule));
+
+    scheduleService.modifyGroupSchedule(null, 1L, request);
+
+    verify(alarmScheduleRepository, times(1)).delete(alarmSchedule);
+  }
+
+  @Test
+  @DisplayName("modifyGroupSchedule: 그룹 스케줄을 변경할 수 있다 - 알람 활성화(생성)")
+  void successModifyGroupSchedule_createAlarm() {
+    GroupSchedule schedule = Mockito.spy(GroupScheduleFactory.builder()
+        .group(testGroup)
+        .user(testUser)
+        .title("테스트 스케줄 1")
+        .build());
+    AlarmSchedule alarmSchedule = Mockito.spy(AlarmSchedule.builder()
+        .schedule(schedule)
+        .dateTime(LocalDateTime.now())
+        .build());
+    CreateGroupScheduleRequest request = new CreateGroupScheduleRequest(
+        "바뀐 이름",
+        LocalDateTime.now().plusMinutes(10),
+        LocalDateTime.now().plusHours(1),
+        true,
+        2,
+        "바뀐 위치",
+        12.3,
+        34.1
+    );
+
+    given(scheduleRepository.findById(anyLong())).willReturn(Optional.of(schedule));
+    given(groupService.checkGroupMember(eq(testGroup.getId()), eq(testUser))).willReturn(true);
+    doNothing().when(scheduleValidator).scheduleOwner(eq(schedule), eq(testUser));
+    given(alarmScheduleRepository.findBySchedule(any(GroupSchedule.class)))
+        .willReturn(Optional.empty());
+    given(alarmScheduleRepository.save(any(AlarmSchedule.class))).willReturn(alarmSchedule);
+
+    scheduleService.modifyGroupSchedule(null, 1L, request);
+
+    verify(alarmScheduleRepository, times(1)).save(any(AlarmSchedule.class));
   }
 }
