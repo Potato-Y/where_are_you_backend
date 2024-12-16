@@ -4,6 +4,7 @@ import com.potato_y.where_are_you.group.domain.Group;
 import com.potato_y.where_are_you.user.domain.User;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EntityListeners;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -13,6 +14,7 @@ import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import jakarta.validation.constraints.NotNull;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import lombok.Builder;
@@ -20,11 +22,15 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
+import org.springframework.data.annotation.CreatedDate;
+import org.springframework.data.annotation.LastModifiedDate;
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 @Getter
 @Entity
 @Table(name = "posts")
 @NoArgsConstructor
+@EntityListeners(AuditingEntityListener.class)
 public class Post {
 
   @Id
@@ -47,6 +53,14 @@ public class Post {
 
   @Column(name = "content")
   private String content;
+
+  @CreatedDate
+  @NotNull
+  @Column(name = "create_at", updatable = false)
+  private LocalDateTime createdAt;
+
+  @LastModifiedDate
+  private LocalDateTime updateAt;
 
   @OneToMany(mappedBy = "post", fetch = FetchType.LAZY)
   private List<PostFile> postFiles = new ArrayList<>();
