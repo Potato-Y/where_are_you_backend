@@ -39,7 +39,9 @@ public class GroupPostService {
   @Transactional
   public PostResponse createGroupPost(Long groupId, CreatePostRequest request) {
     User user = currentUserProvider.getCurrentUser();
-    groupService.checkGroupMember(groupId, user);
+    if (!groupService.checkGroupMember(groupId, user)) {
+      throw new ForbiddenException("그룹원이 아닙니다.");
+    }
     Group group = groupService.findByGroup(groupId);
 
     Post post = postRepository.save(Post.builder()
