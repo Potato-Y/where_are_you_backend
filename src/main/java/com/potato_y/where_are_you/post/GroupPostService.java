@@ -4,6 +4,8 @@ import com.potato_y.where_are_you.authentication.CurrentUserProvider;
 import com.potato_y.where_are_you.aws.CloudFrontService;
 import com.potato_y.where_are_you.aws.S3Service;
 import com.potato_y.where_are_you.error.exception.BadRequestException;
+import com.potato_y.where_are_you.error.exception.ForbiddenException;
+import com.potato_y.where_are_you.error.exception.NotFoundException;
 import com.potato_y.where_are_you.group.GroupService;
 import com.potato_y.where_are_you.group.domain.Group;
 import com.potato_y.where_are_you.post.domain.Post;
@@ -79,5 +81,29 @@ public class GroupPostService {
     }
 
     return PostResponse.from(post);
+  }
+
+  @Transactional(readOnly = true)
+  public PostResponse getGroupPost(Long groupId, Long postId) {
+    User user = currentUserProvider.getCurrentUser();
+    if (!groupService.checkGroupMember(groupId, user)) {
+      throw new ForbiddenException("그룹원이 아닙니다.");
+    }
+
+    Post post = findByPostId(postId);
+    List<String> postFilePaths = post.getPostFiles().stream().map(it -> {
+      try {
+        return cloudFrontService.generateSignedUrl(it.getFilePath());
+      } catch (IOException | InvalidKeySpecException e) {
+        throw new BadRequestException("파일 URL을 생성할 수 없습니다");
+      }
+    }).toList();
+
+    return PostResponse.from(post, postFilePaths);
+  }
+
+  private Post findByPostId(Long postId) {
+    return postRepository.findById(postId)
+        .orElseThrow(() -> new NotFoundException("포스트를 찾을 수 없습니다"));
   }
 }

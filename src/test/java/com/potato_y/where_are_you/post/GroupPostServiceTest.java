@@ -23,6 +23,7 @@ import com.potato_y.where_are_you.user.domain.User;
 import java.io.IOException;
 import java.security.spec.InvalidKeySpecException;
 import java.util.List;
+import java.util.Optional;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -133,6 +134,62 @@ class GroupPostServiceTest {
 
     assertThat(response.title()).isEqualTo(request.title());
     assertThat(response.content()).isEqualTo(request.content());
+    assertThat(response.files()).hasSize(2);
+    assertThat(response.files().getFirst()).isEqualTo(signedUrl1);
+    assertThat(response.files().getLast()).isEqualTo(signedUrl2);
+  }
+
+
+  @Test
+  void successGetGroupPost_noFile() throws IOException, InvalidKeySpecException {
+    var title = "title";
+    var content = "content";
+
+    Post post = Post.builder()
+        .group(testGroup)
+        .user(testUser)
+        .title(title)
+        .content(content)
+        .build();
+
+    given(currentUserProvider.getCurrentUser()).willReturn(testUser);
+    given(groupService.checkGroupMember(anyLong(), any(User.class))).willReturn(true);
+    given(postRepository.findById(anyLong())).willReturn(Optional.of(post));
+
+    PostResponse response = groupPostService.getGroupPost(1L, 1L);
+
+    assertThat(response.title()).isEqualTo(title);
+    assertThat(response.content()).isEqualTo(content);
+    assertThat(response.files()).hasSize(0);
+  }
+
+  @Test
+  void successGetGroupPost_twoFile() throws IOException, InvalidKeySpecException {
+    var title = "title";
+    var content = "content";
+    var signedUrl1 = "path1";
+    var signedUrl2 = "path2";
+
+    Post post = Post.builder()
+        .group(testGroup)
+        .user(testUser)
+        .title(title)
+        .content(content)
+        .build();
+    PostFile postFile1 = PostFile.builder().post(post).filePath("path").build();
+    PostFile postFile2 = PostFile.builder().post(post).filePath("path").build();
+    post.updatePostFiles(List.of(postFile1, postFile2));
+
+    given(currentUserProvider.getCurrentUser()).willReturn(testUser);
+    given(groupService.checkGroupMember(anyLong(), any(User.class))).willReturn(true);
+    given(postRepository.findById(anyLong())).willReturn(Optional.of(post));
+    given(cloudFrontService.generateSignedUrl(anyString()))
+        .willReturn(signedUrl1).willReturn(signedUrl2);
+
+    PostResponse response = groupPostService.getGroupPost(1L, 1L);
+
+    assertThat(response.title()).isEqualTo(title);
+    assertThat(response.content()).isEqualTo(content);
     assertThat(response.files()).hasSize(2);
     assertThat(response.files().getFirst()).isEqualTo(signedUrl1);
     assertThat(response.files().getLast()).isEqualTo(signedUrl2);
