@@ -141,7 +141,8 @@ class GroupPostServiceTest {
 
 
   @Test
-  void successGetGroupPost_noFile() throws IOException, InvalidKeySpecException {
+  @DisplayName("getGroupPost(): 특정 포스트 조회할 수 있다 - 빈 파일")
+  void successGetGroupPost_noFile() {
     var title = "title";
     var content = "content";
 
@@ -164,6 +165,7 @@ class GroupPostServiceTest {
   }
 
   @Test
+  @DisplayName("getGroupPost(): 특정 포스트 조회할 수 있다 - 두 개의 파일")
   void successGetGroupPost_twoFile() throws IOException, InvalidKeySpecException {
     var title = "title";
     var content = "content";
