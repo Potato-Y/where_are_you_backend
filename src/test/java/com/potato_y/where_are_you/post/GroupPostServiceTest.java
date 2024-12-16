@@ -31,6 +31,11 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -195,5 +200,35 @@ class GroupPostServiceTest {
     assertThat(response.files()).hasSize(2);
     assertThat(response.files().getFirst()).isEqualTo(signedUrl1);
     assertThat(response.files().getLast()).isEqualTo(signedUrl2);
+  }
+
+  @Test
+  @DisplayName("getGroupPosts(): 그룹 포스트들을 조회할 수 있다")
+  void successGetGroupPosts() {
+    int page = 0;
+    int pageSize = 10;
+
+    List<Post> postList = List.of(
+        Post.builder().title("title1").content("content1").group(testGroup).user(testUser).build(),
+        Post.builder().title("title1").content("content1").group(testGroup).user(testUser).build(),
+        Post.builder().title("title1").content("content1").group(testGroup).user(testUser).build(),
+        Post.builder().title("title1").content("content1").group(testGroup).user(testUser).build()
+    );
+
+    PageRequest pageRequest = PageRequest.of(page, pageSize, Sort.by("createdAt").descending());
+    Page<Post> postPage = new PageImpl<>(postList, pageRequest, postList.size());
+
+    given(currentUserProvider.getCurrentUser()).willReturn(testUser);
+    given(groupService.checkGroupMember(anyLong(), any(User.class))).willReturn(true);
+    given(postRepository.findByGroupIdOrderByIdDesc(anyLong(), any(Pageable.class))).willReturn(
+        postPage);
+
+    List<PostResponse> response = groupPostService.getGroupPosts(1L, page);
+
+    assertThat(response.size()).isEqualTo(postList.size());
+    assertThat(response.get(0).title()).isEqualTo(postList.get(0).getTitle());
+    assertThat(response.get(1).title()).isEqualTo(postList.get(1).getTitle());
+    assertThat(response.get(2).title()).isEqualTo(postList.get(2).getTitle());
+    assertThat(response.get(3).title()).isEqualTo(postList.get(3).getTitle());
   }
 }

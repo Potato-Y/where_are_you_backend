@@ -2,6 +2,7 @@ package com.potato_y.where_are_you.post;
 
 import com.potato_y.where_are_you.post.dto.CreatePostRequest;
 import com.potato_y.where_are_you.post.dto.PostResponse;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -11,6 +12,7 @@ import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 @RequiredArgsConstructor
@@ -34,5 +36,15 @@ public class GroupPostApiController {
     PostResponse response = groupPostService.getGroupPost(groupId, postId);
 
     return ResponseEntity.status(HttpStatus.OK).body(response);
+  }
+
+  @GetMapping("")
+  public ResponseEntity<List<PostResponse>> getGroupPosts(
+      @PathVariable Long groupId,
+      @RequestParam(defaultValue = "0") int page
+  ) {
+    List<PostResponse> responses = groupPostService.getGroupPosts(groupId, page);
+
+    return ResponseEntity.status(HttpStatus.OK).body(responses);
   }
 }

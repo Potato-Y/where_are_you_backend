@@ -20,6 +20,9 @@ import java.security.spec.InvalidKeySpecException;
 import java.util.ArrayList;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -27,6 +30,8 @@ import org.springframework.web.multipart.MultipartFile;
 @Service
 @RequiredArgsConstructor
 public class GroupPostService {
+
+  private final static int PAGE_SIZE = 10;
 
   private final S3Service s3Service;
   private final CloudFrontService cloudFrontService;
@@ -102,6 +107,29 @@ public class GroupPostService {
     }).toList();
 
     return PostResponse.from(post, postFilePaths);
+  }
+
+  @Transactional(readOnly = true)
+  public List<PostResponse> getGroupPosts(Long groupId, int page) {
+    User user = currentUserProvider.getCurrentUser();
+    if (!groupService.checkGroupMember(groupId, user)) {
+      throw new ForbiddenException("그룹원이 아닙니다.");
+    }
+
+    PageRequest pageRequest = PageRequest.of(page, PAGE_SIZE, Sort.by("createdAt").descending());
+    Page<Post> posts = postRepository.findByGroupIdOrderByIdDesc(groupId, pageRequest);
+
+    return posts.map(post -> {
+      List<String> postFilePaths = post.getPostFiles().stream().map(it -> {
+        try {
+          return cloudFrontService.generateSignedUrl(it.getFilePath());
+        } catch (IOException | InvalidKeySpecException e) {
+          throw new BadRequestException("파일 URL을 생성할 수 없습니다");
+        }
+      }).toList();
+
+      return PostResponse.from(post, postFilePaths);
+    }).stream().toList();
   }
 
   private Post findByPostId(Long postId) {
