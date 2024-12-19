@@ -48,7 +48,7 @@ public class Post {
   private User user;
 
   @NotNull
-  @Column(name = "group_name", length = 20)
+  @Column(name = "title", length = 20)
   private String title;
 
   @Column(name = "content")
