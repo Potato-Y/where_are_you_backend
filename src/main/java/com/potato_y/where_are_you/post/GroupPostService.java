@@ -98,13 +98,7 @@ public class GroupPostService {
     }
 
     Post post = findByPostId(postId);
-    List<String> postFilePaths = post.getPostFiles().stream().map(it -> {
-      try {
-        return cloudFrontService.generateSignedUrl(it.getFilePath());
-      } catch (IOException | InvalidKeySpecException e) {
-        throw new BadRequestException("파일 URL을 생성할 수 없습니다");
-      }
-    }).toList();
+    List<String> postFilePaths = getFileUrls(post);
 
     return PostResponse.from(post, postFilePaths);
   }
@@ -120,13 +114,7 @@ public class GroupPostService {
     Page<Post> posts = postRepository.findByGroupIdOrderByIdDesc(groupId, pageRequest);
 
     return posts.map(post -> {
-      List<String> postFilePaths = post.getPostFiles().stream().map(it -> {
-        try {
-          return cloudFrontService.generateSignedUrl(it.getFilePath());
-        } catch (IOException | InvalidKeySpecException e) {
-          throw new BadRequestException("파일 URL을 생성할 수 없습니다");
-        }
-      }).toList();
+      List<String> postFilePaths = getFileUrls(post);
 
       return PostResponse.from(post, postFilePaths);
     }).stream().toList();
@@ -135,5 +123,18 @@ public class GroupPostService {
   private Post findByPostId(Long postId) {
     return postRepository.findById(postId)
         .orElseThrow(() -> new NotFoundException("포스트를 찾을 수 없습니다"));
+  }
+
+  private List<String> getFileUrls(Post post) {
+    List<String> urls = new ArrayList<>();
+    post.getPostFiles().forEach(file -> {
+      try {
+        urls.add(cloudFrontService.generateSignedUrl(file.getFilePath()));
+      } catch (InvalidKeySpecException | IOException e) {
+        throw new RuntimeException(e);
+      }
+    });
+
+    return urls;
   }
 }
