@@ -64,7 +64,7 @@ class GroupPostServiceTest {
   private PostFileRepository postFileRepository;
 
   @Mock
-  private PostFilePathGenerator postFilePathGenerator;
+  private GroupPostFilePathGenerator groupPostFilePathGenerator;
 
   private User testUser;
   private Group testGroup;
@@ -127,9 +127,9 @@ class GroupPostServiceTest {
     given(groupService.findByGroup(anyLong())).willReturn(testGroup);
     given(groupService.checkGroupMember(anyLong(), any(User.class))).willReturn(true);
     given(postRepository.save(any(Post.class))).willReturn(post);
-    given(postFilePathGenerator.generateFilePath(any(Post.class)))
+    given(groupPostFilePathGenerator.generateImagePath(any(Post.class)))
         .willReturn(signedUrl1).willReturn(signedUrl2);
-    given(s3Service.uploadPostFile(any(MultipartFile.class), anyString()))
+    given(s3Service.uploadFile(any(MultipartFile.class), anyString()))
         .willReturn("test1").willReturn("test2");
     given(postFileRepository.save(any(PostFile.class))).willReturn(postFile1).willReturn(postFile2);
     given(cloudFrontService.generateSignedUrl("test1.jpg")).willReturn(signedUrl1);

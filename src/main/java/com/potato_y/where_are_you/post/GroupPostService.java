@@ -39,7 +39,7 @@ public class GroupPostService {
   private final CurrentUserProvider currentUserProvider;
   private final PostRepository postRepository;
   private final PostFileRepository postFileRepository;
-  private final PostFilePathGenerator postFilePathGenerator;
+  private final GroupPostFilePathGenerator groupPostFilePathGenerator;
 
   @Transactional
   public PostResponse createGroupPost(Long groupId, CreatePostRequest request) {
@@ -60,10 +60,10 @@ public class GroupPostService {
       ArrayList<PostFile> postFiles = new ArrayList<>();
 
       for (MultipartFile file : request.files()) {
-        String path = postFilePathGenerator.generateFilePath(post);
+        String path = groupPostFilePathGenerator.generateImagePath(post);
 
         try {
-          String savePath = s3Service.uploadPostFile(file, path);
+          String savePath = s3Service.uploadFile(file, path);
 
           postFiles.add(postFileRepository.save(PostFile.builder()
               .post(post)
@@ -129,7 +129,7 @@ public class GroupPostService {
 
     Post post = findByPostId(postId);
     if (!post.getPostFiles().isEmpty()) {
-      s3Service.deletePostFolder(postFilePathGenerator.generateFilePath(post));
+      s3Service.deleteFolder(groupPostFilePathGenerator.generateImagePath(post));
     }
     postRepository.delete(post);
   }

@@ -21,28 +21,23 @@ public class S3Service {
   @Value("${aws.s3.bucket-name}")
   private String bucketName;
 
-  @Value("${aws.s3.default-image-path}")
-  private String defaultImagePath;
-
-  public String uploadPostFile(MultipartFile image, String path) throws IOException {
+  public String uploadFile(MultipartFile image, String path) throws IOException {
     String fileName = this.getFileName(image, path);
-    String filePath = defaultImagePath + fileName;
     ObjectMetadata objectMetadata = this.getObjectMetadata(image);
 
     PutObjectRequest request = new PutObjectRequest(
-        bucketName, filePath, image.getInputStream(), objectMetadata
+        bucketName, fileName, image.getInputStream(), objectMetadata
     );
 
     s3Client.putObject(request);
 
-    return filePath;
+    return fileName;
   }
 
-  public void deletePostFolder(String folderPath) {
+  public void deleteFolder(String folderPath) {
     if (!folderPath.endsWith("/")) {
       folderPath += "/";
     }
-    folderPath = defaultImagePath + folderPath;
 
     ObjectListing objectListing = s3Client.listObjects(bucketName, folderPath); // 목록 가져오기
 
