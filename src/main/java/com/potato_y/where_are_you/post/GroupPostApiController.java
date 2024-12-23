@@ -7,6 +7,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -46,5 +47,13 @@ public class GroupPostApiController {
     List<PostResponse> responses = groupPostService.getGroupPosts(groupId, page);
 
     return ResponseEntity.status(HttpStatus.OK).body(responses);
+  }
+
+  @DeleteMapping("/{postId}")
+  public ResponseEntity<Void> deleteGroupPost(@PathVariable Long groupId,
+      @PathVariable Long postId) {
+    groupPostService.deleteGroupPost(groupId, postId);
+
+    return ResponseEntity.status(HttpStatus.OK).build();
   }
 }

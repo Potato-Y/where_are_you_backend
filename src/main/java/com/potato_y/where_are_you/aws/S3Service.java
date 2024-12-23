@@ -1,8 +1,10 @@
 package com.potato_y.where_are_you.aws;
 
 import com.amazonaws.services.s3.AmazonS3;
+import com.amazonaws.services.s3.model.ObjectListing;
 import com.amazonaws.services.s3.model.ObjectMetadata;
 import com.amazonaws.services.s3.model.PutObjectRequest;
+import com.amazonaws.services.s3.model.S3ObjectSummary;
 import java.io.IOException;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
@@ -34,6 +36,29 @@ public class S3Service {
     s3Client.putObject(request);
 
     return filePath;
+  }
+
+  public void deletePostFolder(String folderPath) {
+    if (!folderPath.endsWith("/")) {
+      folderPath += "/";
+    }
+    folderPath = defaultImagePath + folderPath;
+
+    ObjectListing objectListing = s3Client.listObjects(bucketName, folderPath); // 목록 가져오기
+
+    // 모든 객체 삭제
+    while (true) {
+      for (S3ObjectSummary objectSummary : objectListing.getObjectSummaries()) {
+        s3Client.deleteObject(bucketName, objectSummary.getKey());
+      }
+
+      // 다음 페이지가 있으면 계속 진행
+      if (objectListing.isTruncated()) {
+        objectListing = s3Client.listNextBatchOfObjects(objectListing);
+      } else {
+        break;
+      }
+    }
   }
 
   private String getFileName(MultipartFile image, String imagePath) {

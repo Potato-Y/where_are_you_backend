@@ -120,6 +120,20 @@ public class GroupPostService {
     }).stream().toList();
   }
 
+  @Transactional
+  public void deleteGroupPost(Long groupId, Long postId) {
+    User user = currentUserProvider.getCurrentUser();
+    if (!groupService.checkGroupMember(groupId, user)) {
+      throw new ForbiddenException("그룹원이 아닙니다.");
+    }
+
+    Post post = findByPostId(postId);
+    if (!post.getPostFiles().isEmpty()) {
+      s3Service.deletePostFolder(postFilePathGenerator.generateFilePath(post));
+    }
+    postRepository.delete(post);
+  }
+
   private Post findByPostId(Long postId) {
     return postRepository.findById(postId)
         .orElseThrow(() -> new NotFoundException("포스트를 찾을 수 없습니다"));
