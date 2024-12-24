@@ -319,4 +319,23 @@ class GroupPostServiceTest {
     assertThatThrownBy(() -> groupPostService.deleteGroupPost(1L, 1L))
         .isInstanceOf(ForbiddenException.class);
   }
+
+  @Test
+  @DisplayName("deleteGroupPost(): 작성자가 아니라면 삭제 시 예외가 발생한다")
+  void failDeleteGroupPost_noWriter() {
+    User otherUser = createUser("other@mail.com", "other", "1");
+    Post post = Post.builder()
+        .group(testGroup)
+        .user(otherUser)
+        .title("title")
+        .content("content")
+        .build();
+
+    given(currentUserProvider.getCurrentUser()).willReturn(testUser);
+    given(groupService.checkGroupMember(anyLong(), any(User.class))).willReturn(true);
+    given(postRepository.findById(anyLong())).willReturn(Optional.of(post));
+
+    assertThatThrownBy(() -> groupPostService.deleteGroupPost(1L, 1L))
+        .isInstanceOf(ForbiddenException.class);
+  }
 }

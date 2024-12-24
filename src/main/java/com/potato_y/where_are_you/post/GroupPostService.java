@@ -128,6 +128,8 @@ public class GroupPostService {
     }
 
     Post post = findByPostId(postId);
+    validateWriter(user, post);
+
     if (!post.getPostFiles().isEmpty()) {
       s3Service.deleteFolder(groupPostFilePathGenerator.generateImagePath(post));
     }
@@ -150,5 +152,11 @@ public class GroupPostService {
     });
 
     return urls;
+  }
+
+  private void validateWriter(User user, Post post) {
+    if (!user.equals(post.getUser())) {
+      throw new ForbiddenException("작성자가 아닙니다. 변경 권한이 없습니다.");
+    }
   }
 }
