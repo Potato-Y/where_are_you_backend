@@ -14,6 +14,7 @@ import com.potato_y.where_are_you.post.domain.PostFileRepository;
 import com.potato_y.where_are_you.post.domain.PostRepository;
 import com.potato_y.where_are_you.post.dto.CreatePostRequest;
 import com.potato_y.where_are_you.post.dto.PostResponse;
+import com.potato_y.where_are_you.post.dto.UpdatePostRequest;
 import com.potato_y.where_are_you.user.domain.User;
 import java.io.IOException;
 import java.security.spec.InvalidKeySpecException;
@@ -39,7 +40,7 @@ public class GroupPostService {
   private final CurrentUserProvider currentUserProvider;
   private final PostRepository postRepository;
   private final PostFileRepository postFileRepository;
-  private final PostFilePathGenerator postFilePathGenerator;
+  private final GroupPostFilePathGenerator groupPostFilePathGenerator;
 
   @Transactional
   public PostResponse createGroupPost(Long groupId, CreatePostRequest request) {
@@ -60,10 +61,10 @@ public class GroupPostService {
       ArrayList<PostFile> postFiles = new ArrayList<>();
 
       for (MultipartFile file : request.files()) {
-        String path = postFilePathGenerator.generateFilePath(post);
+        String path = groupPostFilePathGenerator.generateImagePath(post);
 
         try {
-          String savePath = s3Service.uploadPostFile(file, path);
+          String savePath = s3Service.uploadFile(file, path);
 
           postFiles.add(postFileRepository.save(PostFile.builder()
               .post(post)
@@ -98,13 +99,7 @@ public class GroupPostService {
     }
 
     Post post = findByPostId(postId);
-    List<String> postFilePaths = post.getPostFiles().stream().map(it -> {
-      try {
-        return cloudFrontService.generateSignedUrl(it.getFilePath());
-      } catch (IOException | InvalidKeySpecException e) {
-        throw new BadRequestException("파일 URL을 생성할 수 없습니다");
-      }
-    }).toList();
+    List<String> postFilePaths = getFileUrls(post);
 
     return PostResponse.from(post, postFilePaths);
   }
@@ -120,20 +115,64 @@ public class GroupPostService {
     Page<Post> posts = postRepository.findByGroupIdOrderByIdDesc(groupId, pageRequest);
 
     return posts.map(post -> {
-      List<String> postFilePaths = post.getPostFiles().stream().map(it -> {
-        try {
-          return cloudFrontService.generateSignedUrl(it.getFilePath());
-        } catch (IOException | InvalidKeySpecException e) {
-          throw new BadRequestException("파일 URL을 생성할 수 없습니다");
-        }
-      }).toList();
+      List<String> postFilePaths = getFileUrls(post);
 
       return PostResponse.from(post, postFilePaths);
     }).stream().toList();
   }
 
+  @Transactional
+  public void deleteGroupPost(Long groupId, Long postId) {
+    User user = currentUserProvider.getCurrentUser();
+    if (!groupService.checkGroupMember(groupId, user)) {
+      throw new ForbiddenException("그룹원이 아닙니다.");
+    }
+
+    Post post = findByPostId(postId);
+    validateWriter(user, post);
+
+    if (!post.getPostFiles().isEmpty()) {
+      s3Service.deleteFolder(groupPostFilePathGenerator.generateImagePath(post));
+    }
+    postRepository.delete(post);
+  }
+
+  @Transactional
+  public PostResponse updateGroupPost(Long groupId, Long postId, UpdatePostRequest request) {
+    User user = currentUserProvider.getCurrentUser();
+    if (!groupService.checkGroupMember(groupId, user)) { // 현재 그룹 멤버인지 확인
+      throw new ForbiddenException("그룹원이 아닙니다.");
+    }
+    Post post = findByPostId(postId);
+    validateWriter(user, post);
+
+    return PostResponse.from(
+        post.updateTitle(request.title())
+            .updateContent(request.content()),
+        getFileUrls(post));
+  }
+
   private Post findByPostId(Long postId) {
     return postRepository.findById(postId)
         .orElseThrow(() -> new NotFoundException("포스트를 찾을 수 없습니다"));
+  }
+
+  private List<String> getFileUrls(Post post) {
+    List<String> urls = new ArrayList<>();
+    post.getPostFiles().forEach(file -> {
+      try {
+        urls.add(cloudFrontService.generateSignedUrl(file.getFilePath()));
+      } catch (InvalidKeySpecException | IOException e) {
+        throw new RuntimeException(e);
+      }
+    });
+
+    return urls;
+  }
+
+  private void validateWriter(User user, Post post) {
+    if (!user.equals(post.getUser())) {
+      throw new ForbiddenException("작성자가 아닙니다. 변경 권한이 없습니다.");
+    }
   }
 }

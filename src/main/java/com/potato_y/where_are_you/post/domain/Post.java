@@ -48,7 +48,7 @@ public class Post {
   private User user;
 
   @NotNull
-  @Column(name = "group_name", length = 20)
+  @Column(name = "title", length = 20)
   private String title;
 
   @Column(name = "content")
@@ -71,6 +71,18 @@ public class Post {
     this.user = user;
     this.title = title;
     this.content = content;
+  }
+
+  public Post updateTitle(String title) {
+    this.title = title;
+
+    return this;
+  }
+
+  public Post updateContent(String content) {
+    this.content = content;
+
+    return this;
   }
 
   public Post updatePostFiles(List<PostFile> postFiles) {

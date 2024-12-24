@@ -1,8 +1,10 @@
 package com.potato_y.where_are_you.aws;
 
 import com.amazonaws.services.s3.AmazonS3;
+import com.amazonaws.services.s3.model.ObjectListing;
 import com.amazonaws.services.s3.model.ObjectMetadata;
 import com.amazonaws.services.s3.model.PutObjectRequest;
+import com.amazonaws.services.s3.model.S3ObjectSummary;
 import java.io.IOException;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
@@ -19,21 +21,39 @@ public class S3Service {
   @Value("${aws.s3.bucket-name}")
   private String bucketName;
 
-  @Value("${aws.s3.default-image-path}")
-  private String defaultImagePath;
-
-  public String uploadPostFile(MultipartFile image, String path) throws IOException {
+  public String uploadFile(MultipartFile image, String path) throws IOException {
     String fileName = this.getFileName(image, path);
-    String filePath = defaultImagePath + fileName;
     ObjectMetadata objectMetadata = this.getObjectMetadata(image);
 
     PutObjectRequest request = new PutObjectRequest(
-        bucketName, filePath, image.getInputStream(), objectMetadata
+        bucketName, fileName, image.getInputStream(), objectMetadata
     );
 
     s3Client.putObject(request);
 
-    return filePath;
+    return fileName;
+  }
+
+  public void deleteFolder(String folderPath) {
+    if (!folderPath.endsWith("/")) {
+      folderPath += "/";
+    }
+
+    ObjectListing objectListing = s3Client.listObjects(bucketName, folderPath); // 목록 가져오기
+
+    // 모든 객체 삭제
+    while (true) {
+      for (S3ObjectSummary objectSummary : objectListing.getObjectSummaries()) {
+        s3Client.deleteObject(bucketName, objectSummary.getKey());
+      }
+
+      // 다음 페이지가 있으면 계속 진행
+      if (objectListing.isTruncated()) {
+        objectListing = s3Client.listNextBatchOfObjects(objectListing);
+      } else {
+        break;
+      }
+    }
   }
 
   private String getFileName(MultipartFile image, String imagePath) {
