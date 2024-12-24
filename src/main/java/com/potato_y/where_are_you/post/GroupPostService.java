@@ -14,6 +14,7 @@ import com.potato_y.where_are_you.post.domain.PostFileRepository;
 import com.potato_y.where_are_you.post.domain.PostRepository;
 import com.potato_y.where_are_you.post.dto.CreatePostRequest;
 import com.potato_y.where_are_you.post.dto.PostResponse;
+import com.potato_y.where_are_you.post.dto.UpdatePostRequest;
 import com.potato_y.where_are_you.user.domain.User;
 import java.io.IOException;
 import java.security.spec.InvalidKeySpecException;
@@ -134,6 +135,21 @@ public class GroupPostService {
       s3Service.deleteFolder(groupPostFilePathGenerator.generateImagePath(post));
     }
     postRepository.delete(post);
+  }
+
+  @Transactional
+  public PostResponse updateGroupPost(Long groupId, Long postId, UpdatePostRequest request) {
+    User user = currentUserProvider.getCurrentUser();
+    if (!groupService.checkGroupMember(groupId, user)) { // 현재 그룹 멤버인지 확인
+      throw new ForbiddenException("그룹원이 아닙니다.");
+    }
+    Post post = findByPostId(postId);
+    validateWriter(user, post);
+
+    return PostResponse.from(
+        post.updateTitle(request.title())
+            .updateContent(request.content()),
+        getFileUrls(post));
   }
 
   private Post findByPostId(Long postId) {

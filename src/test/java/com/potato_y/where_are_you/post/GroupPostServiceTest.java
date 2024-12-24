@@ -24,6 +24,7 @@ import com.potato_y.where_are_you.post.domain.PostFileRepository;
 import com.potato_y.where_are_you.post.domain.PostRepository;
 import com.potato_y.where_are_you.post.dto.CreatePostRequest;
 import com.potato_y.where_are_you.post.dto.PostResponse;
+import com.potato_y.where_are_you.post.dto.UpdatePostRequest;
 import com.potato_y.where_are_you.user.domain.User;
 import java.io.IOException;
 import java.security.spec.InvalidKeySpecException;
@@ -35,6 +36,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
@@ -336,6 +338,60 @@ class GroupPostServiceTest {
     given(postRepository.findById(anyLong())).willReturn(Optional.of(post));
 
     assertThatThrownBy(() -> groupPostService.deleteGroupPost(1L, 1L))
+        .isInstanceOf(ForbiddenException.class);
+  }
+
+  @Test
+  @DisplayName("updateGroupPost(): 포스트를 업데이트 할 수 있다")
+  void successUpdateGroupPost() {
+    Post post = Mockito.spy(Post.builder()
+        .group(testGroup)
+        .user(testUser)
+        .title("title")
+        .content("content")
+        .build());
+    var request = new UpdatePostRequest("fix title", "fix content");
+
+    given(currentUserProvider.getCurrentUser()).willReturn(testUser);
+    given(groupService.checkGroupMember(anyLong(), any(User.class))).willReturn(true);
+    given(postRepository.findById(anyLong())).willReturn(Optional.of(post));
+
+    PostResponse response = groupPostService.updateGroupPost(1L, 1L, request);
+
+    assertThat(response.title()).isEqualTo(request.title());
+    assertThat(response.content()).isEqualTo(request.content());
+    verify(post, times(1)).updateTitle(request.title());
+    verify(post, times(1)).updateContent(request.content());
+  }
+
+  @Test
+  @DisplayName("updateGroupPost(): 그룹원이 아니라면 업데이트 할 수 없다")
+  void failUpdateGroupPost_notGroupMember() {
+    given(currentUserProvider.getCurrentUser()).willReturn(testUser);
+    given(groupService.checkGroupMember(anyLong(), any(User.class))).willReturn(false);
+
+    assertThatThrownBy(
+        () -> groupPostService.updateGroupPost(1L, 1L, new UpdatePostRequest("", "")))
+        .isInstanceOf(ForbiddenException.class);
+  }
+
+  @Test
+  @DisplayName("updateGroupPost(): 작성자가 아니라면 업데이트 할 수 없다")
+  void failUpdateGroupPost_notWriter() {
+    User otherUser = createUser("other@mail.com", "other", "1");
+    Post post = Post.builder()
+        .group(testGroup)
+        .user(otherUser)
+        .title("title")
+        .content("content")
+        .build();
+
+    given(currentUserProvider.getCurrentUser()).willReturn(testUser);
+    given(groupService.checkGroupMember(anyLong(), any(User.class))).willReturn(true);
+    given(postRepository.findById(anyLong())).willReturn(Optional.of(post));
+
+    assertThatThrownBy(
+        () -> groupPostService.updateGroupPost(1L, 1L, new UpdatePostRequest("", "")))
         .isInstanceOf(ForbiddenException.class);
   }
 }

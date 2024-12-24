@@ -73,6 +73,18 @@ public class Post {
     this.content = content;
   }
 
+  public Post updateTitle(String title) {
+    this.title = title;
+
+    return this;
+  }
+
+  public Post updateContent(String content) {
+    this.content = content;
+
+    return this;
+  }
+
   public Post updatePostFiles(List<PostFile> postFiles) {
     this.postFiles = postFiles;
 
