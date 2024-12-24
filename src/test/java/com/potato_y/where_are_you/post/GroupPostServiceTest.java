@@ -149,6 +149,16 @@ class GroupPostServiceTest {
     assertThat(response.files().getLast()).isEqualTo(signedUrl2);
   }
 
+  @Test
+  @DisplayName("createGroupPost(): 그룹원이 아니라면 포스트 생성 시 예외가 발생한다")
+  void failCreateGroupPost() {
+    given(currentUserProvider.getCurrentUser()).willReturn(testUser);
+    given(groupService.checkGroupMember(anyLong(), any(User.class))).willReturn(false);
+
+    assertThatThrownBy(() -> groupPostService.createGroupPost(1L,
+        new CreatePostRequest("title", "content", List.of())))
+        .isInstanceOf(ForbiddenException.class);
+  }
 
   @Test
   @DisplayName("getGroupPost(): 특정 포스트 조회할 수 있다 - 빈 파일")
@@ -208,6 +218,16 @@ class GroupPostServiceTest {
   }
 
   @Test
+  @DisplayName("getGroupPost(): 그룹원이 아니라면 포스트 조회 시 예외가 발생한다")
+  void failGetGroupPost() {
+    given(currentUserProvider.getCurrentUser()).willReturn(testUser);
+    given(groupService.checkGroupMember(anyLong(), any(User.class))).willReturn(false);
+
+    assertThatThrownBy(() -> groupPostService.getGroupPost(1L, 1L))
+        .isInstanceOf(ForbiddenException.class);
+  }
+
+  @Test
   @DisplayName("getGroupPosts(): 그룹 포스트들을 조회할 수 있다")
   void successGetGroupPosts() {
     int page = 0;
@@ -235,6 +255,16 @@ class GroupPostServiceTest {
     assertThat(response.get(1).title()).isEqualTo(postList.get(1).getTitle());
     assertThat(response.get(2).title()).isEqualTo(postList.get(2).getTitle());
     assertThat(response.get(3).title()).isEqualTo(postList.get(3).getTitle());
+  }
+
+  @Test
+  @DisplayName("getGroupPosts(): 그룹원이 아니면 예외가 발생한다")
+  void failGetGroupPosts() {
+    given(currentUserProvider.getCurrentUser()).willReturn(testUser);
+    given(groupService.checkGroupMember(anyLong(), any(User.class))).willReturn(false);
+
+    assertThatThrownBy(() -> groupPostService.getGroupPosts(1L, 1))
+        .isInstanceOf(ForbiddenException.class);
   }
 
   @Test
