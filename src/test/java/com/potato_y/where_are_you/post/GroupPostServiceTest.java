@@ -3,14 +3,19 @@ package com.potato_y.where_are_you.post;
 import static com.potato_y.where_are_you.group.GroupTestUtils.createGroup;
 import static com.potato_y.where_are_you.user.UserTestUtils.createUser;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 
 import com.potato_y.where_are_you.authentication.CurrentUserProvider;
 import com.potato_y.where_are_you.aws.CloudFrontService;
 import com.potato_y.where_are_you.aws.S3Service;
+import com.potato_y.where_are_you.error.exception.ForbiddenException;
 import com.potato_y.where_are_you.group.GroupService;
 import com.potato_y.where_are_you.group.domain.Group;
 import com.potato_y.where_are_you.post.domain.Post;
@@ -230,5 +235,58 @@ class GroupPostServiceTest {
     assertThat(response.get(1).title()).isEqualTo(postList.get(1).getTitle());
     assertThat(response.get(2).title()).isEqualTo(postList.get(2).getTitle());
     assertThat(response.get(3).title()).isEqualTo(postList.get(3).getTitle());
+  }
+
+  @Test
+  @DisplayName("deleteGroupPost(): 포스트를 삭제할 수 있다 - 파일이 있다")
+  void successDeleteGroupPost_twoFile() throws IOException, InvalidKeySpecException {
+    Post post = Post.builder()
+        .group(testGroup)
+        .user(testUser)
+        .title("title")
+        .content("content")
+        .build();
+    PostFile postFile1 = PostFile.builder().post(post).filePath("path").build();
+    PostFile postFile2 = PostFile.builder().post(post).filePath("path").build();
+    post.updatePostFiles(List.of(postFile1, postFile2));
+
+    given(currentUserProvider.getCurrentUser()).willReturn(testUser);
+    given(groupService.checkGroupMember(anyLong(), any(User.class))).willReturn(true);
+    given(postRepository.findById(anyLong())).willReturn(Optional.of(post));
+    given(groupPostFilePathGenerator.generateImagePath(any(Post.class))).willReturn("path");
+    doNothing().when(s3Service).deleteFolder(anyString());
+
+    groupPostService.deleteGroupPost(1L, 1L);
+
+    verify(postRepository, times(1)).delete(any(Post.class));
+  }
+
+  @Test
+  @DisplayName("deleteGroupPost(): 포스트를 삭제할 수 있다 - 파일이 없다")
+  void successDeleteGroupPost_noFile() {
+    Post post = Post.builder()
+        .group(testGroup)
+        .user(testUser)
+        .title("title")
+        .content("content")
+        .build();
+
+    given(currentUserProvider.getCurrentUser()).willReturn(testUser);
+    given(groupService.checkGroupMember(anyLong(), any(User.class))).willReturn(true);
+    given(postRepository.findById(anyLong())).willReturn(Optional.of(post));
+
+    groupPostService.deleteGroupPost(1L, 1L);
+
+    verify(postRepository, times(1)).delete(any(Post.class));
+  }
+
+  @Test
+  @DisplayName("deleteGroupPost(): 그룹원이 아니면 예외가 발생한다")
+  void failDeleteGroupPost() {
+    given(currentUserProvider.getCurrentUser()).willReturn(testUser);
+    given(groupService.checkGroupMember(anyLong(), any(User.class))).willReturn(false);
+
+    assertThatThrownBy(() -> groupPostService.deleteGroupPost(1L, 1L))
+        .isInstanceOf(ForbiddenException.class);
   }
 }
