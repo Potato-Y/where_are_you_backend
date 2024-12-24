@@ -118,8 +118,8 @@ class UserApiControllerTest {
   void successUpdateUserLate_update() throws Exception {
     final String url = "/v1/users/late";
     User user = userRepository.save(createUser("test@mail.com", "test user", "1"));
-    UserLate userLate = userLateRepository.save(UserLate.builder().user(user).build())
-        .upCount(true);
+    userLateRepository.save(
+        UserLate.builder().user(user).build().upCount(true));
     UserLateRequest request = new UserLateRequest(true);
     final var requestBody = objectMapper.writeValueAsString(request);
 
