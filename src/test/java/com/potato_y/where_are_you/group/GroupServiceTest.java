@@ -12,6 +12,7 @@ import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
@@ -62,6 +63,9 @@ class GroupServiceTest {
 
   @Mock
   private CurrentUserProvider currentUserProvider;
+
+  @Mock
+  private GroupValidator groupValidator;
 
   private User testUser;
 
@@ -228,6 +232,8 @@ class GroupServiceTest {
 
     given(currentUserProvider.getCurrentUser()).willReturn(otherUser);
     given(groupRepository.findById(any(Long.class))).willReturn(Optional.of(group));
+    doThrow(new ForbiddenException("")).when(groupValidator)
+        .groupHostUser(any(Group.class), any(User.class));
 
     // when, then
     assertThatThrownBy(() -> groupService.createInviteCode(1L))
@@ -279,6 +285,8 @@ class GroupServiceTest {
 
     given(currentUserProvider.getCurrentUser()).willReturn(otherUser);
     given(groupRepository.findById(any(Long.class))).willReturn(Optional.of(group));
+    doThrow(new ForbiddenException("")).when(groupValidator)
+        .groupHostUser(any(Group.class), any(User.class));
 
     // when, then
     assertThatThrownBy(() -> groupService.updateGroup(1L, request))
