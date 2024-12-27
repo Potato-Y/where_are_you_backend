@@ -37,7 +37,7 @@ public class OAuthLoginService {
   }
 
   private Long findOrCreateUser(OAuthInfoResponse oAuthInfoResponse) {
-    return userRepository.findByServiceId(oAuthInfoResponse.getId())
+    return userRepository.findByProviderAccountId(oAuthInfoResponse.getId())
         .map(User::getId)
         .orElseGet(() -> userService.createUser(oAuthInfoResponse).getId());
   }

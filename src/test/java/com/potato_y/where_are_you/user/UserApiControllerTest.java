@@ -57,11 +57,11 @@ class UserApiControllerTest {
   public void successGetMyAccount() throws Exception {
     final String url = "/v1/users/me";
     User user = userRepository.save(User.builder()
-        .oAuthProvider(OAuthProvider.KAKAO)
+        .oauthProvider(OAuthProvider.KAKAO)
         .email("user@mail.com")
         .password("password")
         .nickname("name")
-        .serviceId("2")
+        .providerAccountId("2")
         .build());
 
     ResultActions result = mockMvc.perform(get(url));
