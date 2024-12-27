@@ -297,7 +297,7 @@ class GroupApiControllerTest {
     final String url = "/v1/groups/signup/{inviteCode}";
     final String groupName = "group";
     final String code = "code";
-    final User hostUser = userRepository.save(createUser("host@mail.com", "host", "1"));
+    final User hostUser = userRepository.save(createUser("host@mail.com", "host", "2"));
 
     Group group = groupRepository.save(
         Group.builder().groupName(groupName).hostUser(hostUser).build());
@@ -347,7 +347,7 @@ class GroupApiControllerTest {
     // given
     final String url = "/v1/groups/signup/{inviteCode}";
     final String groupName = "group";
-    final User hostUser = userRepository.save(createUser("host@mail.com", "host", "1"));
+    final User hostUser = userRepository.save(createUser("host@mail.com", "host", "2"));
 
     Group group = groupRepository.save(
         Group.builder().groupName(groupName).hostUser(hostUser).build());
@@ -370,7 +370,7 @@ class GroupApiControllerTest {
     final String url = "/v1/groups/signup/{inviteCode}";
     final String groupName = "group";
     final String code = "code";
-    final User hostUser = userRepository.save(createUser("host@mail.com", "host", "1"));
+    final User hostUser = userRepository.save(createUser("host@mail.com", "host", "2"));
 
     Group group = groupRepository.save(
         Group.builder().groupName(groupName).hostUser(hostUser).build());
@@ -393,7 +393,7 @@ class GroupApiControllerTest {
     final String url = "/v1/groups/signup/{inviteCode}";
     final String groupName = "group";
     final String code = "code";
-    final User hostUser = userRepository.save(createUser("host@mail.com", "host", "1"));
+    final User hostUser = userRepository.save(createUser("host@mail.com", "host", "2"));
 
     Group group = groupRepository.save(
         Group.builder().groupName(groupName).hostUser(hostUser).build());

@@ -9,9 +9,9 @@ public class UserTestUtils {
     return User.builder()
         .email(email)
         .nickname(nickname)
-        .serviceId(serviceId)
+        .providerAccountId(serviceId)
         .password("test_password")
-        .oAuthProvider(OAuthProvider.KAKAO)
+        .oauthProvider(OAuthProvider.KAKAO)
         .build();
   }
 }

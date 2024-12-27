@@ -44,10 +44,10 @@ public class TokenProviderTest {
   void generateToken_accessToken() {
     // given 토큰에 유저 정보를 추가하기 위한 테스트 유저를 만든다.
     User testUser = userRepository.save(User.builder()
-        .serviceId("1")
+        .providerAccountId("1")
         .email("user@email.com")
         .password("password")
-        .oAuthProvider(OAuthProvider.KAKAO)
+        .oauthProvider(OAuthProvider.KAKAO)
         .nickname("test user")
         .build());
 
@@ -73,10 +73,10 @@ public class TokenProviderTest {
   void generateToken_refreshToken() {
     // given 토큰에 유저 정보를 추가하기 위한 테스트 유저를 만든다.
     User testUser = userRepository.save(User.builder()
-        .serviceId("1")
+        .providerAccountId("1")
         .email("user@email.com")
         .password("password")
-        .oAuthProvider(OAuthProvider.KAKAO)
+        .oauthProvider(OAuthProvider.KAKAO)
         .nickname("test user")
         .build());
 
@@ -166,10 +166,10 @@ public class TokenProviderTest {
     String userId = "1";
     String token = JwtFactory.builder().subject(userId).build().createToken(jwtProperties);
     userRepository.save(User.builder()
-        .serviceId("1")
+        .providerAccountId("1")
         .email("test@mail.com")
         .password("password")
-        .oAuthProvider(OAuthProvider.KAKAO)
+        .oauthProvider(OAuthProvider.KAKAO)
         .nickname("test_user")
         .build());
 

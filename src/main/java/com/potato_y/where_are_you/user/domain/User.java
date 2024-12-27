@@ -1,6 +1,7 @@
 package com.potato_y.where_are_you.user.domain;
 
 import com.potato_y.where_are_you.authentication.domain.oauth.OAuthProvider;
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
@@ -8,6 +9,7 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
+import jakarta.persistence.UniqueConstraint;
 import jakarta.validation.constraints.NotNull;
 import java.util.Collection;
 import java.util.List;
@@ -18,27 +20,47 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
-@Table(name = "users")
 @Getter
 @Entity
 @NoArgsConstructor
+@Table(
+    name = "users",
+    uniqueConstraints = {
+        @UniqueConstraint(
+            name = "oauth_id_unique",
+            columnNames = {
+                "provider_account_id",
+                "oauth_provider"
+            }
+        )
+    }
+)
 public class User implements UserDetails {
 
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   private Long id;
 
-  private String serviceId;
+  @NotNull
+  @Column(name = "provider_account_id")
+  private String providerAccountId;
 
+  @NotNull
+  @Column(name = "email")
   private String email;
 
+  @NotNull
+  @Column(name = "nickname")
   private String nickname;
 
   @NotNull
+  @Column(name = "password")
   private String password;
 
+  @NotNull
   @Enumerated(EnumType.STRING)
-  private OAuthProvider oAuthProvider;
+  @Column(name = "oauth_provider")
+  private OAuthProvider oauthProvider;
 
   @Override
   public Collection<? extends GrantedAuthority> getAuthorities() {
@@ -80,12 +102,12 @@ public class User implements UserDetails {
   }
 
   @Builder
-  public User(String serviceId, String email, String nickname, String password,
-      OAuthProvider oAuthProvider) {
-    this.serviceId = serviceId;
+  public User(String providerAccountId, String email, String nickname, String password,
+      OAuthProvider oauthProvider) {
+    this.providerAccountId = providerAccountId;
     this.email = email;
     this.password = password;
     this.nickname = nickname;
-    this.oAuthProvider = oAuthProvider;
+    this.oauthProvider = oauthProvider;
   }
 }

@@ -50,9 +50,9 @@ class UserServiceTest {
     User user = User.builder()
         .email(email)
         .nickname(nickname)
-        .serviceId(serviceId)
+        .providerAccountId(serviceId)
         .password("pwd")
-        .oAuthProvider(OAuthProvider.KAKAO)
+        .oauthProvider(OAuthProvider.KAKAO)
         .build();
 
     OAuthInfoResponse oAuthInfoResponse = new OAuthInfoResponse() {
@@ -81,7 +81,7 @@ class UserServiceTest {
 
     User response = userService.createUser(oAuthInfoResponse);
 
-    assertThat(response.getServiceId()).isEqualTo(serviceId);
+    assertThat(response.getProviderAccountId()).isEqualTo(serviceId);
     assertThat(response.getEmail()).isEqualTo(email);
     assertThat(response.getNickname()).isEqualTo(nickname);
     assertThat(response.getPassword()).isNotEmpty();

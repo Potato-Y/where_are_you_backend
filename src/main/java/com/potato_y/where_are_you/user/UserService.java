@@ -34,8 +34,8 @@ public class UserService {
     BCryptPasswordEncoder encoder = new BCryptPasswordEncoder();
 
     User user = User.builder()
-        .serviceId(response.getId())
-        .oAuthProvider(response.getOAuthProvider())
+        .providerAccountId(response.getId())
+        .oauthProvider(response.getOAuthProvider())
         .password(encoder.encode(generateSecureRandomString(USER_RANDOM_PASSWORD_SIZE)))
         .email(response.getEmail())
         .nickname(response.getNickname())
