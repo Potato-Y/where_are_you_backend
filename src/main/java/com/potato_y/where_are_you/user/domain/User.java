@@ -9,6 +9,7 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
+import jakarta.persistence.UniqueConstraint;
 import jakarta.validation.constraints.NotNull;
 import java.util.Collection;
 import java.util.List;
@@ -19,10 +20,21 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
-@Table(name = "users")
 @Getter
 @Entity
 @NoArgsConstructor
+@Table(
+    name = "users",
+    uniqueConstraints = {
+        @UniqueConstraint(
+            name = "oauth_id_unique",
+            columnNames = {
+                "provider_account_id",
+                "oauth_provider"
+            }
+        )
+    }
+)
 public class User implements UserDetails {
 
   @Id
