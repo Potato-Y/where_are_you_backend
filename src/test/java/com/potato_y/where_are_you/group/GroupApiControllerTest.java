@@ -4,6 +4,7 @@ import static com.potato_y.where_are_you.group.GroupTestUtils.createGroup;
 import static com.potato_y.where_are_you.group.GroupTestUtils.createGroupHost;
 import static com.potato_y.where_are_you.group.GroupTestUtils.createGroupMember;
 import static com.potato_y.where_are_you.user.UserTestUtils.createUser;
+import static com.potato_y.where_are_you.utils.SecurityContextUtils.setAuthentication;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers.springSecurity;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
@@ -32,8 +33,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
-import org.springframework.security.test.context.support.WithMockUser;
-import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
@@ -42,7 +41,6 @@ import org.springframework.web.context.WebApplicationContext;
 
 @SpringBootTest
 @AutoConfigureMockMvc
-@DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
 @ActiveProfiles("test")
 class GroupApiControllerTest {
 
@@ -79,17 +77,18 @@ class GroupApiControllerTest {
     groupInviteCodeRepository.deleteAll();
     groupMemberRepository.deleteAll();
     groupRepository.deleteAll();
+    userRepository.deleteAll();
 
     testUser = userRepository.save(createUser("test@mail.com", "test user", "1"));
   }
 
   @Test
-  @WithMockUser("1")
   @DisplayName("createGroup(): 그룹을 생성할 수 있다.")
   void successCreateGroup() throws Exception {
     // given
     final String url = "/v1/groups";
     final String groupName = "test group";
+    setAuthentication(testUser);
 
     CreateGroupRequest request = new CreateGroupRequest(groupName, 0);
     final String requestBody = objectMapper.writeValueAsString(request);
@@ -110,11 +109,11 @@ class GroupApiControllerTest {
   }
 
   @Test
-  @WithMockUser("1")
   @DisplayName("createGroup(): 그룹 이름이 없으면 500 응답을 반환한다.")
   void failCreateGroup_emptyGroupName() throws Exception {
     // given
     final String url = "/v1/groups";
+    setAuthentication(testUser);
 
     CreateGroupRequest request = new CreateGroupRequest(null, 0);
     final String requestBody = objectMapper.writeValueAsString(request);
@@ -128,11 +127,11 @@ class GroupApiControllerTest {
   }
 
   @Test
-  @WithMockUser("1")
   @DisplayName("createGroup(): 그룹 이름이 공백이면 500 응답을 반환한다.")
   void failCreateGroup_blankGroupName() throws Exception {
     // given
     final String url = "/v1/groups";
+    setAuthentication(testUser);
 
     CreateGroupRequest request = new CreateGroupRequest(" ", null);
     final String requestBody = objectMapper.writeValueAsString(request);
@@ -146,7 +145,6 @@ class GroupApiControllerTest {
   }
 
   @Test
-  @WithMockUser("1")
   @DisplayName("getGroup(): 그룹 정보를 조회할 수 있다.")
   void successGetGroup() throws Exception {
     // given
@@ -154,6 +152,7 @@ class GroupApiControllerTest {
     final String groupName = "test group";
     final Group group = groupRepository.save(createGroup(groupName, testUser));
     groupMemberRepository.save(createGroupHost(group, testUser));
+    setAuthentication(testUser);
 
     // when
     ResultActions result = mockMvc.perform(get(url, group.getId()));
@@ -181,12 +180,12 @@ class GroupApiControllerTest {
   }
 
   @Test
-  @WithMockUser("1")
   @DisplayName("createGroupInviteCode(): 그룹 초대 코드를 생성할 수 있다.")
   void successCreateGroupInviteCode() throws Exception {
     // given
     final String url = "/v1/groups/{groupId}/invite-code";
     Group group = groupRepository.save(createGroup("test group", testUser));
+    setAuthentication(testUser);
 
     // when
     ResultActions result = mockMvc.perform(post(url, group.getId()));
@@ -214,12 +213,12 @@ class GroupApiControllerTest {
   }
 
   @Test
-  @WithMockUser("1")
   @DisplayName("updateGroup(): 그룹 정보를 변경할 수 있다.")
   void successUpdateGroup() throws Exception {
     // given
     final String url = "/v1/groups/{groupId}";
     final String groupName = "new group";
+    setAuthentication(testUser);
 
     Group group = groupRepository.save(
         Group.builder().groupName("group").hostUser(testUser).build());
@@ -245,12 +244,12 @@ class GroupApiControllerTest {
   }
 
   @Test
-  @WithMockUser("1")
   @DisplayName("updateGroup(): 없는 그룹은 정보를 변경할 수 없다.")
   void failUpdateGroup_notFoundGroup() throws Exception {
     // given
     final String url = "/v1/groups/{groupId}";
     final String groupName = "new group";
+    setAuthentication(testUser);
 
     CreateGroupRequest request = new CreateGroupRequest(groupName, null);
     final String requestBody = objectMapper.writeValueAsString(request);
@@ -290,7 +289,6 @@ class GroupApiControllerTest {
   }
 
   @Test
-  @WithMockUser("1")
   @DisplayName("signupGroup(): 그룹에 가입할 수 있다.")
   void successSignupGroup() throws Exception {
     // given
@@ -298,6 +296,7 @@ class GroupApiControllerTest {
     final String groupName = "group";
     final String code = "code";
     final User hostUser = userRepository.save(createUser("host@mail.com", "host", "2"));
+    setAuthentication(testUser);
 
     Group group = groupRepository.save(
         Group.builder().groupName(groupName).hostUser(hostUser).build());
@@ -319,13 +318,13 @@ class GroupApiControllerTest {
   }
 
   @Test
-  @WithMockUser("1")
   @DisplayName("signupGroup(): 호스트 사용자는 그룹에 가입할 수 없다.")
   void failSignupGroup_hostUser() throws Exception {
     // given
     final String url = "/v1/groups/signup/{inviteCode}";
     final String groupName = "group";
     final String code = "code";
+    setAuthentication(testUser);
 
     Group group = groupRepository.save(
         Group.builder().groupName(groupName).hostUser(testUser).build());
@@ -341,13 +340,13 @@ class GroupApiControllerTest {
   }
 
   @Test
-  @WithMockUser("1")
   @DisplayName("signupGroup(): 호스트 사용자는 그룹에 가입할 수 없다.")
   void failSignupGroup_notFoundCode() throws Exception {
     // given
     final String url = "/v1/groups/signup/{inviteCode}";
     final String groupName = "group";
     final User hostUser = userRepository.save(createUser("host@mail.com", "host", "2"));
+    setAuthentication(testUser);
 
     Group group = groupRepository.save(
         Group.builder().groupName(groupName).hostUser(hostUser).build());
@@ -363,7 +362,6 @@ class GroupApiControllerTest {
   }
 
   @Test
-  @WithMockUser("1")
   @DisplayName("signupGroup(): 이미 그룹에 가입한 사용자는 가입할 수 없다.")
   void failSignupGroup_inMember() throws Exception {
     // given
@@ -371,6 +369,7 @@ class GroupApiControllerTest {
     final String groupName = "group";
     final String code = "code";
     final User hostUser = userRepository.save(createUser("host@mail.com", "host", "2"));
+    setAuthentication(testUser);
 
     Group group = groupRepository.save(
         Group.builder().groupName(groupName).hostUser(hostUser).build());
@@ -409,11 +408,11 @@ class GroupApiControllerTest {
   }
 
   @Test
-  @WithMockUser("1")
   @DisplayName("getGroupList(): 사용자의 그룹 목록을 조회할 수 있다.")
   void successGetGroupList() throws Exception {
     // given
     final String url = "/v1/groups";
+    setAuthentication(testUser);
 
     Group hostGroup = groupRepository.save(createGroup("host group", testUser));
     groupMemberRepository.save(createGroupHost(hostGroup, testUser));
@@ -444,11 +443,11 @@ class GroupApiControllerTest {
   }
 
   @Test
-  @WithMockUser("1")
   @DisplayName("getGroupList(): 그룹이 없는 경우 빈 배열을 반환한다.")
   void successGetGroupList_empty() throws Exception {
     // given
     final String url = "/v1/groups";
+    setAuthentication(testUser);
 
     // when
     ResultActions result = mockMvc.perform(get(url));
@@ -474,12 +473,12 @@ class GroupApiControllerTest {
   }
 
   @Test
-  @WithMockUser("1")
   @DisplayName("deleteOrLeaveGroup(): 호스트 사용자는 그룹을 삭제할 수 있다.")
   void successDeleteOrLeaveGroup_hostUser() throws Exception {
     // given
     final String url = "/v1/groups/{groupId}";
     Group group = groupRepository.save(createGroup("test group", testUser));
+    setAuthentication(testUser);
 
     // when
     ResultActions result = mockMvc.perform(delete(url, group.getId()));
@@ -490,7 +489,6 @@ class GroupApiControllerTest {
   }
 
   @Test
-  @WithMockUser("1")
   @DisplayName("deleteOrLeaveGroup(): 멤버 사용자는 그룹에서 탈퇴할 수 있다.")
   void successDeleteOrLeaveGroup_memberUser() throws Exception {
     // given
@@ -498,6 +496,7 @@ class GroupApiControllerTest {
     User hostUser = userRepository.save(createUser("host@mail.com", "host user", "2"));
     Group group = groupRepository.save(createGroup("test group", hostUser));
     GroupMember member = groupMemberRepository.save(createGroupMember(group, testUser));
+    setAuthentication(testUser);
 
     // when
     ResultActions result = mockMvc.perform(delete(url, group.getId()));
@@ -509,11 +508,11 @@ class GroupApiControllerTest {
   }
 
   @Test
-  @WithMockUser("1")
   @DisplayName("deleteOrLeaveGroup(): 존재하지 않는 그룹은 삭제/탈퇴할 수 없다.")
   void failDeleteOrLeaveGroup_notFoundGroup() throws Exception {
     // given
     final String url = "/v1/groups/{groupId}";
+    setAuthentication(testUser);
 
     // when
     ResultActions result = mockMvc.perform(delete(url, 1L));
@@ -537,13 +536,13 @@ class GroupApiControllerTest {
   }
 
   @Test
-  @WithMockUser("1")
   @DisplayName("deleteOrLeaveGroup(): 그룹의 멤버가 아닌 사용자는 탈퇴할 수 없다.")
   void failDeleteOrLeaveGroup_notMember() throws Exception {
     // given
     final String url = "/v1/groups/{groupId}";
     User hostUser = userRepository.save(createUser("host@mail.com", "host user", "2"));
     Group group = groupRepository.save(createGroup("test group", hostUser));
+    setAuthentication(testUser);
 
     // when
     ResultActions result = mockMvc.perform(
@@ -555,7 +554,6 @@ class GroupApiControllerTest {
   }
 
   @Test
-  @WithMockUser("1")
   @DisplayName("getMemberInfo(): 그룹원의 지각 정보를 조회할 수 있다 - 새 데이터")
   void successGetMemberInfo_new() throws Exception {
     // given
@@ -565,6 +563,7 @@ class GroupApiControllerTest {
     final Group group = groupRepository.save(createGroup(groupName, testUser));
     groupMemberRepository.save(createGroupHost(group, hostUser));
     groupMemberRepository.save(createGroupMember(group, testUser));
+    setAuthentication(testUser);
 
     // when
     ResultActions result = mockMvc.perform(get(url, group.getId())
@@ -581,7 +580,6 @@ class GroupApiControllerTest {
   }
 
   @Test
-  @WithMockUser("1")
   @DisplayName("getMemberInfo(): 그룹원의 지각 정보를 조회할 수 있다 - 기존 데이터")
   void successGetMemberInfo_get() throws Exception {
     // given
@@ -593,6 +591,7 @@ class GroupApiControllerTest {
     groupMemberRepository.save(createGroupMember(group, testUser));
     final var userLate = userLateRepository.save(
         UserLate.builder().user(hostUser).build().upCount(true));
+    setAuthentication(testUser);
 
     // when
     ResultActions result = mockMvc.perform(get(url, group.getId())
@@ -609,7 +608,6 @@ class GroupApiControllerTest {
   }
 
   @Test
-  @WithMockUser("1")
   @DisplayName("getMemberInfo(): 그룹원이 아니라면 정보를 조회할 수 없다")
   void failGetMemberInfo_currentNotMember() throws Exception {
     // given
@@ -618,6 +616,7 @@ class GroupApiControllerTest {
     final User hostUser = userRepository.save(createUser("host@mail.com", "host", "123"));
     final Group group = groupRepository.save(createGroup(groupName, hostUser));
     groupMemberRepository.save(createGroupHost(group, hostUser));
+    setAuthentication(testUser);
 
     // when
     ResultActions result = mockMvc.perform(get(url, group.getId())
@@ -628,7 +627,6 @@ class GroupApiControllerTest {
   }
 
   @Test
-  @WithMockUser("1")
   @DisplayName("getGroup(): 대상이 그룹원이 아니라면 정보를 조회할 수 없다")
   void failGetMemberInfo_NotMember() throws Exception {
     // given
@@ -637,6 +635,7 @@ class GroupApiControllerTest {
     final User otherUser = userRepository.save(createUser("host@mail.com", "host", "123"));
     final Group group = groupRepository.save(createGroup(groupName, testUser));
     groupMemberRepository.save(createGroupHost(group, testUser));
+    setAuthentication(testUser);
 
     // when
     ResultActions result = mockMvc.perform(get(url, group.getId())
