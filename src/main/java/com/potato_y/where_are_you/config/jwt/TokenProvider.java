@@ -15,7 +15,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 
 @Slf4j
@@ -96,10 +95,12 @@ public class TokenProvider {
     Set<SimpleGrantedAuthority> authorities = Collections.singleton(
         new SimpleGrantedAuthority("ROLE_USER"));
 
-    Long userId = Long.parseLong(claims.getSubject()); // 토큰에서 subject를 userId로 사용
-    UserDetails userDetails = userDetailService.loadUserById(userId); // ID로 사용자 조회
-
-    return new UsernamePasswordAuthenticationToken(userDetails, token, authorities);
+    return new UsernamePasswordAuthenticationToken(
+        new org.springframework.security.core.userdetails.User(
+            claims.getSubject(),
+            "",
+            authorities
+        ), token, authorities);
   }
 
   /**
