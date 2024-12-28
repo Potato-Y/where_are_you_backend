@@ -1,6 +1,7 @@
 package com.potato_y.where_are_you.firebase;
 
 import static com.potato_y.where_are_you.user.UserTestUtils.createUser;
+import static com.potato_y.where_are_you.utils.SecurityContextUtils.setAuthentication;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers.springSecurity;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -19,8 +20,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
-import org.springframework.security.test.context.support.WithMockUser;
-import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
@@ -29,7 +28,6 @@ import org.springframework.web.context.WebApplicationContext;
 
 @SpringBootTest
 @AutoConfigureMockMvc
-@DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
 @ActiveProfiles("test")
 class FirebaseApiControllerTest {
 
@@ -58,10 +56,10 @@ class FirebaseApiControllerTest {
     userRepository.deleteAll();
 
     testUser = userRepository.save(createUser("test@mail.com", "test user", "1"));
+    setAuthentication(testUser);
   }
 
   @Test
-  @WithMockUser("1")
   @DisplayName("saveOrUpdateFcmToken(): Token을 업데이트 할 수 있다.")
   void successSaveOrUpdateFcmToken_update() throws Exception {
     // given
@@ -87,7 +85,6 @@ class FirebaseApiControllerTest {
   }
 
   @Test
-  @WithMockUser("1")
   @DisplayName("saveOrUpdateFcmToken(): Token을 저장할 수 있다.")
   void successSaveOrUpdateFcmToken_save() throws Exception {
     // given
@@ -108,7 +105,6 @@ class FirebaseApiControllerTest {
   }
 
   @Test
-  @WithMockUser("1")
   @DisplayName("saveOrUpdateFcmToken(): 공백 Token은 업데이트 할 수 없다.")
   void failSaveOrUpdateFcmToken_update() throws Exception {
     // given
@@ -132,7 +128,6 @@ class FirebaseApiControllerTest {
   }
 
   @Test
-  @WithMockUser("1")
   @DisplayName("saveOrUpdateFcmToken(): 빈 Token은 저장할 수 없다.")
   void failSaveOrUpdateFcmToken_save() throws Exception {
     // given

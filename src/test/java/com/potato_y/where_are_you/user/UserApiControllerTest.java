@@ -1,6 +1,7 @@
 package com.potato_y.where_are_you.user;
 
 import static com.potato_y.where_are_you.user.UserTestUtils.createUser;
+import static com.potato_y.where_are_you.utils.SecurityContextUtils.setAuthentication;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -20,8 +21,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
-import org.springframework.security.test.context.support.WithMockUser;
-import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
@@ -30,7 +29,6 @@ import org.springframework.web.context.WebApplicationContext;
 
 @SpringBootTest
 @AutoConfigureMockMvc
-@DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
 @ActiveProfiles("test")
 class UserApiControllerTest {
 
@@ -52,7 +50,6 @@ class UserApiControllerTest {
   }
 
   @DisplayName("getMyAccount(): 자신의 정보를 불러온다")
-  @WithMockUser(username = "1")
   @Test
   public void successGetMyAccount() throws Exception {
     final String url = "/v1/users/me";
@@ -63,6 +60,7 @@ class UserApiControllerTest {
         .nickname("name")
         .providerAccountId("2")
         .build());
+    setAuthentication(user);
 
     ResultActions result = mockMvc.perform(get(url));
 
@@ -73,11 +71,12 @@ class UserApiControllerTest {
   }
 
   @Test
-  @WithMockUser("1")
   @DisplayName("updateUserLate(): 지각 카운트를 추가할 수 있다 - 새로운 추가")
   void successUpdateUserLate_new_true() throws Exception {
     final String url = "/v1/users/late";
     User user = userRepository.save(createUser("test@mail.com", "test user", "1"));
+    setAuthentication(user);
+
     UserLateRequest request = new UserLateRequest(true);
     final var requestBody = objectMapper.writeValueAsString(request);
 
@@ -93,11 +92,12 @@ class UserApiControllerTest {
   }
 
   @Test
-  @WithMockUser("1")
   @DisplayName("updateUserLate(): 지각 카운트를 추가할 수 있다 - 새로운 추가")
   void successUpdateUserLate_new_false() throws Exception {
     final String url = "/v1/users/late";
     User user = userRepository.save(createUser("test@mail.com", "test user", "1"));
+    setAuthentication(user);
+
     UserLateRequest request = new UserLateRequest(false);
     final var requestBody = objectMapper.writeValueAsString(request);
 
@@ -113,13 +113,14 @@ class UserApiControllerTest {
   }
 
   @Test
-  @WithMockUser("1")
   @DisplayName("updateUserLate(): 지각 카운트를 추가할 수 있다 - 기존 값을 업데이트")
   void successUpdateUserLate_update() throws Exception {
     final String url = "/v1/users/late";
     User user = userRepository.save(createUser("test@mail.com", "test user", "1"));
     userLateRepository.save(
         UserLate.builder().user(user).build().upCount(true));
+    setAuthentication(user);
+
     UserLateRequest request = new UserLateRequest(true);
     final var requestBody = objectMapper.writeValueAsString(request);
 
