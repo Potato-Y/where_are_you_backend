@@ -16,6 +16,8 @@ import java.time.LocalDateTime;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.OnDelete;
+import org.hibernate.annotations.OnDeleteAction;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
@@ -32,6 +34,7 @@ public class FcmToken {
 
   @ManyToOne(fetch = FetchType.LAZY)
   @JoinColumn(name = "user_id", unique = true, nullable = false)
+  @OnDelete(action = OnDeleteAction.CASCADE)
   private User user;
 
   @NotNull
