@@ -4,6 +4,7 @@ import static com.potato_y.where_are_you.group.GroupTestUtils.createGroup;
 import static com.potato_y.where_are_you.group.GroupTestUtils.createGroupHost;
 import static com.potato_y.where_are_you.group.GroupTestUtils.createGroupMember;
 import static com.potato_y.where_are_you.user.UserTestUtils.createUser;
+import static com.potato_y.where_are_you.utils.SecurityContextUtils.setAuthentication;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.startsWith;
 import static org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers.springSecurity;
@@ -38,8 +39,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
-import org.springframework.security.test.context.support.WithMockUser;
-import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
@@ -49,7 +48,6 @@ import org.springframework.web.context.WebApplicationContext;
 
 @SpringBootTest
 @AutoConfigureMockMvc
-@DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
 @ActiveProfiles("test")
 class GroupScheduleApiControllerTest {
 
@@ -93,14 +91,15 @@ class GroupScheduleApiControllerTest {
     groupRepository.deleteAll();
     userRepository.deleteAll();
 
+    userRepository.findAll();  // flush 목적
     testUser = userRepository.save(createUser("test@mail.com", "test user", "1"));
   }
 
   @Test
   @Transactional
-  @WithMockUser("1")
   @DisplayName("createGroupSchedule(): 그룹 스케줄을 추가할 수 있다 - 호스트")
   void successCreateGroupSchedule_host() throws Exception {
+    setAuthentication(testUser);
     final var url = "/v1/groups/{groupId}/schedule";
 
     Group testGroup = groupRepository.save(createGroup("test group", testUser));
@@ -144,9 +143,9 @@ class GroupScheduleApiControllerTest {
 
   @Test
   @Transactional
-  @WithMockUser("1")
   @DisplayName("createGroupSchedule(): 그룹 스케줄을 추가할 수 있다 - 호스트")
   void successCreateGroupSchedule_member() throws Exception {
+    setAuthentication(testUser);
     final var url = "/v1/groups/{groupId}/schedule";
 
     User hostUser = userRepository.save(createUser("host@mail.com", "host", "213"));
@@ -192,9 +191,9 @@ class GroupScheduleApiControllerTest {
 
   @Test
   @Transactional
-  @WithMockUser("1")
   @DisplayName("createGroupSchedule(): 그룹 스케줄을 추가할 수 있다 - 알람 없이")
   void successCreateGroupSchedule_notAlarm() throws Exception {
+    setAuthentication(testUser);
     final var url = "/v1/groups/{groupId}/schedule";
 
     Group testGroup = groupRepository.save(createGroup("test group", testUser));
@@ -237,9 +236,9 @@ class GroupScheduleApiControllerTest {
   }
 
   @Test
-  @WithMockUser("1")
   @DisplayName("createGroupSchedule(): 그룹원이 아니라면 권한 예외가 발생한다")
   void failCreateGroupSchedule_notGroupMember() throws Exception {
+    setAuthentication(testUser);
     final var url = "/v1/groups/{groupId}/schedule";
 
     User hostUser = userRepository.save(createUser("host@mail.com", "host", "213"));
@@ -266,9 +265,9 @@ class GroupScheduleApiControllerTest {
   }
 
   @Test
-  @WithMockUser("1")
   @DisplayName("getGroupSchedules(): 그룹의 스케줄 목록을 가져올 수 있다")
   void successGetGroupSchedules() throws Exception {
+    setAuthentication(testUser);
     final var url = "/v1/groups/{groupId}/schedule";
 
     User hostUser = userRepository.save(createUser("host@mail.com", "host", "213"));
@@ -339,9 +338,9 @@ class GroupScheduleApiControllerTest {
   }
 
   @Test
-  @WithMockUser("1")
   @DisplayName("getGroupSchedules(): 그룹원이 아니라면 조회할 수 없다")
   void failGetGroupSchedules_notMember() throws Exception {
+    setAuthentication(testUser);
     final var url = "/v1/groups/{groupId}/schedule";
 
     User hostUser = userRepository.save(createUser("host@mail.com", "host", "213"));
@@ -355,9 +354,9 @@ class GroupScheduleApiControllerTest {
 
   @Test
   @Transactional
-  @WithMockUser("1")
   @DisplayName("registerParticipation(): 처음으로 스케줄 참여를 신청할 수 있다 - 호스트")
   void successRegisterParticipation_noData_groupHost() throws Exception {
+    setAuthentication(testUser);
     final var url = "/v1/groups/{groupId}/schedule/{scheduleId}/participation";
 
     Group testGroup = groupRepository.save(createGroup("test group", testUser));
@@ -382,9 +381,9 @@ class GroupScheduleApiControllerTest {
 
   @Test
   @Transactional
-  @WithMockUser("1")
   @DisplayName("registerParticipation(): 처음으로 스케줄 참여를 신청할 수 있다 - 그룹원")
   void successRegisterParticipation_noData_groupMember() throws Exception {
+    setAuthentication(testUser);
     final var url = "/v1/groups/{groupId}/schedule/{scheduleId}/participation";
 
     User hostUser = userRepository.save(createUser("host@mail.com", "host", "213"));
@@ -412,9 +411,9 @@ class GroupScheduleApiControllerTest {
 
   @Test
   @Transactional
-  @WithMockUser("1")
   @DisplayName("registerParticipation(): 취소한 일정을 다시 신청할 수 있다")
   void successRegisterParticipation_updateData() throws Exception {
+    setAuthentication(testUser);
     final var url = "/v1/groups/{groupId}/schedule/{scheduleId}/participation";
 
     User hostUser = userRepository.save(createUser("host@mail.com", "host", "213"));
@@ -446,9 +445,9 @@ class GroupScheduleApiControllerTest {
   }
 
   @Test
-  @WithMockUser("1")
   @DisplayName("registerParticipation(): 그룹원이 아니라면 참여할 수 없다")
   void failRegisterParticipation_notMember() throws Exception {
+    setAuthentication(testUser);
     final var url = "/v1/groups/{groupId}/schedule/{scheduleId}/participation";
 
     User hostUser = userRepository.save(createUser("host@mail.com", "host", "213"));
@@ -467,9 +466,9 @@ class GroupScheduleApiControllerTest {
 
   @Test
   @Transactional
-  @WithMockUser("1")
   @DisplayName("cancelParticipation(): 참여를 취소할 수 있다")
   void successCancelParticipation() throws Exception {
+    setAuthentication(testUser);
     final var url = "/v1/groups/{groupId}/schedule/{scheduleId}/participation";
 
     User hostUser = userRepository.save(createUser("host@mail.com", "host", "213"));
@@ -501,9 +500,9 @@ class GroupScheduleApiControllerTest {
   }
 
   @Test
-  @WithMockUser("1")
   @DisplayName("cancelParticipation(): 그룹원이 아니라면 참여를 취소할 수 없다")
   void failCancelParticipation_notMember() throws Exception {
+    setAuthentication(testUser);
     final var url = "/v1/groups/{groupId}/schedule/{scheduleId}/participation";
 
     User hostUser = userRepository.save(createUser("host@mail.com", "host", "213"));
@@ -521,9 +520,9 @@ class GroupScheduleApiControllerTest {
   }
 
   @Test
-  @WithMockUser("1")
   @DisplayName("getParticipationList(): 특정 스케줄의 참여자 목록을 가져올 수 있다")
   void successGetParticipationList() throws Exception {
+    setAuthentication(testUser);
     final var url = "/v1/groups/{groupId}/schedule/{scheduleId}/participation";
 
     User hostUser = userRepository.save(createUser("host@mail.com", "host", "213"));
@@ -556,9 +555,9 @@ class GroupScheduleApiControllerTest {
   }
 
   @Test
-  @WithMockUser("1")
   @DisplayName("getParticipationList(): 그룹원이 아니라면 스케줄의 참여자 목록을 가져올 수 없다")
   void failGetParticipationList_notMember() throws Exception {
+    setAuthentication(testUser);
     final var url = "/v1/groups/{groupId}/schedule/{scheduleId}/participation";
 
     User hostUser = userRepository.save(createUser("host@mail.com", "host", "213"));
@@ -582,9 +581,9 @@ class GroupScheduleApiControllerTest {
   }
 
   @Test
-  @WithMockUser("1")
   @DisplayName("deleteGroupSchedule(): 스케줄을 삭제할 수 있다")
   void successDeleteGroupSchedule() throws Exception {
+    setAuthentication(testUser);
     final var url = "/v1/groups/{groupId}/schedule/{scheduleId}";
 
     Group testGroup = groupRepository.save(createGroup("test group", testUser));
@@ -614,9 +613,9 @@ class GroupScheduleApiControllerTest {
   }
 
   @Test
-  @WithMockUser("1")
   @DisplayName("deleteGroupSchedule(): 그룹 유저가 아니라면 스케줄을 삭제할 수 없다")
   void failDeleteGroupSchedule_notGroupMember() throws Exception {
+    setAuthentication(testUser);
     final var url = "/v1/groups/{groupId}/schedule/{scheduleId}";
 
     User hostUser = userRepository.save(createUser("host@mail.com", "host", "213"));
@@ -637,9 +636,9 @@ class GroupScheduleApiControllerTest {
   }
 
   @Test
-  @WithMockUser("1")
   @DisplayName("deleteGroupSchedule(): 스케줄을 생성한 유저가 아니라면 스케줄을 삭제할 수 없다")
   void failDeleteGroupSchedule_notScheduleOwner() throws Exception {
+    setAuthentication(testUser);
     final var url = "/v1/groups/{groupId}/schedule/{scheduleId}";
 
     User hostUser = userRepository.save(createUser("host@mail.com", "host", "213"));
@@ -661,10 +660,10 @@ class GroupScheduleApiControllerTest {
   }
 
   @Test
-  @WithMockUser("1")
   @Transactional
   @DisplayName("modifyGroupSchedule(): 그룹 스케줄을 변경할 수 있다 - 이미 알람이 등록된 경우, 알람 시간 업데이트")
   void successModifyGroupSchedule_updateAlarm() throws Exception {
+    setAuthentication(testUser);
     final var url = "/v1/groups/{groupId}/schedule/{scheduleId}";
 
     Group testGroup = groupRepository.save(createGroup("test group", testUser));
@@ -717,10 +716,10 @@ class GroupScheduleApiControllerTest {
   }
 
   @Test
-  @WithMockUser("1")
   @Transactional
   @DisplayName("modifyGroupSchedule(): 그룹 스케줄을 변경할 수 있다 - 알람 비활성화")
   void successModifyGroupSchedule_deleteAlarm() throws Exception {
+    setAuthentication(testUser);
     final var url = "/v1/groups/{groupId}/schedule/{scheduleId}";
 
     Group testGroup = groupRepository.save(createGroup("test group", testUser));
@@ -769,10 +768,10 @@ class GroupScheduleApiControllerTest {
   }
 
   @Test
-  @WithMockUser("1")
   @Transactional
   @DisplayName("modifyGroupSchedule(): 그룹 스케줄을 변경할 수 있다 - 알람 활성화(생성)")
   void successModifyGroupSchedule_createAlarm() throws Exception {
+    setAuthentication(testUser);
     final var url = "/v1/groups/{groupId}/schedule/{scheduleId}";
 
     Group testGroup = groupRepository.save(createGroup("test group", testUser));
@@ -821,9 +820,9 @@ class GroupScheduleApiControllerTest {
   }
 
   @Test
-  @WithMockUser("1")
   @DisplayName("modifyGroupSchedule(): 그룹 스케줄을 변경할 수 없다 - 없는 스케줄")
   void failModifyGroupSchedule_notSchedule() throws Exception {
+    setAuthentication(testUser);
     final var url = "/v1/groups/{groupId}/schedule/{scheduleId}";
 
     Group testGroup = groupRepository.save(createGroup("test group", testUser));
@@ -850,9 +849,9 @@ class GroupScheduleApiControllerTest {
   }
 
   @Test
-  @WithMockUser("1")
   @DisplayName("modifyGroupSchedule(): 그룹 스케줄을 변경할 수 없다 - 스케줄 생성자가 아님")
   void failModifyGroupSchedule_notScheduleOwner() throws Exception {
+    setAuthentication(testUser);
     final var url = "/v1/groups/{groupId}/schedule/{scheduleId}";
 
     User hostUser = userRepository.save(createUser("host@mail.com", "host", "213"));
@@ -877,7 +876,7 @@ class GroupScheduleApiControllerTest {
     final var requestBody = objectMapper.writeValueAsString(request);
 
     ResultActions result = mockMvc.perform(
-        put(url, testGroup.getId(), 1L)
+        put(url, testGroup.getId(), schedule.getId())
             .contentType(MediaType.APPLICATION_JSON_VALUE)
             .content(requestBody));
 
