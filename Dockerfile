@@ -10,7 +10,7 @@ COPY build.gradle settings.gradle ./
 COPY src ./src
 
 #RUN chmod +x ./gradlew
-RUN ./gradlew build -x test --stacktrace
+RUN ./gradlew build --stacktrace
 
 # App 구동
 FROM amazoncorretto:21-alpine
