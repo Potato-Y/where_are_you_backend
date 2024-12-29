@@ -45,7 +45,6 @@ public class User implements UserDetails {
   @Column(name = "provider_account_id")
   private String providerAccountId;
 
-  @NotNull
   @Column(name = "email")
   private String email;
 
