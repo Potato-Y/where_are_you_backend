@@ -1,7 +1,9 @@
 package com.potato_y.where_are_you.location.domain;
 
+import com.potato_y.where_are_you.location.converter.LocationEncryptConverter;
 import com.potato_y.where_are_you.user.domain.User;
 import jakarta.persistence.Column;
+import jakarta.persistence.Convert;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EntityListeners;
 import jakarta.persistence.FetchType;
@@ -36,9 +38,11 @@ public class UserLocation {
   @OnDelete(action = OnDeleteAction.CASCADE)
   private User user;
 
+  @Convert(converter = LocationEncryptConverter.class)
   @Column(name = "location_latitude")
   private Double locationLatitude;
 
+  @Convert(converter = LocationEncryptConverter.class)
   @Column(name = "location_longitude")
   private Double locationLongitude;
 
