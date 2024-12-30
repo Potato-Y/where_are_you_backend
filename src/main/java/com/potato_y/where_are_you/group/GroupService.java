@@ -93,12 +93,11 @@ public class GroupService {
     return new GroupInviteCodeResponse(groupId, groupInviteCode.getCode());
   }
 
-  @Transactional(readOnly = true)
-  protected String getUniqueInviteCode() {
-    String code = createCode(GROUP_INVITE_CODE_LENGTH);
+  private String getUniqueInviteCode() {
+    String code = createCode();
 
     while (groupInviteCodeRepository.findByCode(code).isPresent()) {
-      code = createCode(GROUP_INVITE_CODE_LENGTH);
+      code = createCode();
     }
 
     return code;
