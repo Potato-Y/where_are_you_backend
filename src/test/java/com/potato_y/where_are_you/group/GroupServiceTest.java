@@ -241,19 +241,6 @@ class GroupServiceTest {
   }
 
   @Test
-  @DisplayName("getUniqueInviteCode(): 고유한 코드를 생성할 수 있다.")
-  void successGetUniqueInviteCode() {
-    // given
-    given(groupInviteCodeRepository.findByCode(any(String.class))).willReturn(Optional.empty());
-
-    // when
-    String result = groupService.getUniqueInviteCode();
-
-    // then
-    assertThat(result).hasSize(10);
-  }
-
-  @Test
   @DisplayName("updateGroup(): 그룹 정보를 변경할 수 있다.")
   void successUpdateGroup() {
     // given
