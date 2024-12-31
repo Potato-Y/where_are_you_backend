@@ -85,9 +85,8 @@ public class GroupService {
 
     GroupInviteCode groupInviteCode = groupInviteCodeRepository.save(
         GroupInviteCode.builder()
-            .group(group)
-            .createUser(user)
             .code(code)
+            .groupId(group.getId())
             .build());
 
     return new GroupInviteCodeResponse(groupId, groupInviteCode.getCode());
@@ -96,7 +95,7 @@ public class GroupService {
   private String getUniqueInviteCode() {
     String code = createCode();
 
-    while (groupInviteCodeRepository.findByCode(code).isPresent()) {
+    while (groupInviteCodeRepository.findById(code).isPresent()) {
       code = createCode();
     }
 
@@ -121,9 +120,9 @@ public class GroupService {
   public GroupResponse signupGroup(String inviteCode) {
     User user = currentUserProvider.getCurrentUser();
 
-    GroupInviteCode codeInfo = groupInviteCodeRepository.findByCode(inviteCode)
+    GroupInviteCode codeInfo = groupInviteCodeRepository.findById(inviteCode)
         .orElseThrow(NotFoundException::new);
-    Group group = codeInfo.getGroup();
+    Group group = findByGroup(codeInfo.getGroupId());
 
     groupMemberRepository.findByGroupAndUser(group, user)
         .ifPresent(v -> {

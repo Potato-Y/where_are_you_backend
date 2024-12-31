@@ -1,13 +1,7 @@
 package com.potato_y.where_are_you.group.domain;
 
-import java.time.LocalDateTime;
-import java.util.List;
-import java.util.Optional;
-import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.repository.CrudRepository;
 
-public interface GroupInviteCodeRepository extends JpaRepository<GroupInviteCode, Long> {
+public interface GroupInviteCodeRepository extends CrudRepository<GroupInviteCode, String> {
 
-  Optional<GroupInviteCode> findByCode(String code);
-
-  List<GroupInviteCode> findAllByCreatedAtBefore(LocalDateTime createdAt);
 }

@@ -212,9 +212,9 @@ class GroupServiceTest {
 
     given(currentUserProvider.getCurrentUser()).willReturn(testUser);
     given(groupRepository.findById(any(Long.class))).willReturn(Optional.of(group));
-    given(groupInviteCodeRepository.findByCode(any(String.class))).willReturn(Optional.empty());
+    given(groupInviteCodeRepository.findById(any(String.class))).willReturn(Optional.empty());
     given(groupInviteCodeRepository.save(any(GroupInviteCode.class))).willReturn(
-        createGroupInviteCode(group, testUser, code));
+        createGroupInviteCode(code, 1L));
 
     // when
     GroupInviteCodeResponse response = groupService.createInviteCode(1L);
@@ -291,8 +291,9 @@ class GroupServiceTest {
         createGroupMember(group, user));
 
     given(currentUserProvider.getCurrentUser()).willReturn(user);
-    given(groupInviteCodeRepository.findByCode(anyString())).willReturn(
-        Optional.ofNullable(createGroupInviteCode(group, testUser, code)));
+    given(groupInviteCodeRepository.findById(anyString())).willReturn(
+        Optional.ofNullable(createGroupInviteCode(code, 1L)));
+    given(groupRepository.findById(anyLong())).willReturn(Optional.of(group));
     given(groupMemberRepository.findByGroupAndUser(any(Group.class), any(User.class))).willReturn(
         Optional.empty());
     given(groupMemberRepository.findByGroup(group)).willReturn(members);
@@ -314,8 +315,9 @@ class GroupServiceTest {
     Group group = createGroup(groupName, testUser);
 
     given(currentUserProvider.getCurrentUser()).willReturn(testUser);
-    given(groupInviteCodeRepository.findByCode(anyString())).willReturn(
-        Optional.ofNullable(createGroupInviteCode(group, testUser, code)));
+    given(groupInviteCodeRepository.findById(anyString())).willReturn(
+        Optional.ofNullable(createGroupInviteCode(code, 1L)));
+    given(groupRepository.findById(anyLong())).willReturn(Optional.of(group));
 
     // when, then
     assertThatThrownBy(() -> groupService.signupGroup(code))
@@ -333,8 +335,9 @@ class GroupServiceTest {
     GroupMember member = createGroupMember(group, user);
 
     given(currentUserProvider.getCurrentUser()).willReturn(user);
-    given(groupInviteCodeRepository.findByCode(anyString())).willReturn(
-        Optional.ofNullable(createGroupInviteCode(group, testUser, code)));
+    given(groupInviteCodeRepository.findById(anyString())).willReturn(
+        Optional.ofNullable(createGroupInviteCode(code, 1L)));
+    given(groupRepository.findById(anyLong())).willReturn(Optional.of(group));
     given(groupMemberRepository.findByGroupAndUser(any(Group.class), any(User.class))).willReturn(
         Optional.ofNullable(member));
 
