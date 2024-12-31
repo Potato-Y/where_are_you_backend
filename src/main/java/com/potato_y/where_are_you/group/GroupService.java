@@ -30,8 +30,6 @@ import org.springframework.transaction.annotation.Transactional;
 @RequiredArgsConstructor
 public class GroupService {
 
-  private static final int GROUP_INVITE_CODE_LENGTH = 10;
-
   private final GroupRepository groupRepository;
   private final UserService userService;
   private final CurrentUserProvider currentUserProvider;
