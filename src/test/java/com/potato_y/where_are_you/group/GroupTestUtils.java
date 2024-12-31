@@ -31,11 +31,10 @@ public class GroupTestUtils {
         .build();
   }
 
-  public static GroupInviteCode createGroupInviteCode(Group group, User user, String code) {
+  public static GroupInviteCode createGroupInviteCode(String code, Long groupId) {
     return GroupInviteCode.builder()
-        .group(group)
-        .createUser(user)
         .code(code)
+        .groupId(groupId)
         .build();
   }
 }
