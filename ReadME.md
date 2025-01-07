@@ -94,7 +94,7 @@ Timely를 통해 일정을 관리하고 위치를 확인하세요!
     <td>
       <img src = "./docs/img/screenshot/5-2.gif" width="200px"/>
     </td>
-    <td><img src = "./docs/img/screenshot/5-3.gif" width="200px"/></td>
+    <td><img src = "./docs/img/screenshot/5-3.png" width="200px"/></td>
   </tr>
 </table>
 <br>
