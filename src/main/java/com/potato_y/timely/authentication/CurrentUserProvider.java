@@ -1,0 +1,25 @@
+package com.potato_y.timely.authentication;
+
+import com.potato_y.timely.error.exception.NotFoundException;
+import com.potato_y.timely.user.domain.User;
+import com.potato_y.timely.user.domain.UserRepository;
+import lombok.RequiredArgsConstructor;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.stereotype.Component;
+
+@RequiredArgsConstructor
+@Component
+public class CurrentUserProvider {
+
+  private final UserRepository userRepository;
+
+  public User getCurrentUser() {
+    Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+    UserDetails userDetails = (UserDetails) authentication.getPrincipal();
+
+    return userRepository.findById(Long.valueOf(userDetails.getUsername()))
+        .orElseThrow(() -> new NotFoundException("Unexpected user"));
+  }
+}
