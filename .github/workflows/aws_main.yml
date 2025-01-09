@@ -7,7 +7,7 @@ on:
 env:
   AWS_REGION: ap-northeast-2
   ECR_REPOSITORY: ${{ secrets.PROD_REPO_NAME }}
-  IMAGE_TAG: latest
+  IMAGE_TAG: ${{ github.sha }}
 
 permissions:
   contents: read
