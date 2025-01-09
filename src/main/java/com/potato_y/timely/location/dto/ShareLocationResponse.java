@@ -1,8 +1,8 @@
-package com.potato_y.where_are_you.location.dto;
+package com.potato_y.timely.location.dto;
 
-import com.potato_y.where_are_you.location.domain.UserLocation;
-import com.potato_y.where_are_you.schedule.domain.GroupSchedule;
-import com.potato_y.where_are_you.user.dto.UserResponse;
+import com.potato_y.timely.location.domain.UserLocation;
+import com.potato_y.timely.schedule.domain.GroupSchedule;
+import com.potato_y.timely.user.dto.UserResponse;
 import java.util.List;
 
 public record ShareLocationResponse(

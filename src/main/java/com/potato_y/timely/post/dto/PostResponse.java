@@ -1,7 +1,7 @@
-package com.potato_y.where_are_you.post.dto;
+package com.potato_y.timely.post.dto;
 
-import com.potato_y.where_are_you.post.domain.Post;
-import com.potato_y.where_are_you.user.dto.UserResponse;
+import com.potato_y.timely.post.domain.Post;
+import com.potato_y.timely.user.dto.UserResponse;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;

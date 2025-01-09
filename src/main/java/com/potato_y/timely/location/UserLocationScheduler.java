@@ -1,11 +1,11 @@
-package com.potato_y.where_are_you.location;
+package com.potato_y.timely.location;
 
-import static com.potato_y.where_are_you.common.utils.DateTimeUtils.clearSecondAndNano;
+import static com.potato_y.timely.common.utils.DateTimeUtils.clearSecondAndNano;
 
-import com.potato_y.where_are_you.schedule.domain.GroupSchedule;
-import com.potato_y.where_are_you.schedule.domain.GroupScheduleRepository;
-import com.potato_y.where_are_you.schedule.domain.Participation;
-import com.potato_y.where_are_you.schedule.domain.ParticipationRepository;
+import com.potato_y.timely.schedule.domain.GroupSchedule;
+import com.potato_y.timely.schedule.domain.GroupScheduleRepository;
+import com.potato_y.timely.schedule.domain.Participation;
+import com.potato_y.timely.schedule.domain.ParticipationRepository;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;

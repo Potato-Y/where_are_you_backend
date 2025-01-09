@@ -1,7 +1,7 @@
-package com.potato_y.where_are_you.config;
+package com.potato_y.timely.config;
 
-import com.potato_y.where_are_you.config.jwt.TokenProvider;
-import com.potato_y.where_are_you.config.jwt.TokenType;
+import com.potato_y.timely.config.jwt.TokenProvider;
+import com.potato_y.timely.config.jwt.TokenType;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;

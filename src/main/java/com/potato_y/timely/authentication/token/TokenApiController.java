@@ -1,8 +1,8 @@
-package com.potato_y.where_are_you.authentication.token;
+package com.potato_y.timely.authentication.token;
 
-import com.potato_y.where_are_you.authentication.token.dto.TokenDto.AccessTokenResponse;
-import com.potato_y.where_are_you.authentication.token.dto.TokenDto.AllTokenResponse;
-import com.potato_y.where_are_you.authentication.token.dto.TokenDto.RefreshTokenRequest;
+import com.potato_y.timely.authentication.token.dto.TokenDto.AccessTokenResponse;
+import com.potato_y.timely.authentication.token.dto.TokenDto.AllTokenResponse;
+import com.potato_y.timely.authentication.token.dto.TokenDto.RefreshTokenRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;

@@ -1,9 +1,9 @@
-package com.potato_y.where_are_you.schedule;
+package com.potato_y.timely.schedule;
 
-import com.potato_y.where_are_you.group.domain.Group;
-import com.potato_y.where_are_you.schedule.domain.GroupSchedule;
-import com.potato_y.where_are_you.schedule.domain.Participation;
-import com.potato_y.where_are_you.user.domain.User;
+import com.potato_y.timely.group.domain.Group;
+import com.potato_y.timely.schedule.domain.GroupSchedule;
+import com.potato_y.timely.schedule.domain.Participation;
+import com.potato_y.timely.user.domain.User;
 import java.time.LocalDateTime;
 
 public class GroupScheduleUtils {

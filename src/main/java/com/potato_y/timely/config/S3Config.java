@@ -1,4 +1,4 @@
-package com.potato_y.where_are_you.config;
+package com.potato_y.timely.config;
 
 import com.amazonaws.auth.AWSStaticCredentialsProvider;
 import com.amazonaws.auth.BasicAWSCredentials;

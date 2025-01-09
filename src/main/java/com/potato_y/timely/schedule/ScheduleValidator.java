@@ -1,8 +1,8 @@
-package com.potato_y.where_are_you.schedule;
+package com.potato_y.timely.schedule;
 
-import com.potato_y.where_are_you.error.exception.ForbiddenException;
-import com.potato_y.where_are_you.schedule.domain.GroupSchedule;
-import com.potato_y.where_are_you.user.domain.User;
+import com.potato_y.timely.error.exception.ForbiddenException;
+import com.potato_y.timely.schedule.domain.GroupSchedule;
+import com.potato_y.timely.user.domain.User;
 import org.springframework.stereotype.Component;
 
 @Component

@@ -1,4 +1,4 @@
-package com.potato_y.where_are_you.error.dto;
+package com.potato_y.timely.error.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;

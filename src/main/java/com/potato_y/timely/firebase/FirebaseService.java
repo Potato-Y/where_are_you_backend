@@ -1,15 +1,15 @@
-package com.potato_y.where_are_you.firebase;
+package com.potato_y.timely.firebase;
 
 import com.google.firebase.messaging.FirebaseMessaging;
 import com.google.firebase.messaging.FirebaseMessagingException;
 import com.google.firebase.messaging.Message;
-import com.potato_y.where_are_you.authentication.CurrentUserProvider;
-import com.potato_y.where_are_you.firebase.domain.FcmChannelId;
-import com.potato_y.where_are_you.firebase.domain.FcmToken;
-import com.potato_y.where_are_you.firebase.domain.FcmTokenRepository;
-import com.potato_y.where_are_you.firebase.dto.FcmTokenRequest;
-import com.potato_y.where_are_you.schedule.domain.GroupSchedule;
-import com.potato_y.where_are_you.user.domain.User;
+import com.potato_y.timely.authentication.CurrentUserProvider;
+import com.potato_y.timely.firebase.domain.FcmChannelId;
+import com.potato_y.timely.firebase.domain.FcmToken;
+import com.potato_y.timely.firebase.domain.FcmTokenRepository;
+import com.potato_y.timely.firebase.dto.FcmTokenRequest;
+import com.potato_y.timely.schedule.domain.GroupSchedule;
+import com.potato_y.timely.user.domain.User;
 import jakarta.transaction.Transactional;
 import java.util.List;
 import lombok.RequiredArgsConstructor;

@@ -1,16 +1,16 @@
-package com.potato_y.where_are_you.user;
+package com.potato_y.timely.user;
 
-import static com.potato_y.where_are_you.authentication.utils.RandomStringGenerator.generateSecureRandomString;
+import static com.potato_y.timely.authentication.utils.RandomStringGenerator.generateSecureRandomString;
 
-import com.potato_y.where_are_you.authentication.CurrentUserProvider;
-import com.potato_y.where_are_you.authentication.domain.oauth.OAuthInfoResponse;
-import com.potato_y.where_are_you.user.domain.User;
-import com.potato_y.where_are_you.user.domain.UserLate;
-import com.potato_y.where_are_you.user.domain.UserLateRepository;
-import com.potato_y.where_are_you.user.domain.UserRepository;
-import com.potato_y.where_are_you.user.dto.UserLateRequest;
-import com.potato_y.where_are_you.user.dto.UserLateResponse;
-import com.potato_y.where_are_you.user.dto.UserResponse;
+import com.potato_y.timely.authentication.CurrentUserProvider;
+import com.potato_y.timely.authentication.domain.oauth.OAuthInfoResponse;
+import com.potato_y.timely.user.domain.User;
+import com.potato_y.timely.user.domain.UserLate;
+import com.potato_y.timely.user.domain.UserLateRepository;
+import com.potato_y.timely.user.domain.UserRepository;
+import com.potato_y.timely.user.dto.UserLateRequest;
+import com.potato_y.timely.user.dto.UserLateResponse;
+import com.potato_y.timely.user.dto.UserResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;

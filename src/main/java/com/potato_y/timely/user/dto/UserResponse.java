@@ -1,6 +1,6 @@
-package com.potato_y.where_are_you.user.dto;
+package com.potato_y.timely.user.dto;
 
-import com.potato_y.where_are_you.user.domain.User;
+import com.potato_y.timely.user.domain.User;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;

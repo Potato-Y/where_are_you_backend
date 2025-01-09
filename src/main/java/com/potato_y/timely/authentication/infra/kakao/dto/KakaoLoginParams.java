@@ -1,7 +1,7 @@
-package com.potato_y.where_are_you.authentication.infra.kakao.dto;
+package com.potato_y.timely.authentication.infra.kakao.dto;
 
-import com.potato_y.where_are_you.authentication.domain.oauth.OAuthLoginParams;
-import com.potato_y.where_are_you.authentication.domain.oauth.OAuthProvider;
+import com.potato_y.timely.authentication.domain.oauth.OAuthLoginParams;
+import com.potato_y.timely.authentication.domain.oauth.OAuthProvider;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;

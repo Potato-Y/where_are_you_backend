@@ -1,4 +1,4 @@
-package com.potato_y.where_are_you.config.jwt;
+package com.potato_y.timely.config.jwt;
 
 import static java.util.Collections.emptyMap;
 

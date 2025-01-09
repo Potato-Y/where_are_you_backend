@@ -1,4 +1,4 @@
-package com.potato_y.where_are_you.firebase.dto;
+package com.potato_y.timely.firebase.dto;
 
 import jakarta.validation.constraints.NotBlank;
 

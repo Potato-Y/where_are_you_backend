@@ -1,8 +1,8 @@
-package com.potato_y.where_are_you.user;
+package com.potato_y.timely.user;
 
-import com.potato_y.where_are_you.user.dto.UserLateRequest;
-import com.potato_y.where_are_you.user.dto.UserLateResponse;
-import com.potato_y.where_are_you.user.dto.UserResponse;
+import com.potato_y.timely.user.dto.UserLateRequest;
+import com.potato_y.timely.user.dto.UserLateResponse;
+import com.potato_y.timely.user.dto.UserResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;

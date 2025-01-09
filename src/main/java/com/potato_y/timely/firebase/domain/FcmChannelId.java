@@ -1,4 +1,4 @@
-package com.potato_y.where_are_you.firebase.domain;
+package com.potato_y.timely.firebase.domain;
 
 import lombok.Getter;
 

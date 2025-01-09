@@ -1,4 +1,4 @@
-package com.potato_y.where_are_you.authentication.utils;
+package com.potato_y.timely.authentication.utils;
 
 import java.security.SecureRandom;
 import java.util.Base64;

@@ -1,7 +1,7 @@
-package com.potato_y.where_are_you.config.jwt;
+package com.potato_y.timely.config.jwt;
 
-import com.potato_y.where_are_you.user.UserDetailService;
-import com.potato_y.where_are_you.user.domain.User;
+import com.potato_y.timely.user.UserDetailService;
+import com.potato_y.timely.user.domain.User;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Header;
 import io.jsonwebtoken.Jwts;

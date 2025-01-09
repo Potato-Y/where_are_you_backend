@@ -1,4 +1,4 @@
-package com.potato_y.where_are_you;
+package com.potato_y.timely;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;

@@ -1,9 +1,9 @@
-package com.potato_y.where_are_you.error.handler;
+package com.potato_y.timely.error.handler;
 
-import com.potato_y.where_are_you.error.dto.ErrorResponse;
-import com.potato_y.where_are_you.error.exception.BadRequestException;
-import com.potato_y.where_are_you.error.exception.ForbiddenException;
-import com.potato_y.where_are_you.error.exception.NotFoundException;
+import com.potato_y.timely.error.dto.ErrorResponse;
+import com.potato_y.timely.error.exception.BadRequestException;
+import com.potato_y.timely.error.exception.ForbiddenException;
+import com.potato_y.timely.error.exception.NotFoundException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.ExceptionHandler;

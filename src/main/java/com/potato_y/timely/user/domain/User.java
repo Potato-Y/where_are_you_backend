@@ -1,6 +1,6 @@
-package com.potato_y.where_are_you.user.domain;
+package com.potato_y.timely.user.domain;
 
-import com.potato_y.where_are_you.authentication.domain.oauth.OAuthProvider;
+import com.potato_y.timely.authentication.domain.oauth.OAuthProvider;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;

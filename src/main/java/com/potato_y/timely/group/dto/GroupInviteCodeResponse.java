@@ -1,4 +1,4 @@
-package com.potato_y.where_are_you.group.dto;
+package com.potato_y.timely.group.dto;
 
 public record GroupInviteCodeResponse(
     Long groupId,

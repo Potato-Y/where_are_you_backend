@@ -1,7 +1,7 @@
-package com.potato_y.where_are_you.location.domain;
+package com.potato_y.timely.location.domain;
 
-import com.potato_y.where_are_you.location.converter.LocationEncryptConverter;
-import com.potato_y.where_are_you.user.domain.User;
+import com.potato_y.timely.location.converter.LocationEncryptConverter;
+import com.potato_y.timely.user.domain.User;
 import jakarta.persistence.Column;
 import jakarta.persistence.Convert;
 import jakarta.persistence.Entity;

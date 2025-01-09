@@ -1,6 +1,6 @@
-package com.potato_y.where_are_you.common.utils;
+package com.potato_y.timely.common.utils;
 
-import com.potato_y.where_are_you.common.constants.Number;
+import com.potato_y.timely.common.constants.Number;
 import java.time.LocalDateTime;
 
 public class DateTimeUtils {

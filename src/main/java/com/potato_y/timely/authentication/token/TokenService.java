@@ -1,12 +1,12 @@
-package com.potato_y.where_are_you.authentication.token;
+package com.potato_y.timely.authentication.token;
 
-import com.potato_y.where_are_you.authentication.token.dto.TokenDto.AccessTokenResponse;
-import com.potato_y.where_are_you.authentication.token.dto.TokenDto.AllTokenResponse;
-import com.potato_y.where_are_you.config.jwt.TokenProvider;
-import com.potato_y.where_are_you.config.jwt.TokenType;
-import com.potato_y.where_are_you.error.exception.BadRequestException;
-import com.potato_y.where_are_you.user.UserService;
-import com.potato_y.where_are_you.user.domain.User;
+import com.potato_y.timely.authentication.token.dto.TokenDto.AccessTokenResponse;
+import com.potato_y.timely.authentication.token.dto.TokenDto.AllTokenResponse;
+import com.potato_y.timely.config.jwt.TokenProvider;
+import com.potato_y.timely.config.jwt.TokenType;
+import com.potato_y.timely.error.exception.BadRequestException;
+import com.potato_y.timely.user.UserService;
+import com.potato_y.timely.user.domain.User;
 import java.time.Duration;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;

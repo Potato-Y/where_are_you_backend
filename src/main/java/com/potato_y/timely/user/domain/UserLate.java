@@ -1,4 +1,4 @@
-package com.potato_y.where_are_you.user.domain;
+package com.potato_y.timely.user.domain;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;

@@ -1,6 +1,6 @@
-package com.potato_y.where_are_you.user.dto;
+package com.potato_y.timely.user.dto;
 
-import com.potato_y.where_are_you.user.domain.UserLate;
+import com.potato_y.timely.user.domain.UserLate;
 
 public record UserLateResponse(
     UserResponse user,

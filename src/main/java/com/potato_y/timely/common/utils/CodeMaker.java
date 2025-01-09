@@ -1,4 +1,4 @@
-package com.potato_y.where_are_you.common.utils;
+package com.potato_y.timely.common.utils;
 
 import java.util.UUID;
 

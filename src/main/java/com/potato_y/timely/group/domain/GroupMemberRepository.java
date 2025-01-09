@@ -1,6 +1,6 @@
-package com.potato_y.where_are_you.group.domain;
+package com.potato_y.timely.group.domain;
 
-import com.potato_y.where_are_you.user.domain.User;
+import com.potato_y.timely.user.domain.User;
 import java.util.List;
 import java.util.Optional;
 import org.springframework.data.jpa.repository.JpaRepository;

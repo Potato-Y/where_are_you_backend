@@ -1,4 +1,4 @@
-package com.potato_y.where_are_you.group.domain;
+package com.potato_y.timely.group.domain;
 
 public enum GroupMemberType {
   HOST, MEMBER

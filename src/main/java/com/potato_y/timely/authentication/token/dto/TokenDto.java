@@ -1,4 +1,4 @@
-package com.potato_y.where_are_you.authentication.token.dto;
+package com.potato_y.timely.authentication.token.dto;
 
 import jakarta.validation.constraints.NotBlank;
 import lombok.AllArgsConstructor;

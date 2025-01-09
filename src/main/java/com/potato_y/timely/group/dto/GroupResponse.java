@@ -1,7 +1,7 @@
-package com.potato_y.where_are_you.group.dto;
+package com.potato_y.timely.group.dto;
 
-import com.potato_y.where_are_you.group.domain.Group;
-import com.potato_y.where_are_you.user.dto.UserResponse;
+import com.potato_y.timely.group.domain.Group;
+import com.potato_y.timely.user.dto.UserResponse;
 import java.time.LocalDateTime;
 
 public record GroupResponse(

@@ -1,6 +1,6 @@
-package com.potato_y.where_are_you.schedule.dto;
+package com.potato_y.timely.schedule.dto;
 
-import com.potato_y.where_are_you.schedule.domain.GroupSchedule;
+import com.potato_y.timely.schedule.domain.GroupSchedule;
 
 public record GetGroupScheduleListResponse(
     GroupScheduleResponse groupSchedule,

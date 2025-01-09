@@ -1,7 +1,7 @@
-package com.potato_y.where_are_you.location;
+package com.potato_y.timely.location;
 
-import static com.potato_y.where_are_you.group.GroupTestUtils.createGroup;
-import static com.potato_y.where_are_you.user.UserTestUtils.createUser;
+import static com.potato_y.timely.group.GroupTestUtils.createGroup;
+import static com.potato_y.timely.user.UserTestUtils.createUser;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
@@ -11,16 +11,16 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
-import com.potato_y.where_are_you.authentication.CurrentUserProvider;
-import com.potato_y.where_are_you.error.exception.BadRequestException;
-import com.potato_y.where_are_you.group.domain.Group;
-import com.potato_y.where_are_you.location.domain.UserLocation;
-import com.potato_y.where_are_you.location.domain.UserLocationRepository;
-import com.potato_y.where_are_you.location.dto.StateMessage.StateMessageRequest;
-import com.potato_y.where_are_you.location.dto.UpdateUserLocationRequest;
-import com.potato_y.where_are_you.schedule.GroupScheduleService;
-import com.potato_y.where_are_you.schedule.domain.GroupSchedule;
-import com.potato_y.where_are_you.user.domain.User;
+import com.potato_y.timely.authentication.CurrentUserProvider;
+import com.potato_y.timely.error.exception.BadRequestException;
+import com.potato_y.timely.group.domain.Group;
+import com.potato_y.timely.location.domain.UserLocation;
+import com.potato_y.timely.location.domain.UserLocationRepository;
+import com.potato_y.timely.location.dto.StateMessage.StateMessageRequest;
+import com.potato_y.timely.location.dto.UpdateUserLocationRequest;
+import com.potato_y.timely.schedule.GroupScheduleService;
+import com.potato_y.timely.schedule.domain.GroupSchedule;
+import com.potato_y.timely.user.domain.User;
 import java.time.LocalDateTime;
 import java.util.Optional;
 import org.junit.jupiter.api.BeforeEach;

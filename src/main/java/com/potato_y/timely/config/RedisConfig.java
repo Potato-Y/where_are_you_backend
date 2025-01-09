@@ -1,4 +1,4 @@
-package com.potato_y.where_are_you.config;
+package com.potato_y.timely.config;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;

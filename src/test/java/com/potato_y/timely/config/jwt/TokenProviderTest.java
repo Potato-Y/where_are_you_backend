@@ -1,11 +1,11 @@
-package com.potato_y.where_are_you.config.jwt;
+package com.potato_y.timely.config.jwt;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
-import com.potato_y.where_are_you.authentication.domain.oauth.OAuthProvider;
-import com.potato_y.where_are_you.user.domain.User;
-import com.potato_y.where_are_you.user.domain.UserRepository;
+import com.potato_y.timely.authentication.domain.oauth.OAuthProvider;
+import com.potato_y.timely.user.domain.User;
+import com.potato_y.timely.user.domain.UserRepository;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import java.time.Duration;

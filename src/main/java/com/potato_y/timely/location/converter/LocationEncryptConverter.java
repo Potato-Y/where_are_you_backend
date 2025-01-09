@@ -1,6 +1,6 @@
-package com.potato_y.where_are_you.location.converter;
+package com.potato_y.timely.location.converter;
 
-import com.potato_y.where_are_you.error.exception.BadRequestException;
+import com.potato_y.timely.error.exception.BadRequestException;
 import jakarta.persistence.AttributeConverter;
 import jakarta.persistence.Converter;
 import java.security.Key;

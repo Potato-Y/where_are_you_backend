@@ -1,4 +1,4 @@
-package com.potato_y.where_are_you.group.dto;
+package com.potato_y.timely.group.dto;
 
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;

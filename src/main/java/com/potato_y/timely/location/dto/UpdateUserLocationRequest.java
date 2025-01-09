@@ -1,4 +1,4 @@
-package com.potato_y.where_are_you.location.dto;
+package com.potato_y.timely.location.dto;
 
 import jakarta.validation.constraints.NotNull;
 

@@ -1,4 +1,4 @@
-package com.potato_y.where_are_you.authentication.infra.kakao.dto;
+package com.potato_y.timely.authentication.infra.kakao.dto;
 
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;

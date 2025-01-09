@@ -1,9 +1,9 @@
-package com.potato_y.where_are_you.schedule;
+package com.potato_y.timely.schedule;
 
-import com.potato_y.where_are_you.schedule.dto.CreateGroupScheduleRequest;
-import com.potato_y.where_are_you.schedule.dto.GetGroupScheduleListResponse;
-import com.potato_y.where_are_you.schedule.dto.GroupScheduleResponse;
-import com.potato_y.where_are_you.user.dto.UserResponse;
+import com.potato_y.timely.schedule.dto.CreateGroupScheduleRequest;
+import com.potato_y.timely.schedule.dto.GetGroupScheduleListResponse;
+import com.potato_y.timely.schedule.dto.GroupScheduleResponse;
+import com.potato_y.timely.user.dto.UserResponse;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;

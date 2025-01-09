@@ -1,8 +1,8 @@
-package com.potato_y.where_are_you.authentication;
+package com.potato_y.timely.authentication;
 
-import com.potato_y.where_are_you.error.exception.NotFoundException;
-import com.potato_y.where_are_you.user.domain.User;
-import com.potato_y.where_are_you.user.domain.UserRepository;
+import com.potato_y.timely.error.exception.NotFoundException;
+import com.potato_y.timely.user.domain.User;
+import com.potato_y.timely.user.domain.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;

@@ -1,6 +1,6 @@
-package com.potato_y.where_are_you.firebase;
+package com.potato_y.timely.firebase;
 
-import com.potato_y.where_are_you.firebase.dto.FcmTokenRequest;
+import com.potato_y.timely.firebase.dto.FcmTokenRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;

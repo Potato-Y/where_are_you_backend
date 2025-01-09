@@ -1,9 +1,9 @@
-package com.potato_y.where_are_you.location;
+package com.potato_y.timely.location;
 
-import com.potato_y.where_are_you.location.dto.ShareLocationResponse;
-import com.potato_y.where_are_you.location.dto.StateMessage.StateMessageRequest;
-import com.potato_y.where_are_you.location.dto.StateMessage.StateMessageResponse;
-import com.potato_y.where_are_you.location.dto.UpdateUserLocationRequest;
+import com.potato_y.timely.location.dto.ShareLocationResponse;
+import com.potato_y.timely.location.dto.StateMessage.StateMessageRequest;
+import com.potato_y.timely.location.dto.StateMessage.StateMessageResponse;
+import com.potato_y.timely.location.dto.UpdateUserLocationRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;

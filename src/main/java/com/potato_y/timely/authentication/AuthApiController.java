@@ -1,7 +1,7 @@
-package com.potato_y.where_are_you.authentication;
+package com.potato_y.timely.authentication;
 
-import com.potato_y.where_are_you.authentication.infra.kakao.dto.KakaoAccessTokenRequest;
-import com.potato_y.where_are_you.authentication.infra.kakao.dto.KakaoLoginParams;
+import com.potato_y.timely.authentication.infra.kakao.dto.KakaoAccessTokenRequest;
+import com.potato_y.timely.authentication.infra.kakao.dto.KakaoLoginParams;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;

@@ -1,15 +1,15 @@
-package com.potato_y.where_are_you.firebase;
+package com.potato_y.timely.firebase;
 
-import static com.potato_y.where_are_you.user.UserTestUtils.createUser;
+import static com.potato_y.timely.user.UserTestUtils.createUser;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.verify;
 
-import com.potato_y.where_are_you.authentication.CurrentUserProvider;
-import com.potato_y.where_are_you.firebase.domain.FcmToken;
-import com.potato_y.where_are_you.firebase.domain.FcmTokenRepository;
-import com.potato_y.where_are_you.firebase.dto.FcmTokenRequest;
-import com.potato_y.where_are_you.user.domain.User;
+import com.potato_y.timely.authentication.CurrentUserProvider;
+import com.potato_y.timely.firebase.domain.FcmToken;
+import com.potato_y.timely.firebase.domain.FcmTokenRepository;
+import com.potato_y.timely.firebase.dto.FcmTokenRequest;
+import com.potato_y.timely.user.domain.User;
 import java.util.Optional;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;

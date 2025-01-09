@@ -1,4 +1,4 @@
-package com.potato_y.where_are_you.aws;
+package com.potato_y.timely.aws;
 
 import com.amazonaws.services.cloudfront.CloudFrontUrlSigner;
 import com.amazonaws.services.cloudfront.util.SignerUtils.Protocol;

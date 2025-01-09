@@ -1,10 +1,10 @@
-package com.potato_y.where_are_you.schedule;
+package com.potato_y.timely.schedule;
 
-import static com.potato_y.where_are_you.group.GroupTestUtils.createGroup;
-import static com.potato_y.where_are_you.group.GroupTestUtils.createGroupHost;
-import static com.potato_y.where_are_you.group.GroupTestUtils.createGroupMember;
-import static com.potato_y.where_are_you.user.UserTestUtils.createUser;
-import static com.potato_y.where_are_you.utils.SecurityContextUtils.setAuthentication;
+import static com.potato_y.timely.group.GroupTestUtils.createGroup;
+import static com.potato_y.timely.group.GroupTestUtils.createGroupHost;
+import static com.potato_y.timely.group.GroupTestUtils.createGroupMember;
+import static com.potato_y.timely.user.UserTestUtils.createUser;
+import static com.potato_y.timely.utils.SecurityContextUtils.setAuthentication;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.startsWith;
 import static org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers.springSecurity;
@@ -17,18 +17,18 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.potato_y.where_are_you.group.domain.Group;
-import com.potato_y.where_are_you.group.domain.GroupMemberRepository;
-import com.potato_y.where_are_you.group.domain.GroupRepository;
-import com.potato_y.where_are_you.schedule.domain.AlarmSchedule;
-import com.potato_y.where_are_you.schedule.domain.AlarmScheduleRepository;
-import com.potato_y.where_are_you.schedule.domain.GroupSchedule;
-import com.potato_y.where_are_you.schedule.domain.GroupScheduleRepository;
-import com.potato_y.where_are_you.schedule.domain.Participation;
-import com.potato_y.where_are_you.schedule.domain.ParticipationRepository;
-import com.potato_y.where_are_you.schedule.dto.CreateGroupScheduleRequest;
-import com.potato_y.where_are_you.user.domain.User;
-import com.potato_y.where_are_you.user.domain.UserRepository;
+import com.potato_y.timely.group.domain.Group;
+import com.potato_y.timely.group.domain.GroupMemberRepository;
+import com.potato_y.timely.group.domain.GroupRepository;
+import com.potato_y.timely.schedule.domain.AlarmSchedule;
+import com.potato_y.timely.schedule.domain.AlarmScheduleRepository;
+import com.potato_y.timely.schedule.domain.GroupSchedule;
+import com.potato_y.timely.schedule.domain.GroupScheduleRepository;
+import com.potato_y.timely.schedule.domain.Participation;
+import com.potato_y.timely.schedule.domain.ParticipationRepository;
+import com.potato_y.timely.schedule.dto.CreateGroupScheduleRequest;
+import com.potato_y.timely.user.domain.User;
+import com.potato_y.timely.user.domain.UserRepository;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;

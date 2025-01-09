@@ -1,6 +1,6 @@
-package com.potato_y.where_are_you.post;
+package com.potato_y.timely.post;
 
-import com.potato_y.where_are_you.post.domain.Post;
+import com.potato_y.timely.post.domain.Post;
 import java.util.StringJoiner;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;

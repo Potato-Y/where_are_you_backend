@@ -1,6 +1,6 @@
-package com.potato_y.where_are_you.user;
+package com.potato_y.timely.user;
 
-import com.potato_y.where_are_you.user.domain.UserRepository;
+import com.potato_y.timely.user.domain.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;

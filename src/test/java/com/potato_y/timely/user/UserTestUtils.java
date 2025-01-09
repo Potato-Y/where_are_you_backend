@@ -1,7 +1,7 @@
-package com.potato_y.where_are_you.user;
+package com.potato_y.timely.user;
 
-import com.potato_y.where_are_you.authentication.domain.oauth.OAuthProvider;
-import com.potato_y.where_are_you.user.domain.User;
+import com.potato_y.timely.authentication.domain.oauth.OAuthProvider;
+import com.potato_y.timely.user.domain.User;
 
 public class UserTestUtils {
 

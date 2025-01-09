@@ -1,4 +1,4 @@
-package com.potato_y.where_are_you.schedule.domain;
+package com.potato_y.timely.schedule.domain;
 
 import java.time.LocalDateTime;
 import java.util.List;

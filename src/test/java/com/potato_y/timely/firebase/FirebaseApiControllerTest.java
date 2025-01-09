@@ -1,18 +1,18 @@
-package com.potato_y.where_are_you.firebase;
+package com.potato_y.timely.firebase;
 
-import static com.potato_y.where_are_you.user.UserTestUtils.createUser;
-import static com.potato_y.where_are_you.utils.SecurityContextUtils.setAuthentication;
+import static com.potato_y.timely.user.UserTestUtils.createUser;
+import static com.potato_y.timely.utils.SecurityContextUtils.setAuthentication;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers.springSecurity;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.potato_y.where_are_you.firebase.domain.FcmToken;
-import com.potato_y.where_are_you.firebase.domain.FcmTokenRepository;
-import com.potato_y.where_are_you.firebase.dto.FcmTokenRequest;
-import com.potato_y.where_are_you.user.domain.User;
-import com.potato_y.where_are_you.user.domain.UserRepository;
+import com.potato_y.timely.firebase.domain.FcmToken;
+import com.potato_y.timely.firebase.domain.FcmTokenRepository;
+import com.potato_y.timely.firebase.dto.FcmTokenRequest;
+import com.potato_y.timely.user.domain.User;
+import com.potato_y.timely.user.domain.UserRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;

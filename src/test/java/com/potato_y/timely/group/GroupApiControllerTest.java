@@ -1,10 +1,10 @@
-//package com.potato_y.where_are_you.group;
+//package com.potato_y.timely.group;
 //
-//import static com.potato_y.where_are_you.group.GroupTestUtils.createGroup;
-//import static com.potato_y.where_are_you.group.GroupTestUtils.createGroupHost;
-//import static com.potato_y.where_are_you.group.GroupTestUtils.createGroupMember;
-//import static com.potato_y.where_are_you.user.UserTestUtils.createUser;
-//import static com.potato_y.where_are_you.utils.SecurityContextUtils.setAuthentication;
+//import static com.potato_y.timely.group.GroupTestUtils.createGroup;
+//import static com.potato_y.timely.group.GroupTestUtils.createGroupHost;
+//import static com.potato_y.timely.group.GroupTestUtils.createGroupMember;
+//import static com.potato_y.timely.user.UserTestUtils.createUser;
+//import static com.potato_y.timely.utils.SecurityContextUtils.setAuthentication;
 //import static org.assertj.core.api.Assertions.assertThat;
 //import static org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers.springSecurity;
 //import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
@@ -15,17 +15,17 @@
 //import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 //
 //import com.fasterxml.jackson.databind.ObjectMapper;
-//import com.potato_y.where_are_you.group.domain.Group;
-//import com.potato_y.where_are_you.group.domain.GroupInviteCode;
-//import com.potato_y.where_are_you.group.domain.GroupInviteCodeRepository;
-//import com.potato_y.where_are_you.group.domain.GroupMember;
-//import com.potato_y.where_are_you.group.domain.GroupMemberRepository;
-//import com.potato_y.where_are_you.group.domain.GroupRepository;
-//import com.potato_y.where_are_you.group.dto.CreateGroupRequest;
-//import com.potato_y.where_are_you.user.domain.User;
-//import com.potato_y.where_are_you.user.domain.UserLate;
-//import com.potato_y.where_are_you.user.domain.UserLateRepository;
-//import com.potato_y.where_are_you.user.domain.UserRepository;
+//import com.potato_y.timely.group.domain.Group;
+//import com.potato_y.timely.group.domain.GroupInviteCode;
+//import com.potato_y.timely.group.domain.GroupInviteCodeRepository;
+//import com.potato_y.timely.group.domain.GroupMember;
+//import com.potato_y.timely.group.domain.GroupMemberRepository;
+//import com.potato_y.timely.group.domain.GroupRepository;
+//import com.potato_y.timely.group.dto.CreateGroupRequest;
+//import com.potato_y.timely.user.domain.User;
+//import com.potato_y.timely.user.domain.UserLate;
+//import com.potato_y.timely.user.domain.UserLateRepository;
+//import com.potato_y.timely.user.domain.UserRepository;
 //import org.junit.jupiter.api.BeforeEach;
 //import org.junit.jupiter.api.DisplayName;
 //import org.junit.jupiter.api.Test;

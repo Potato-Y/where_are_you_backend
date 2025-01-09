@@ -1,4 +1,4 @@
-package com.potato_y.where_are_you.post.dto;
+package com.potato_y.timely.post.dto;
 
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;

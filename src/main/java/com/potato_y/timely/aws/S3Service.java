@@ -1,4 +1,4 @@
-package com.potato_y.where_are_you.aws;
+package com.potato_y.timely.aws;
 
 import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.model.ObjectListing;

@@ -1,6 +1,6 @@
-package com.potato_y.where_are_you.utils;
+package com.potato_y.timely.utils;
 
-import com.potato_y.where_are_you.user.domain.User;
+import com.potato_y.timely.user.domain.User;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;

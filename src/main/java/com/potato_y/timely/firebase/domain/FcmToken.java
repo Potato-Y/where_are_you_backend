@@ -1,6 +1,6 @@
-package com.potato_y.where_are_you.firebase.domain;
+package com.potato_y.timely.firebase.domain;
 
-import com.potato_y.where_are_you.user.domain.User;
+import com.potato_y.timely.user.domain.User;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EntityListeners;

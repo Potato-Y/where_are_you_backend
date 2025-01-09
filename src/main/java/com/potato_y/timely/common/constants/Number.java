@@ -1,4 +1,4 @@
-package com.potato_y.where_are_you.common.constants;
+package com.potato_y.timely.common.constants;
 
 import lombok.Getter;
 

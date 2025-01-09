@@ -1,8 +1,8 @@
-package com.potato_y.where_are_you.post;
+package com.potato_y.timely.post;
 
-import com.potato_y.where_are_you.post.dto.CreatePostRequest;
-import com.potato_y.where_are_you.post.dto.PostResponse;
-import com.potato_y.where_are_you.post.dto.UpdatePostRequest;
+import com.potato_y.timely.post.dto.CreatePostRequest;
+import com.potato_y.timely.post.dto.PostResponse;
+import com.potato_y.timely.post.dto.UpdatePostRequest;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;

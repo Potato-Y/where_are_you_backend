@@ -1,10 +1,10 @@
-package com.potato_y.where_are_you.authentication.infra.kakao.dto;
+package com.potato_y.timely.authentication.infra.kakao.dto;
 
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.potato_y.where_are_you.authentication.domain.oauth.OAuthInfoResponse;
-import com.potato_y.where_are_you.authentication.domain.oauth.OAuthProvider;
+import com.potato_y.timely.authentication.domain.oauth.OAuthInfoResponse;
+import com.potato_y.timely.authentication.domain.oauth.OAuthProvider;
 import java.util.Date;
 import java.util.HashMap;
 import lombok.Getter;

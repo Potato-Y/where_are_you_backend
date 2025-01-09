@@ -1,8 +1,7 @@
-package com.potato_y.where_are_you.config;
+package com.potato_y.timely.config;
 
-
-import com.potato_y.where_are_you.authentication.domain.oauth.RequestOAuthInfoService;
-import com.potato_y.where_are_you.config.jwt.TokenProvider;
+import com.potato_y.timely.authentication.domain.oauth.RequestOAuthInfoService;
+import com.potato_y.timely.config.jwt.TokenProvider;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

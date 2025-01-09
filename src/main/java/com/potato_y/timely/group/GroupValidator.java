@@ -1,9 +1,9 @@
-package com.potato_y.where_are_you.group;
+package com.potato_y.timely.group;
 
-import com.potato_y.where_are_you.error.exception.BadRequestException;
-import com.potato_y.where_are_you.error.exception.ForbiddenException;
-import com.potato_y.where_are_you.group.domain.Group;
-import com.potato_y.where_are_you.user.domain.User;
+import com.potato_y.timely.error.exception.BadRequestException;
+import com.potato_y.timely.error.exception.ForbiddenException;
+import com.potato_y.timely.group.domain.Group;
+import com.potato_y.timely.user.domain.User;
 import org.springframework.stereotype.Component;
 
 @Component

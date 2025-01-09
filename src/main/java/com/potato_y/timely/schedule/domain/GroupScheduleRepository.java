@@ -1,6 +1,6 @@
-package com.potato_y.where_are_you.schedule.domain;
+package com.potato_y.timely.schedule.domain;
 
-import com.potato_y.where_are_you.group.domain.Group;
+import com.potato_y.timely.group.domain.Group;
 import java.time.LocalDateTime;
 import java.util.List;
 import org.springframework.data.jpa.repository.JpaRepository;

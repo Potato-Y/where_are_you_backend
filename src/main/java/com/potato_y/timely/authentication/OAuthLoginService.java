@@ -1,14 +1,14 @@
-package com.potato_y.where_are_you.authentication;
+package com.potato_y.timely.authentication;
 
-import com.potato_y.where_are_you.authentication.domain.oauth.OAuthInfoResponse;
-import com.potato_y.where_are_you.authentication.domain.oauth.OAuthLoginParams;
-import com.potato_y.where_are_you.authentication.domain.oauth.OAuthProvider;
-import com.potato_y.where_are_you.authentication.domain.oauth.RequestOAuthInfoService;
-import com.potato_y.where_are_you.authentication.token.TokenService;
-import com.potato_y.where_are_you.authentication.token.dto.TokenDto.AllTokenResponse;
-import com.potato_y.where_are_you.user.UserService;
-import com.potato_y.where_are_you.user.domain.User;
-import com.potato_y.where_are_you.user.domain.UserRepository;
+import com.potato_y.timely.authentication.domain.oauth.OAuthInfoResponse;
+import com.potato_y.timely.authentication.domain.oauth.OAuthLoginParams;
+import com.potato_y.timely.authentication.domain.oauth.OAuthProvider;
+import com.potato_y.timely.authentication.domain.oauth.RequestOAuthInfoService;
+import com.potato_y.timely.authentication.token.TokenService;
+import com.potato_y.timely.authentication.token.dto.TokenDto.AllTokenResponse;
+import com.potato_y.timely.user.UserService;
+import com.potato_y.timely.user.domain.User;
+import com.potato_y.timely.user.domain.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 

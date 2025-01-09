@@ -1,10 +1,10 @@
-package com.potato_y.where_are_you.group;
+package com.potato_y.timely.group;
 
-import com.potato_y.where_are_you.group.dto.CreateGroupRequest;
-import com.potato_y.where_are_you.group.dto.GroupInviteCodeResponse;
-import com.potato_y.where_are_you.group.dto.GroupResponse;
-import com.potato_y.where_are_you.user.domain.UserLate;
-import com.potato_y.where_are_you.user.dto.UserLateResponse;
+import com.potato_y.timely.group.dto.CreateGroupRequest;
+import com.potato_y.timely.group.dto.GroupInviteCodeResponse;
+import com.potato_y.timely.group.dto.GroupResponse;
+import com.potato_y.timely.user.domain.UserLate;
+import com.potato_y.timely.user.dto.UserLateResponse;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;

@@ -1,4 +1,4 @@
-package com.potato_y.where_are_you.authentication.domain.oauth;
+package com.potato_y.timely.authentication.domain.oauth;
 
 import java.util.List;
 import java.util.Map;

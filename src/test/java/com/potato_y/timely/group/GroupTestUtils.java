@@ -1,10 +1,10 @@
-package com.potato_y.where_are_you.group;
+package com.potato_y.timely.group;
 
-import com.potato_y.where_are_you.group.domain.Group;
-import com.potato_y.where_are_you.group.domain.GroupInviteCode;
-import com.potato_y.where_are_you.group.domain.GroupMember;
-import com.potato_y.where_are_you.group.domain.GroupMemberType;
-import com.potato_y.where_are_you.user.domain.User;
+import com.potato_y.timely.group.domain.Group;
+import com.potato_y.timely.group.domain.GroupInviteCode;
+import com.potato_y.timely.group.domain.GroupMember;
+import com.potato_y.timely.group.domain.GroupMemberType;
+import com.potato_y.timely.user.domain.User;
 
 public class GroupTestUtils {
 

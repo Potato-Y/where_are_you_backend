@@ -1,4 +1,4 @@
-package com.potato_y.where_are_you.schedule.dto;
+package com.potato_y.timely.schedule.dto;
 
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;

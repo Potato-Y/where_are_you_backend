@@ -1,20 +1,20 @@
-package com.potato_y.where_are_you.user;
+package com.potato_y.timely.user;
 
-import static com.potato_y.where_are_you.user.UserTestUtils.createUser;
+import static com.potato_y.timely.user.UserTestUtils.createUser;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.BDDMockito.given;
 
-import com.potato_y.where_are_you.authentication.CurrentUserProvider;
-import com.potato_y.where_are_you.authentication.domain.oauth.OAuthInfoResponse;
-import com.potato_y.where_are_you.authentication.domain.oauth.OAuthProvider;
-import com.potato_y.where_are_you.user.domain.User;
-import com.potato_y.where_are_you.user.domain.UserLate;
-import com.potato_y.where_are_you.user.domain.UserLateRepository;
-import com.potato_y.where_are_you.user.domain.UserRepository;
-import com.potato_y.where_are_you.user.dto.UserLateRequest;
-import com.potato_y.where_are_you.user.dto.UserLateResponse;
+import com.potato_y.timely.authentication.CurrentUserProvider;
+import com.potato_y.timely.authentication.domain.oauth.OAuthInfoResponse;
+import com.potato_y.timely.authentication.domain.oauth.OAuthProvider;
+import com.potato_y.timely.user.domain.User;
+import com.potato_y.timely.user.domain.UserLate;
+import com.potato_y.timely.user.domain.UserLateRepository;
+import com.potato_y.timely.user.domain.UserRepository;
+import com.potato_y.timely.user.dto.UserLateRequest;
+import com.potato_y.timely.user.dto.UserLateResponse;
 import java.util.Optional;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
