@@ -8,10 +8,10 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 @EnableScheduling
 @EnableJpaAuditing
 @SpringBootApplication
-public class WhereAreYouApplication {
+public class TimelyApplication {
 
   public static void main(String[] args) {
-    SpringApplication.run(WhereAreYouApplication.class, args);
+    SpringApplication.run(TimelyApplication.class, args);
   }
 
 }
